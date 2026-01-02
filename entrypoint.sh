@@ -1,57 +1,31 @@
 #!/bin/bash
 set -euo pipefail
 
-DB_FILE="database.db"
-RESET=0
-DOMAIN="example.com"
-PUBLIC_IP="127.0.0.1"
+# ================================
+# Variables
+# ================================
+DB_FILE="${DB_PATH:-database.db}"
+DB_RESET="${DB_RESET:-0}"
+DOMAIN="${DOMAIN:-example.com}"
+PUBLIC_IP="${PUBLIC_IP:-127.0.0.1}"
 
-# ================================
-# Parse arguments
-# ================================
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --reset)
-            RESET=1
-            shift
-            ;;
-        --domain)
-            DOMAIN="$2"
-            shift 2
-            ;;
-        --public-ip)
-            PUBLIC_IP="$2"
-            shift 2
-            ;;
-        *)
-            echo "Unknown argument: $1"
-            exit 1
-            ;;
-    esac
-done
+function create_db() {
+    # Reset database if requested
+    if [[ $DB_RESET -eq 1 && -f "$DB_FILE" ]]; then
+        echo "INFO:     [*] Removing existing database..."
+        rm -f "$DB_FILE"
+    fi
 
-# ================================
-# Reset database if requested
-# ================================
-if [[ $RESET -eq 1 && -f "$DB_FILE" ]]; then
-    echo "[*] Removing existing database..."
-    rm -f "$DB_FILE"
-fi
+    # Skip creation if DB already exists
+    if [[ -f "$DB_FILE" ]]; then
+        echo "INFO:     [✓] Database already exists. Nothing to do."
+        return 0
+    fi
 
-# ================================
-# Skip creation if DB already exists
-# ================================
-if [[ -f "$DB_FILE" ]]; then
-    echo "[✓] Database already exists. Nothing to do."
-    exit 0
-fi
+    echo "INFO:     [*] Creating database: $DB_FILE"
 
-echo "[*] Creating database: $DB_FILE"
-
-# ================================
-# Create DB with dynamic settings
-# ================================
-sqlite3 "$DB_FILE" <<EOF
+    # Create DB with dynamic settings
+    sqlite3 "$DB_FILE" <<EOF
 PRAGMA foreign_keys = ON;
 
 -- ============================================
@@ -109,4 +83,40 @@ CREATE TABLE txt_records (
 CREATE INDEX idx_txt_host ON txt_records(host_id);
 EOF
 
-echo "[✓] Database initialized successfully."
+    echo "INFO:     [✓] Database initialized successfully for $DOMAIN."
+    echo "INFO:     [✓] Public IP: $PUBLIC_IP."
+}
+
+# ================================
+# Parse arguments
+# ================================
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --reset)
+            DB_RESET=1
+            shift
+            ;;
+        --domain)
+            DOMAIN="$2"
+            shift 2
+            ;;
+        --public-ip)
+            PUBLIC_IP="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+create_db
+
+# ================================
+# Continue to CMD
+# ================================
+exec "$@"
