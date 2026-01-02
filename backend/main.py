@@ -27,7 +27,7 @@ app.add_middleware(
 # FRONTEND PATHS (absolute paths inside Docker)
 # ---------------------------------------------------------
 
-FRONTEND_DIR = "/app/frontend"
+FRONTEND_DIR = "/var/www/network-manager/frontend"
 
 # Homepage
 @app.get("/")

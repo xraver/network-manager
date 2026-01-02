@@ -8,6 +8,7 @@ services:
     environment:
       - TZ=${DOCKER_TZ}
       - DB_PATH=/data/database.db
+      - HTTP_PORT=8000
     volumes:
       - ${DOCKER_CFG_DIR}/network:/data
     networks:

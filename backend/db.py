@@ -2,7 +2,7 @@ import sqlite3
 import os
 import ipaddress
 
-DB_PATH = os.environ.get("DB_PATH", "/app/database.db")
+DB_PATH = os.environ.get("DB_PATH", "/data/database.db")
 
 # -----------------------------
 # Connect to the database
