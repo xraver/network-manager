@@ -6,8 +6,9 @@ WORKDIR /var/www/network-manager
 # Install system dependencies 
 RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN pip install --no-cache-dir fastapi uvicorn[standard]
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 # Copy backend and frontend
 COPY backend/ /var/www/network-manager/backend/
