@@ -6,6 +6,9 @@ import secrets
 # Import local modules
 from backend.utils import load_hash
 
+# Frontend related settings
+FRONTEND_DIR = "/app/frontend"
+
 # Database related settings
 DB_FILE = os.getenv("DB_FILE", "/data/database.db")
 DB_RESET = os.getenv("DB_RESET", "0") == "1"
