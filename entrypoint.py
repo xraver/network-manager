@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
 
+import bcrypt
 import os
 import sys
 import sqlite3
@@ -8,21 +9,36 @@ import subprocess
 # ================================
 # Variables
 # ================================
-DB_FILE = os.environ.get("DB_PATH", "database.db")
+DB_FILE = os.environ.get("DB_PATH", "/data/database.db")
 DB_RESET = os.environ.get("DB_RESET", "0") == "1"
 DOMAIN = os.environ.get("DOMAIN", "example.com")
 PUBLIC_IP = os.environ.get("PUBLIC_IP", "127.0.0.1")
+ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
+ADMIN_HASH = os.environ.get("ADMIN_HASH", "")
 
 IMAGE_NAME = "network-manager-distroless"
 IMAGE_VERSION = "1.0"
+
+import bcrypt
+
+# ================================
+# Create hash password
+# ================================
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password.encode(), salt)
+    return hashed.decode()
 
 # ================================
 # Create DB if needed
 # ================================
 def create_db():
+    global DB_FILE, DB_RESET, DOMAIN, PUBLIC_IP, ADMIN_USER, ADMIN_PASSWORD, ADMIN_HASH
+
     # Reset database if requested
     if DB_RESET and os.path.exists(DB_FILE):
-        print("INFO:     Removing existing database...")
+        print("INFO:     Removing existing database.")
         os.remove(DB_FILE)
 
     # Skip creation if DB already exists
@@ -91,10 +107,50 @@ def create_db():
     """)
     cur.execute("CREATE INDEX idx_txt_host ON txt_records(host_id);")
 
+    # Users RECORDS
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            email TEXT UNIQUE,
+            is_admin INTEGER NOT NULL DEFAULT 0,
+            modules TEXT, -- JSON: ["dns","dhcp","vpn"]
+            status TEXT NOT NULL DEFAULT 'active', -- active, disabled, locked
+            failed_attempts INTEGER NOT NULL DEFAULT 0,
+            last_failed_at INTEGER,
+            last_login_at INTEGER,
+            password_changed_at INTEGER,
+            notes TEXT,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+    """)
+    cur.execute("CREATE INDEX idx_users_username ON users(username);")
+    # Insert default admin user
+    if not ADMIN_HASH:
+        ADMIN_HASH = hash_password(ADMIN_PASSWORD)
+    else:
+        ADMIN_PASSWORD = "(hidden)"
+    cur.execute("""
+        INSERT INTO users (
+            username, password_hash, email, is_admin, modules, status,
+            created_at, updated_at, password_changed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
+    """, (
+        ADMIN_USER,
+        ADMIN_HASH,
+        "admin@example.com",
+        1,
+        '["dns","dhcp"]',
+        "active"
+    ))
+
     conn.commit()
     conn.close()
 
     print(f"INFO:     Database initialized successfully for {DOMAIN}.")
+    print(f"INFO:     Admin user: {ADMIN_USER} with password {ADMIN_PASSWORD} - {ADMIN_HASH}.")
     print(f"INFO:     Public IP: {PUBLIC_IP}.")
 
 # ================================
@@ -105,7 +161,6 @@ def create_db():
 sys.stdout.reconfigure(line_buffering=True)
 
 print(f"INFO:     Starting {IMAGE_NAME} docker image version {IMAGE_VERSION}.")
-
 
 # Parse arguments
 args = sys.argv[1:]

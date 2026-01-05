@@ -1,18 +1,8 @@
-import sqlite3
-import os
+# backend/db/hosts.py
+
 import ipaddress
-
-DB_PATH = os.environ.get("DB_PATH", "/data/database.db")
-
-# -----------------------------
-# Connect to the database
-# -----------------------------
-def get_db():
-    conn = sqlite3.connect(DB_PATH, timeout=5)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL;")
-    conn.execute("PRAGMA synchronous=NORMAL;")
-    return conn
+import os
+from backend.db.db import get_db
 
 # -----------------------------
 # SELECT ALL HOSTS
@@ -21,7 +11,6 @@ def get_hosts():
     conn = get_db()
     cur = conn.execute("SELECT * FROM hosts ORDER BY name")
     rows = cur.fetchall()
-    conn.close()
     return [dict(r) for r in rows]
 
 # -----------------------------
@@ -31,7 +20,6 @@ def get_host(host_id: int):
     conn = get_db()
     cur = conn.execute("SELECT * FROM hosts WHERE id = ?", (host_id,))
     row = cur.fetchone()
-    conn.close()
     return dict(row) if row else None
 
 # -----------------------------
@@ -52,7 +40,6 @@ def add_host(data: dict):
     )
     conn.commit()
     last_id = cur.lastrowid
-    conn.close()
     return last_id
 
 # -----------------------------
@@ -73,7 +60,6 @@ def update_host(host_id: int, data: dict):
         )
     )
     conn.commit()
-    conn.close()
     return True
 
 # -----------------------------
@@ -83,5 +69,4 @@ def delete_host(host_id: int):
     conn = get_db()
     conn.execute("DELETE FROM hosts WHERE id = ?", (host_id,))
     conn.commit()
-    conn.close()
     return True

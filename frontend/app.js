@@ -288,7 +288,7 @@ async function handleLogin(e) {
     const data = await res.json();
 
     if (data.status === "ok") {
-        window.location.href = "/hosts";   // ora funziona davvero
+        window.location.href = "/hosts";
     } else {
         document.getElementById("loginError").textContent = "Wrong credentials";
     }
@@ -300,7 +300,7 @@ async function handleLogin(e) {
 async function handleLogout() {
     await fetch("/api/logout", {
         method: "POST",
-        credentials: "include"   // 🔥 fondamentale per cancellare il cookie
+        credentials: "include"
     });
 
     window.location.href = "/login";
@@ -312,7 +312,6 @@ async function handleLogout() {
 loadHosts();
 document.getElementById("searchInput").value = "";
 
-//document.getElementById("searchInput").addEventListener("keydown", (e) => {
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         resetSorting();  

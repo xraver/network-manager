@@ -1,3 +1,4 @@
-fastapi 
-uvicorn[standard]
+bcrypt
+fastapi
 itsdangerous
+uvicorn[standard]

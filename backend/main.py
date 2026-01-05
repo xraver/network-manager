@@ -9,12 +9,16 @@ import ipaddress
 import time
 
 # Import local models
-from backend.db import (
+from backend.db.hosts import (
     get_hosts,
     get_host,
     add_host,
     update_host,
     delete_host
+)
+
+from backend.db.users import (
+    verify_login
 )
 
 # Read Variables
@@ -127,7 +131,8 @@ def api_login(request: Request, data: dict, response: Response):
 
     user = data.get("username")
     pwd = data.get("password")
-    if user == "admin" and pwd == "admin":
+    if (verify_login(user, pwd)):
+    #if user == "admin" and pwd == "admin":
         # reset tentativi su IP 
         login_attempts.pop(ip, None)
 

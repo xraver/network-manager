@@ -44,8 +44,6 @@ COPY --from=builder /app/entrypoint.py /usr/local/bin/entrypoint.py
 # Ensure Python sees the installed packages 
 ENV PYTHONPATH="/usr/local/lib/python3.12/site-packages"
 
-ENV DB_PATH=/data/database.db
-ENV DB_RESET=0
 ENV HTTP_PORT=8000
 ENV LOGIN_MAX_ATTEMPTS=5
 ENV LOGIN_WINDOW_SECONDS=600
