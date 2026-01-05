@@ -1,14 +1,15 @@
+# backend/main.py
+
+# import standard modules
 from fastapi import FastAPI
 from fastapi import Request, Response, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from itsdangerous import TimestampSigner
-import secrets
 import os
 import ipaddress
 import time
-
-# Import local models
+# Import local modules
 from backend.db.hosts import (
     get_hosts,
     get_host,
@@ -16,16 +17,14 @@ from backend.db.hosts import (
     update_host,
     delete_host
 )
-
 from backend.db.users import (
     verify_login
 )
-
-# Read Variables
-SECRET_KEY = os.getenv("SESSION_SECRET", secrets.token_urlsafe(64))
-HTTP_PORT = os.getenv("HTTP_PORT", "8000")
-LOGIN_MAX_ATTEMPTS = int(os.getenv("LOGIN_MAX_ATTEMPTS", "5"))
-LOGIN_WINDOW_SECONDS = int(os.getenv("LOGIN_WINDOW_SECONDS", "600"))
+# Import config variables
+from backend.config import SECRET_KEY
+from backend.config import HTTP_PORT
+from backend.config import LOGIN_MAX_ATTEMPTS
+from backend.config import LOGIN_WINDOW_SECONDS
 
 # IP → lista timestamp tentativi 
 login_attempts = {}

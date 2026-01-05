@@ -39,19 +39,15 @@ WORKDIR /app
 # Copy application
 COPY --from=builder /app/backend backend
 COPY --from=builder /app/frontend frontend
-COPY --from=builder /app/entrypoint.py /usr/local/bin/entrypoint.py
+COPY --from=builder /app/entrypoint.py entrypoint.py
 
 # Ensure Python sees the installed packages 
 ENV PYTHONPATH="/usr/local/lib/python3.12/site-packages"
 
 ENV HTTP_PORT=8000
-ENV LOGIN_MAX_ATTEMPTS=5
-ENV LOGIN_WINDOW_SECONDS=600
-ENV DOMAIN=example.com
-ENV PUBLIC_IP=127.0.0.1
 
 # Expose the port dynamically
 EXPOSE ${HTTP_PORT}
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.py"]
+ENTRYPOINT ["/app/entrypoint.py"]
 CMD ["python3", "-u", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
