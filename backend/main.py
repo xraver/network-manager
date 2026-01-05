@@ -70,7 +70,7 @@ def check_rate_limit(ip: str):
 # FRONTEND PATHS (absolute paths inside Docker)
 # ---------------------------------------------------------
 
-FRONTEND_DIR = "/var/www/network-manager/frontend"
+FRONTEND_DIR = "/app/frontend"
 
 # Homepage
 @app.get("/")
