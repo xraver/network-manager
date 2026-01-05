@@ -290,7 +290,7 @@ async function handleLogin(e) {
     if (data.status === "ok") {
         window.location.href = "/hosts";
     } else {
-        document.getElementById("loginError").textContent = "Wrong credentials";
+        document.getElementById("loginError").textContent = data.error;
     }
 }
 

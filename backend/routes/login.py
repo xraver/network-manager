@@ -1,7 +1,7 @@
 # backend/routes/login.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
 import os
 import time
@@ -11,6 +11,7 @@ from backend.db.users import verify_login
 # Import config variables
 from backend.config import FRONTEND_DIR, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_SECONDS
 
+# Create Router
 router = APIRouter()
 
 # IP -> lista timestamp tentativi 
@@ -73,7 +74,7 @@ def api_login(request: Request, data: dict, response: Response):
         )
         return {"status": "ok"}
 
-    return {"error": "Invalid credentials"}
+    return {"error": "Wrong credentials"}
 
 @router.post("/api/logout")
 def api_logout(response: Response):
