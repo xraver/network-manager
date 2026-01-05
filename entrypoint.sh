@@ -9,10 +9,13 @@ DB_RESET="${DB_RESET:-0}"
 DOMAIN="${DOMAIN:-example.com}"
 PUBLIC_IP="${PUBLIC_IP:-127.0.0.1}"
 
+IMAGE_NAME="network-manager"
+IMAGE_VERSION="0.0"
+
 function create_db() {
     # Reset database if requested
     if [[ $DB_RESET -eq 1 && -f "$DB_FILE" ]]; then
-        echo "INFO:     [*] Removing existing database..."
+        echo "INFO:     [✓]] Removing existing database."
         rm -f "$DB_FILE"
     fi
 
@@ -22,7 +25,7 @@ function create_db() {
         return 0
     fi
 
-    echo "INFO:     [*] Creating database: $DB_FILE"
+    echo "INFO:     [✓] Creating database: $DB_FILE"
 
     # Create DB with dynamic settings
     sqlite3 "$DB_FILE" <<EOF
@@ -88,8 +91,12 @@ EOF
 }
 
 # ================================
-# Parse arguments
+# Entry Point
 # ================================
+
+echo "INFO:     Starting $IMAGE_NAME docker image version $IMAGE_VERSION."
+
+# Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --reset)
