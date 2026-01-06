@@ -83,7 +83,12 @@ async def session_middleware(request: Request, call_next):
 def home(request: Request):
     return FileResponse(os.path.join(FRONTEND_DIR, "hosts.html"))
 
-# Main CSS
+# CSS variables
 @app.get("/css/variables.css")
 def home(request: Request):
     return FileResponse(os.path.join(FRONTEND_DIR, "css/variables.css"))
+
+# CSS Layoyt
+@app.get("/css/layout.css")
+def home(request: Request):
+    return FileResponse(os.path.join(FRONTEND_DIR, "css/layout.css"))

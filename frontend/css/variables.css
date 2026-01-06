@@ -13,4 +13,8 @@
     --text-dark: #222;
 
     --border-light: #ccc;
+    --border-dark: #999;
+
+    --shadow-soft: rgba(0, 0, 0, 0.12);
+    --shadow-strong: rgba(0, 0, 0, 0.25);
 }
