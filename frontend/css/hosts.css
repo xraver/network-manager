@@ -1,21 +1,4 @@
 /* ================================
-   Global color variables (pfSense style)
-   ================================ */
-:root {
-    --accent: #4da3ff;
-    --accent-hover: #1f8bff;
-
-    --bg-dark: #111;
-    --bg-light: #f9f9f9;
-    --bg-frame: #e8e8e8;
-
-    --text-light: #e6e6e6;
-    --text-dark: #222;
-
-    --border-light: #ccc;
-}
-
-/* ================================
    Global layout
    ================================ */
 body {
