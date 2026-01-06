@@ -6,8 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 import os
 import time
 # Import local modules
-from backend.security import signer
-from backend.db.users import verify_login
+from backend.security import verify_login, apply_session
 # Import config variables
 from backend.config import FRONTEND_DIR, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_SECONDS
 
@@ -60,16 +59,7 @@ def api_login(request: Request, data: dict, response: Response):
         # reset tentativi su IP 
         login_attempts.pop(ip, None)
 
-        token = signer.sign(user).decode()
-        response.set_cookie(
-            "session",
-            token,
-            httponly=True,
-            max_age=86400,
-            path="/",
-            #secure=True, # solo via HTTPS
-            samesite="Strict"
-        )
+        apply_session(response, username=user)
         return {"status": "ok"}
 
     return {"error": "Wrong credentials"}

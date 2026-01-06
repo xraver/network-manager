@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 import os
 # Import local modules
-from backend.security import is_logged_in
+from backend.security import is_logged_in, apply_session
 from backend.routes.health import router as health_router
 from backend.routes.login import router as login_router
 from backend.routes.hosts import router as hosts_router
@@ -37,6 +37,7 @@ app.add_middleware(
 @app.middleware("http")
 async def session_middleware(request: Request, call_next):
     path = request.url.path
+    token = request.cookies.get("session")
 
     # Excludes the login methods
     if path.startswith("/login") or path.startswith("/api/login"):
@@ -58,13 +59,20 @@ async def session_middleware(request: Request, call_next):
     if path.startswith("/api"):
         if not is_logged_in(request):
             return JSONResponse({"error": "Not authenticated"}, status_code=401)
-        return await call_next(request)
+
+        response = await call_next(request)
+        # Sliding expiration
+        apply_session(response, username=None, token=token)
+        return response
 
     # Protected HTML pages
     if not is_logged_in(request):
         return RedirectResponse("/login")
 
-    return await call_next(request)
+    response = await call_next(request)
+    # Sliding expiration
+    apply_session(response, username=None, token=token)
+    return response
 
 # ---------------------------------------------------------
 # FRONTEND PATHS (absolute paths inside Docker)

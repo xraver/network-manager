@@ -1,12 +1,10 @@
 # backend/db/users.py
 
 # Import standard modules
-import bcrypt
 import json
 import os
 # Import local modules
-from backend.db.db import get_db
-from backend.db.db import register_init
+from backend.db.db import get_db, register_init
 
 # ================================
 # Create hash password
@@ -95,19 +93,3 @@ def create_user(username, password_hash, email=None, is_admin=0, modules=None):
     ))
 
     conn.commit()
-
-# -----------------------------
-# Verify Login
-# -----------------------------
-def verify_login(username, password):
-    user = get_user_by_username(username)
-    if not user:
-        return False
-
-    if user["status"] != "active":
-        return False
-
-    if not bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
-        return False
-
-    return True
