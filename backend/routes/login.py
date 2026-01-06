@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 import os
 import time
 # Import local modules
-from backend.security import is_logged_in, signer
+from backend.security import signer
 from backend.db.users import verify_login
 # Import config variables
 from backend.config import FRONTEND_DIR, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_SECONDS
@@ -37,8 +37,6 @@ def check_rate_limit(ip: str):
 # Login page
 @router.get("/login")
 def login_page(request: Request):
-    if is_logged_in(request):
-        return RedirectResponse("/")
     return FileResponse(os.path.join(FRONTEND_DIR, "login.html"))
 
 # Serve login.css

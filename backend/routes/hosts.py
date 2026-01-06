@@ -6,7 +6,6 @@ from fastapi.responses import FileResponse, RedirectResponse
 import os
 import ipaddress
 # Import local modules
-from backend.security import is_logged_in, require_login, html_protected
 from backend.db.hosts import (
     get_hosts,
     get_host,
@@ -27,7 +26,7 @@ router = APIRouter()
 # Hosts page
 @router.get("/hosts")
 def hosts(request: Request):
-    return html_protected(request, "hosts.html")
+    return FileResponse(os.path.join(FRONTEND_DIR, "hosts.html"))
 
 # Serve hosts.css
 @router.get("/css/hosts.css")
@@ -40,12 +39,10 @@ def css_hosts():
 
 @router.get("/api/hosts")
 def api_get_hosts(request: Request):
-    require_login(request)
     return get_hosts()
 
 @router.post("/api/hosts")
 def api_add_host(request: Request, data: dict):
-    require_login(request)
     name = data.get("name", "").strip()
     ipv4 = data.get("ipv4")
     ipv6 = data.get("ipv6")
@@ -65,12 +62,10 @@ def api_add_host(request: Request, data: dict):
 
 @router.get("/api/hosts/{host_id}")
 def api_get_host(request: Request, host_id: int):
-    require_login(request)
     return get_host(host_id) or {}
 
 @router.put("/api/hosts/{host_id}")
 def api_update_host(request: Request, data: dict, host_id: int):
-    require_login(request)
     name = data.get("name", "").strip()
     ipv4 = data.get("ipv4")
     ipv6 = data.get("ipv6")
@@ -91,6 +86,5 @@ def api_update_host(request: Request, data: dict, host_id: int):
 
 @router.delete("/api/hosts/{host_id}")
 def api_delete_host(request: Request, host_id: int):
-    require_login(request)
     delete_host(host_id)
     return {"status": "ok"}

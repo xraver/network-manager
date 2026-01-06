@@ -3,7 +3,6 @@
 # import standard modules
 import os
 from fastapi import Request, HTTPException
-from fastapi.responses import FileResponse, RedirectResponse
 from itsdangerous import TimestampSigner
 # Import config variables
 from backend.config import FRONTEND_DIR, SECRET_KEY
@@ -11,7 +10,7 @@ from backend.config import FRONTEND_DIR, SECRET_KEY
 signer = TimestampSigner(SECRET_KEY)
 
 # -----------------------------
-# login check
+# check session cookie
 # -----------------------------
 def is_logged_in(request: Request) -> bool:
     token = request.cookies.get("session")
@@ -24,16 +23,8 @@ def is_logged_in(request: Request) -> bool:
         return False
 
 # -----------------------------
-# login check (for api)
+# check login
 # -----------------------------
 def require_login(request: Request):
     if not is_logged_in(request):
         raise HTTPException(status_code=401, detail="Not authenticated")
-
-# -----------------------------
-# login check (for html)
-# -----------------------------
-def html_protected(request: Request, filename: str):
-    if not is_logged_in(request):
-        return RedirectResponse("/login")
-    return FileResponse(os.path.join(FRONTEND_DIR, filename))

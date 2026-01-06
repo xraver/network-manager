@@ -1,20 +1,12 @@
 # backend/main.py
 
 # import standard modules
-from fastapi import FastAPI
-from fastapi import Request, Response
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 import os
 # Import local modules
-from backend.security import is_logged_in, require_login, html_protected
-from backend.db.hosts import (
-    get_hosts,
-    get_host,
-    add_host,
-    update_host,
-    delete_host
-)
+from backend.security import is_logged_in
 from backend.routes.health import router as health_router
 from backend.routes.login import router as login_router
 from backend.routes.hosts import router as hosts_router
@@ -39,19 +31,49 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------
-# FRONTEND PATHS (absolute paths inside Docker)
+# Middleware to manage Login
 # ---------------------------------------------------------
 
-# Protect html pages
-def html_protected(request: Request, filename: str):
+@app.middleware("http")
+async def session_middleware(request: Request, call_next):
+    path = request.url.path
+
+    # Excludes the login methods
+    if path.startswith("/login") or path.startswith("/api/login"):
+        return await call_next(request)
+
+    # Excludes static files
+    if (
+        path.startswith("/css") or
+        path.startswith("/js") or
+        path.endswith(".js") or
+        path.endswith(".css") or
+        path.endswith(".png") or
+        path.endswith(".jpg") or
+        path.endswith(".ico")
+    ):
+        return await call_next(request)
+
+    # Protected APIs
+    if path.startswith("/api"):
+        if not is_logged_in(request):
+            return JSONResponse({"error": "Not authenticated"}, status_code=401)
+        return await call_next(request)
+
+    # Protected HTML pages
     if not is_logged_in(request):
         return RedirectResponse("/login")
-    return FileResponse(os.path.join(FRONTEND_DIR, filename))
+
+    return await call_next(request)
+
+# ---------------------------------------------------------
+# FRONTEND PATHS (absolute paths inside Docker)
+# ---------------------------------------------------------
 
 # Homepage
 @app.get("/")
 def home(request: Request):
-    return html_protected(request, "hosts.html")
+    return FileResponse(os.path.join(FRONTEND_DIR, "hosts.html"))
 
 # Serve app.js
 @app.get("/app.js")
