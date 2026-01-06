@@ -43,6 +43,16 @@ def login_page(request: Request):
 def css_login():
     return FileResponse(os.path.join(FRONTEND_DIR, "css/login.css"))
 
+# Serve login.js
+@router.get("/js/login.js")
+def css_login():
+    return FileResponse(os.path.join(FRONTEND_DIR, "js/login.js"))
+
+# Serve session.js
+@router.get("/js/session.js")
+def css_login():
+    return FileResponse(os.path.join(FRONTEND_DIR, "js/session.js"))
+
 # ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------

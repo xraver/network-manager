@@ -33,6 +33,11 @@ def hosts(request: Request):
 def css_hosts():
     return FileResponse(os.path.join(FRONTEND_DIR, "css/hosts.css"))
 
+# Serve hosts.js
+@router.get("/js/hosts.js")
+def css_hosts():
+    return FileResponse(os.path.join(FRONTEND_DIR, "js/hosts.js"))
+
 # ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------

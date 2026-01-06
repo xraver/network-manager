@@ -82,8 +82,3 @@ async def session_middleware(request: Request, call_next):
 @app.get("/")
 def home(request: Request):
     return FileResponse(os.path.join(FRONTEND_DIR, "hosts.html"))
-
-# Serve app.js
-@app.get("/app.js")
-def js():
-    return FileResponse(os.path.join(FRONTEND_DIR, "app.js"))
