@@ -1,10 +1,24 @@
 # backend/config.py
 
 # Import standard modules
+import datetime
 import os
 import secrets
 # Import local modules
 from backend.utils import load_hash
+
+# Software Version
+BASE_VERSION = "0.1.0"
+DEVEL = os.getenv("DEV", "0") == "1"
+if DEVEL:
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M")
+    APP_VERSION = f"{BASE_VERSION}-dev-{timestamp}"
+else:
+    APP_VERSION = BASE_VERSION
+
+# Base Image / Docker Image
+BASEIMG_NAME = os.getenv("BASEIMG_NAME", "unknown")
+BASEIMG_VERSION = os.getenv("BASEIMG_VERSION", "unknown")
 
 # Frontend related settings
 FRONTEND_DIR = "/app/frontend"

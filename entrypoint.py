@@ -11,8 +11,8 @@ import backend.db.users
 # ================================
 # Variables
 # ================================
-IMAGE_NAME = "network-manager-distroless"
-IMAGE_VERSION = "1.0"
+BASEIMG_NAME = "network-manager-distroless"
+BASEIMG_VERSION = "0.2"
 
 from backend.config import DB_FILE
 from backend.config import DB_RESET
@@ -46,7 +46,9 @@ def docker_create_db():
 # Force flush
 sys.stdout.reconfigure(line_buffering=True)
 
-print(f"INFO:     Starting {IMAGE_NAME} docker image version {IMAGE_VERSION}.")
+print(f"INFO:     Starting {BASEIMG_NAME} docker image version {BASEIMG_VERSION}.")
+os.environ["BASEIMG_NAME"] = BASEIMG_NAME
+os.environ["BASEIMG_VERSION"] = BASEIMG_VERSION
 
 # Parse arguments
 args = sys.argv[1:]
