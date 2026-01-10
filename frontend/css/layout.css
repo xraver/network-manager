@@ -1,4 +1,11 @@
 /* ================================
+   Reset di base
+   ================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* ================================
    Global layout
    ================================ */
 body {
@@ -31,7 +38,6 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-sizing: border-box;
 }
 
 .logo {
@@ -146,12 +152,13 @@ th:hover::after {
     font-weight: 600;
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, filter 0.2s ease;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
 .btn-primary:hover {
     background-color: var(--accent-hover);
+    filter: brightness(0.96);
 }
 
 /* ================================
