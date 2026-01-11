@@ -52,12 +52,12 @@
 <table id="hosts-table">
     <thead>
         <tr>
-            <th onclick="sortTable(0)">Name <span class="sort-arrow"></span></th>
-            <th onclick="sortTable(1)">IPv4 <span class="sort-arrow"></span></th>
-            <th onclick="sortTable(2)">IPv6 <span class="sort-arrow"></span></th>
-            <th onclick="sortTable(3)">MAC <span class="sort-arrow"></span></th>
-            <th onclick="sortTable(4)">Note <span class="sort-arrow"></span></th>
-            <th onclick="sortTable(5)">SSL <span class="sort-arrow"></span></th>
+            <th data-type="string" onclick="sortTable(0)">Name <span class="sort-arrow" aria-hidden="true"></span></th>
+            <th data-type="ipv4" onclick="sortTable(1)">IPv4 <span class="sort-arrow" aria-hidden="true"></span></th>
+            <th data-type="ipv6" onclick="sortTable(2)">IPv6 <span class="sort-arrow" aria-hidden="true"></span></th>
+            <th data-type="mac" onclick="sortTable(3)">MAC <span class="sort-arrow" aria-hidden="true"></span></th>
+            <th data-type="string" onclick="sortTable(4)">Note <span class="sort-arrow" aria-hidden="true"></span></th>
+            <th data-type="string" onclick="sortTable(5)">SSL <span class="sort-arrow" aria-hidden="true"></span></th>
             <th>Actions</th>
         </tr>
     </thead>
