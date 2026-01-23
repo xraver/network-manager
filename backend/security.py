@@ -7,48 +7,51 @@ from fastapi import Request, HTTPException
 from itsdangerous import TimestampSigner
 # Import local modules
 from backend.db.users import get_user_by_username
-from backend.utils import log_event
-# Import config variables
-from backend.config import FRONTEND_DIR, SECRET_KEY
+# Import Settings
+from settings.settings import settings
+# Import Log
+from log.log import get_logger
 
-signer = TimestampSigner(SECRET_KEY)
+signer = TimestampSigner(settings.SECRET_KEY)
 
 # -----------------------------
 # Verify Login
 # -----------------------------
 def verify_login(username, password):
+    logger = get_logger(__name__)
     user = get_user_by_username(username)
     if not user:
-        log_event("LOGIN failed - user not found", user=username)
+        logger.error("LOGIN failed - user %s not found", username)
         return False
 
     if user["status"] != "active":
-        log_event("LOGIN Failed - user disabled", user=username)
+        logger.error("LOGIN Failed - user %s disabled", username)
         return False
 
     if not bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
-        log_event("LOGIN Failed - password wrong", user=username)
+        logger.error("LOGIN Failed - password wrong for user %s", username)
         return False
 
-    log_event("LOGIN", user=username)
+    logger.info("LOGIN user %s", username)
     return True
 
 # ----------------------------
 # creates or renew the cookie
 # ----------------------------
 def apply_session(response, username: str | None = None, token: str | None = None):
+    logger = get_logger(__name__)
 
     # First Login
     if username is not None and token is None:
         token = signer.sign(username).decode()
-        log_event("SESSION_CREATE", user=username)
+        logger.info("SESSION_CREATE - %s", username)
 
     if username is None:
         username = signer.unsign(token, max_age=86400).decode()
-        log_event("SESSION_UPDATE", user=username)
+        logger.info("SESSION_UPDATE - %s", username)
 
     if username is None or token is None:
-        log_event("SESSION_ERROR")
+        logger.error("SESSION_ERROR")
         return
 
     response.set_cookie(

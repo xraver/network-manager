@@ -13,8 +13,8 @@ from backend.db.hosts import (
     update_host,
     delete_host
 )
-# Import config variables
-from backend.config import FRONTEND_DIR
+# Import Settings
+from settings.settings import settings
 
 # Create Router
 router = APIRouter()
@@ -22,26 +22,24 @@ router = APIRouter()
 # ---------------------------------------------------------
 # FRONTEND PATHS (absolute paths inside Docker)
 # ---------------------------------------------------------
-
 # Hosts page
 @router.get("/hosts")
 def hosts(request: Request):
-    return FileResponse(os.path.join(FRONTEND_DIR, "hosts.html"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "hosts.html"))
 
 # Serve hosts.css
 @router.get("/css/hosts.css")
 def css_hosts():
-    return FileResponse(os.path.join(FRONTEND_DIR, "css/hosts.css"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/hosts.css"))
 
 # Serve hosts.js
 @router.get("/js/hosts.js")
 def css_hosts():
-    return FileResponse(os.path.join(FRONTEND_DIR, "js/hosts.js"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/hosts.js"))
 
 # ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------
-
 @router.get("/api/hosts")
 def api_get_hosts(request: Request):
     return get_hosts()

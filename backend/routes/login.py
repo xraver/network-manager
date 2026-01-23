@@ -7,8 +7,8 @@ import os
 import time
 # Import local modules
 from backend.security import verify_login, apply_session
-# Import config variables
-from backend.config import FRONTEND_DIR, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_SECONDS
+# Import Settings
+from settings.settings import settings
 
 # Create Router
 router = APIRouter()
@@ -20,9 +20,9 @@ def check_rate_limit(ip: str):
     now = time.time()
     attempts = login_attempts.get(ip, [])
     # tieni solo tentativi negli ultimi LOGIN_WINDOW_SECONDS secondi
-    attempts = [t for t in attempts if now - t < LOGIN_WINDOW_SECONDS]
+    attempts = [t for t in attempts if now - t < settings.LOGIN_WINDOW_SECONDS]
 
-    if len(attempts) >= LOGIN_MAX_ATTEMPTS:
+    if len(attempts) >= settings.LOGIN_MAX_ATTEMPTS:
         raise HTTPException(status_code=429, detail="Too many login attempts")
 
     # registra nuovo tentativo
@@ -32,31 +32,29 @@ def check_rate_limit(ip: str):
 # ---------------------------------------------------------
 # FRONTEND PATHS (absolute paths inside Docker)
 # ---------------------------------------------------------
-
 # Login page
 @router.get("/login")
 def login_page(request: Request):
-    return FileResponse(os.path.join(FRONTEND_DIR, "login.html"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "login.html"))
 
 # Serve login.css
 @router.get("/css/login.css")
 def css_login():
-    return FileResponse(os.path.join(FRONTEND_DIR, "css/login.css"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/login.css"))
 
 # Serve login.js
 @router.get("/js/login.js")
 def css_login():
-    return FileResponse(os.path.join(FRONTEND_DIR, "js/login.js"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/login.js"))
 
 # Serve session.js
 @router.get("/js/session.js")
 def css_login():
-    return FileResponse(os.path.join(FRONTEND_DIR, "js/session.js"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/session.js"))
 
 # ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------
-
 @router.post("/api/login")
 def api_login(request: Request, data: dict, response: Response):
     ip = request.client.host

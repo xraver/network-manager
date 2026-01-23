@@ -1,10 +1,16 @@
 # backend/db/users.py
 
 # Import standard modules
+import bcrypt
 import json
+import logging
 import os
 # Import local modules
 from backend.db.db import get_db, register_init
+# Import Settings
+from settings.settings import settings
+# Import Log
+from log.log import get_logger
 
 # ================================
 # Create hash password
@@ -28,10 +34,9 @@ def get_user_by_username(username):
 # -----------------------------
 @register_init
 def init_db_users_table(cur):
-    from backend.config import ADMIN_USER
-    from backend.config import ADMIN_PASSWORD
-    from backend.config import ADMIN_HASH
+    logger = get_logger(__name__)
 
+    # USERS TABLE
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,25 +57,26 @@ def init_db_users_table(cur):
     """)
     cur.execute("CREATE INDEX idx_users_username ON users(username);")
     # Insert default admin user
-    if not ADMIN_HASH:
-        ADMIN_HASH = hash_password(ADMIN_PASSWORD)
+    if not settings.ADMIN_PASSWORD_HASH:
+        settings.ADMIN_PASSWORD_HASH = hash_password(settings.ADMIN_PASSWORD)
     else:
-        ADMIN_PASSWORD = "(hidden)"
+        settings.ADMIN_PASSWORD = "(hidden)"
     cur.execute("""
         INSERT INTO users (
             username, password_hash, email, is_admin, modules, status,
             created_at, updated_at, password_changed_at
         ) VALUES (?, ?, ?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
     """, (
-        ADMIN_USER,
-        ADMIN_HASH,
+        settings.ADMIN_USER,
+        settings.ADMIN_PASSWORD_HASH,
         "admin@example.com",
         1,
         '["dns","dhcp"]',
         "active"
     ))
 
-    print(f"INFO:     - USERS DB: Admin user: {ADMIN_USER} with password {ADMIN_PASSWORD} - {ADMIN_HASH}.")
+    logger.info("USERS DB: Admin user: %s with password %s - %s" ,
+                settings.ADMIN_USER, settings.ADMIN_PASSWORD, settings.ADMIN_PASSWORD_HASH)
 
 # -----------------------------
 # Create User

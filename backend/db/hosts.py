@@ -2,10 +2,14 @@
 
 # Import standard modules
 import ipaddress
+import logging
 import os
 # Import local modules
-from backend.db.db import get_db
-from backend.db.db import register_init
+from backend.db.db import get_db, register_init
+# Import Settings
+from settings.settings import settings
+# Import Log
+from log.log import get_logger
 
 # -----------------------------
 # SELECT ALL HOSTS
@@ -79,20 +83,19 @@ def delete_host(host_id: int):
 # -----------------------------
 @register_init
 def init_db_hosts_table(cur):
-    from backend.config import DOMAIN
-    from backend.config import PUBLIC_IP
+    logger = get_logger(__name__)
 
-    # GLOBAL SETTINGS
+    # SETTINGS TABLE
     cur.execute("""
         CREATE TABLE settings (
             key TEXT PRIMARY KEY,
             value TEXT
         );
     """)
-    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("domain", DOMAIN))
-    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("external_ipv4", PUBLIC_IP))
+    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("domain", settings.DOMAIN))
+    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("external_ipv4", settings.PUBLIC_IP))
 
-    # HOSTS
+    # HOSTS TABLE
     cur.execute("""
         CREATE TABLE hosts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,7 +109,7 @@ def init_db_hosts_table(cur):
     """)
     cur.execute("CREATE INDEX idx_hosts_name ON hosts(name);")
 
-    # ALIASES
+    # ALIASES TABLE
     cur.execute("""
         CREATE TABLE aliases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,7 +122,7 @@ def init_db_hosts_table(cur):
     """)
     cur.execute("CREATE INDEX idx_aliases_host ON aliases(host_id);")
 
-    # TXT RECORDS
+    # TXT TABLE
     cur.execute("""
         CREATE TABLE txt_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,5 +135,5 @@ def init_db_hosts_table(cur):
     """)
     cur.execute("CREATE INDEX idx_txt_host ON txt_records(host_id);")
 
-    print(f"INFO:     - HOSTS DB: Database initialized successfully for {DOMAIN}.")
-    print(f"INFO:     - HOSTS DB: Public IP: {PUBLIC_IP}.")
+    logger.info("HOSTS DB: Database initialized successfully for %s", settings.DOMAIN)
+    logger.info("HOSTS DB: Public IP: %s", settings.PUBLIC_IP)

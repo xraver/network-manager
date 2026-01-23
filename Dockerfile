@@ -16,6 +16,8 @@ WORKDIR /app
 COPY backend backend
 COPY frontend frontend
 COPY entrypoint.py entrypoint.py
+COPY log log
+COPY settings settings
 RUN chmod 755 entrypoint.py
 
 # ---------- STAGE 2: DISTROLESS ----------
@@ -40,6 +42,8 @@ WORKDIR /app
 COPY --from=builder /app/backend backend
 COPY --from=builder /app/frontend frontend
 COPY --from=builder /app/entrypoint.py entrypoint.py
+COPY --from=builder /app/log log
+COPY --from=builder /app/settings settings
 
 # Ensure Python sees the installed packages 
 ENV PYTHONPATH="/usr/local/lib/python3.12/site-packages"
