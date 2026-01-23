@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 import os
 import time
 # Import local modules
-from backend.security import verify_login, apply_session
+from backend.security import verify_login, apply_session, close_session
 # Import Settings
 from settings.settings import settings
 
@@ -74,5 +74,5 @@ def api_login(request: Request, data: dict, response: Response):
 
 @router.post("/api/logout")
 def api_logout(response: Response):
-    response.delete_cookie("session")
+    close_session(response)
     return {"status": "logged_out"}

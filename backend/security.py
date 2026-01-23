@@ -21,18 +21,18 @@ def verify_login(username, password):
     logger = get_logger(__name__)
     user = get_user_by_username(username)
     if not user:
-        logger.error("LOGIN failed - user %s not found", username)
+        logger.error("Login failed - user %s not found", username)
         return False
 
     if user["status"] != "active":
-        logger.error("LOGIN Failed - user %s disabled", username)
+        logger.error("Login Failed - user %s disabled", username)
         return False
 
     if not bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
-        logger.error("LOGIN Failed - password wrong for user %s", username)
+        logger.error("Login Failed - password wrong for user %s", username)
         return False
 
-    logger.info("LOGIN user %s", username)
+    logger.info("Login successful - user %s", username)
     return True
 
 # ----------------------------
@@ -44,14 +44,14 @@ def apply_session(response, username: str | None = None, token: str | None = Non
     # First Login
     if username is not None and token is None:
         token = signer.sign(username).decode()
-        logger.info("SESSION_CREATE - %s", username)
+        logger.info("Session created - %s", username)
 
     if username is None:
         username = signer.unsign(token, max_age=86400).decode()
-        logger.info("SESSION_UPDATE - %s", username)
+        logger.info("Session updated - %s", username)
 
     if username is None or token is None:
-        logger.error("SESSION_ERROR")
+        logger.error("Session Error - missing username or token")
         return
 
     response.set_cookie(
@@ -60,7 +60,7 @@ def apply_session(response, username: str | None = None, token: str | None = Non
         httponly=True,
         max_age=86400,
         path="/",
-        #secure=True, # solo via HTTPS
+        #secure=True, # GRGR solo via HTTPS
         samesite="Strict"
     )
 
@@ -78,8 +78,14 @@ def is_logged_in(request: Request) -> bool:
         return False
 
 # -----------------------------
-# check login
+# Close Session
 # -----------------------------
-def require_login(request: Request):
-    if not is_logged_in(request):
-        raise HTTPException(status_code=401, detail="Not authenticated")
+def close_session(response):
+    logger = get_logger(__name__)
+    
+    response.delete_cookie(
+        key="session",
+        path="/"
+    )
+
+    logger.info("Session closed")
