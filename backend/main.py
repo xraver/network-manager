@@ -21,8 +21,8 @@ from log.log import setup_logging, get_logger
 # ------------------------------------------------------------------------------
 # Logging setup
 # ------------------------------------------------------------------------------
-setup_logging(settings.LOG_LEVEL, settings.LOG_TO_FILE, settings.LOG_FILE)
-logger = get_logger(__name__)
+setup_logging(level=settings.LOG_LEVEL, to_file=settings.LOG_TO_FILE, log_file=settings.LOG_FILE, log_access_file=settings.LOG_ACCESS_FILE)
+logger = get_logger("backend.main")
 
 # ------------------------------------------------------------------------------
 # App init
@@ -79,7 +79,6 @@ cors_origins = [
     f"http://localhost:{settings.HTTP_PORT}",
     f"http://127.0.0.1:{settings.HTTP_PORT}",
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,

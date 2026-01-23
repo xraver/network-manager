@@ -17,6 +17,7 @@ DB_RESET = False
 LOG_LEVEL = "INFO"
 LOG_TO_FILE = False
 LOG_FILE = "/data/app.log"
+LOG_ACCESS_FILE = "/data/access.log"
 
 # ---------------------------------------------------------
 # Host

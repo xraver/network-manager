@@ -62,6 +62,7 @@ class Settings(BaseModel):
     LOG_LEVEL: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", default.LOG_LEVEL))
     LOG_TO_FILE: bool = Field(default_factory=lambda: _to_bool(os.getenv("LOG_TO_FILE", default.LOG_TO_FILE)))
     LOG_FILE: str = Field(default_factory=lambda: os.getenv("LOG_FILE", default.LOG_FILE))
+    LOG_ACCESS_FILE: str = Field(default_factory=lambda: os.getenv("LOG_ACCESS_FILE", default.LOG_ACCESS_FILE))
 
     # Hosts
     DOMAIN: str = Field(default_factory=lambda: os.getenv("DOMAIN", default.DOMAIN))
