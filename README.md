@@ -199,9 +199,13 @@ Log:
 ```bash
 docker compose logs -f network-manager
 ```
-Container rebuild/recreation:
+Container recreation:
 ```bash
 docker compose up -d --force-recreate
+```
+Container rebuild & recreation:
+```
+docker compose up --build -d --force-recreate
 ```
 
 ---
