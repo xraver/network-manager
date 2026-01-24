@@ -1,5 +1,5 @@
 /* ================================
-   Action icons column
+    Actions column
    ================================ */
 td.actions {
     white-space: nowrap;
@@ -42,5 +42,10 @@ td.actions {
     color: var(--text-dark);
 }
 
-.sort-arrow.asc::after  { content: "▲"; }
-.sort-arrow.desc::after { content: "▼"; }
+.sort-arrow.asc::after {
+    content: "▲";
+}
+
+.sort-arrow.desc::after {
+    content: "▼";
+}
