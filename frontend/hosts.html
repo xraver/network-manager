@@ -42,10 +42,17 @@
             class="search-bar"
         />
 
-        <button class="btn-primary" onclick="openAddHostModal()">
+        <button class="btn-primary" title="Add Host" aria-label="Add Host" onclick="openAddHostModal()">
             + Add Host
         </button>
 
+        <button class="btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS" onclick="reloadDNS()">
+            ↻ Reload DNS
+        </button>
+
+        <button class="btn-primary" title="Reload DHCP (Kea)" aria-label="Reload DHCP" onclick="reloadDHCP()">
+            ↻ Reload DHCP
+        </button>
     </div>
 </section>
 
@@ -58,7 +65,7 @@
             <th data-type="mac" onclick="sortTable(3)">MAC <span class="sort-arrow" aria-hidden="true"></span></th>
             <th data-type="string" onclick="sortTable(4)">Note <span class="sort-arrow" aria-hidden="true"></span></th>
             <th data-type="string" onclick="sortTable(5)">SSL <span class="sort-arrow" aria-hidden="true"></span></th>
-            <th>Actions</th>
+            <th data-type="string"> Actions<span class="sort-arrow" aria-hidden="true"></span></th>
         </tr>
     </thead>
     <tbody></tbody>

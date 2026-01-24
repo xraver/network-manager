@@ -1,5 +1,5 @@
 /* ================================
-   Action icons column (specific to hosts)
+   Action icons column
    ================================ */
 td.actions {
     white-space: nowrap;
@@ -21,7 +21,7 @@ td.actions {
 }
 
 /* ================================
-   Search bar (specific to hosts)
+   Search bar
    ================================ */
 .search-bar {
     width: 250px;
@@ -32,7 +32,7 @@ td.actions {
 }
 
 /* ================================
-    Sort arrows (specific to hosts)
+    Sort arrows
    ================================ */  
 .sort-arrow {
   display: inline-block;

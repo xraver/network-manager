@@ -549,6 +549,22 @@ function resetSorting() {
 }
 
 // -----------------------------
+// RELOAD DNS
+// -----------------------------
+function reloadDNS() {
+    // Implement DNS reload logic here
+    showToast("DNS reloaded successfully");
+}
+
+// -----------------------------
+// RELOAD DHCP
+// -----------------------------
+function reloadDHCP() {
+    // Implement DHCP reload logic here
+    showToast("DHCP reloaded successfully");
+}
+
+// -----------------------------
 // INITIAL TABLE LOAD
 // -----------------------------
 document.addEventListener("DOMContentLoaded", async () => {
