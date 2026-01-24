@@ -32,15 +32,15 @@ td.actions {
 }
 
 /* ================================
-    Sort arrows
-   ================================ */  
+   Sort arrows
+   ================================ */
 .sort-arrow {
-  display: inline-block;
-  width: 1em;
-  text-align: center;
-  margin-left: .25rem;
-  color: var(--text-dark);
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+    margin-left: .25rem;
+    color: var(--text-dark);
 }
 
-.sort-arrow.asc::after { content: "▲"; }
+.sort-arrow.asc::after  { content: "▲"; }
 .sort-arrow.desc::after { content: "▼"; }
