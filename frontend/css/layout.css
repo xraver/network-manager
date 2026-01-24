@@ -1,13 +1,12 @@
 /* ================================
-   Reset di base
+   Base layout
    ================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
-/* ================================
-   Global layout
-   ================================ */
 body {
     font-family: sans-serif;
     margin: 20px;
@@ -16,7 +15,7 @@ body {
 }
 
 /* ================================
-   Topbar (pfSense full-width header)
+   Topbar
    ================================ */
 .topbar {
     width: 100%;
@@ -77,6 +76,27 @@ body {
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--text-dark);
+}
+
+/* ================================
+   Buttons (pfSense style)
+   ================================ */
+.btn-primary {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, filter 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    filter: brightness(0.96);
 }
 
 .frame-row {
@@ -141,27 +161,6 @@ th:hover::after {
 }
 
 /* ================================
-   Buttons (pfSense style)
-   ================================ */
-.btn-primary {
-    background-color: var(--accent);
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease, filter 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-.btn-primary:hover {
-    background-color: var(--accent-hover);
-    filter: brightness(0.96);
-}
-
-/* ================================
    Toast notification
    ================================ */
 .toast {
@@ -184,7 +183,7 @@ th:hover::after {
 }
 
 /* ================================
-   Modal overlay
+    Modal
    ================================ */
 .modal {
     display: none;
@@ -196,9 +195,6 @@ th:hover::after {
     align-items: center;
 }
 
-/* ================================
-   Modal window
-   ================================ */
 .modal-content {
     background: #f4f4f4;
     padding: 20px 24px;
@@ -229,9 +225,6 @@ th:hover::after {
     border-radius: 4px;
 }
 
-/* ================================
-   Modal buttons
-   ================================ */
 .modal-buttons {
     display: flex;
     justify-content: flex-end;
