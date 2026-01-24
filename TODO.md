@@ -1,142 +1,142 @@
 
-## 📝 To‑Do List / Workflow Operativo (Estesa)
+## 📝 To-Do List / Operational Workflow (Extended)
 
 ---
 
-### 🔄 Gestione DB all’avvio
+### 🔄 DB management at startup
 
-- [ ] **Se il database è vuoto**
-  - Importare YAML iniziale
-  - Popolare il database
+- [ ] **If the database is empty**
+  - Import initial YAML
+  - Populate the database
 
-- [ ] **Se il database esiste**
-  - Ignorare YAML **a meno che il file del repository sia cambiato**
-  - Se YAML è variato → aggiornare il DB
+- [ ] **If the database exists**
+  - Ignore YAML **unless the repository file has changed**
+  - If YAML has changed → update the DB
 
 ---
 
-### 🛠️ Aggiornamenti effettuati dalla Webapp
+### 🛠️ Updates made by the Webapp
 
-- [ ] Applicare modifiche al database
-- [ ] Rigenerare YAML dal DB
-- [ ] Effettuare **commit + push** su Git
-- [ ] Rigenerare **da zero**:
-  - [ ] Configurazione **BIND (DNS)**
-  - [ ] Configurazione **Kea (DHCP)**
-- [ ] Eseguire reload dei servizi:
+- [ ] Apply changes to the database
+- [ ] Regenerate YAML from the DB
+- [ ] Perform **commit + push** on Git
+- [ ] Regenerate **from scratch**:
+  - [ ] **BIND (DNS)** configuration
+  - [ ] **Kea (DHCP)** configuration
+- [ ] Reload services:
   - [ ] BIND
   - [ ] Kea
 
 ---
 
-### 🔍 YAML ↔ DB Coerenza Periodica
+### 🔍 YAML ↔ DB Periodic Consistency
 
-- [ ] Calcolare **checksum atteso** YAML
-- [ ] Confrontare con **checksum reale**
-- [ ] Determinare quale elemento è variato
+- [ ] Calculate YAML **expected checksum**
+- [ ] Compare with **actual checksum**
+- [ ] Determine which element has changed
 
-#### Regole di sincronizzazione
-- [ ] YAML cambiato → aggiornare DB
-- [ ] DB cambiato → rigenerare YAML
+#### Synchronization rules
+- [ ] YAML changed → update DB
+- [ ] DB changed → regenerate YAML
 
 ---
 
-## 🧩 Generazione configurazioni
+## 🧩 Configuration Generation
 
 ### 🧪 BIND (DNS)
-- [ ] Ricostruire zone forward e reverse
-- [ ] Ricostruire tutti i record (A, AAAA, CNAME)
-- [ ] Validazione sintassi (`named-checkconf`, `named-checkzone`)
-- [ ] Gestione rollback in caso di errori
+- [ ] Rebuild forward and reverse zones
+- [ ] Rebuild all records (A, AAAA, CNAME)
+- [ ] Syntax validation (`named-checkconf`, `named-checkzone`)
+- [ ] Rollback management in case of errors
 
 ### 🧪 Kea (DHCP)
-- [ ] Rigenerare subnet, pool, opzioni globali e host reservations
-- [ ] Validare config JSON (`kea-dhcp4 -t`)
-- [ ] Rollback se la sintassi non è valida
+- [ ] Regenerate subnets, pools, global options, and host reservations
+- [ ] Validate JSON configuration (`kea-dhcp4 -t`)
+- [ ] Rollback if syntax is invalid
 
 ---
 
-## 🧭 Versioning Git
+## 🧭 Git versioning
 
-- [ ] Controllare modifiche locali (`git status`)
-- [ ] Applicare commit automatico con messaggi standard
-- [ ] Push verso il repository remoto
-- [ ] Tenere traccia delle versioni YAML generate
-- [ ] Usare Git come audit delle modifiche
+- [ ] Check local changes (`git status`)
+- [ ] Apply automatic commit with standard messages
+- [ ] Push to remote repository
+- [ ] Keep track of generated YAML versions
+- [ ] Use Git as an audit of changes
 
 ---
 
-## 🩺 Controllo Servizi (Health Check)
+## 🩺 Service Check (Health Check)
 
 ### 🔎 BIND
-- [ ] Controllo stato servizio
-- [ ] Verifica log per errori
+- [ ] Service status check
+- [ ] Check logs for errors
 
 ### 🔎 Kea
-- [ ] Controllo stato DHCP4/DHCP6
-- [ ] Verifica errori da log agent
+- [ ] DHCP4/DHCP6 status check
+- [ ] Check agent logs for errors
 
 ---
 
-# 🔐 Hardening Sicurezza Web
+# 🔐 Web Security Hardening
 
-### 🔒 Sessioni & Cookie
-- [ ] Impostare `secure=True` quando si usa HTTPS  
-- [ ] Impostare `httponly=True` per prevenire accesso via JS  
-- [ ] Impostare `samesite=Strict` o `Lax` a seconda dell’uso  
-- [ ] Rotazione controllata di `SESSION_SECRET` (manuale o programmata)
+### 🔒 Sessions & Cookies
+- [ ] Set `secure=True` when using HTTPS
+- [ ] Set `httponly=True` to prevent access via JS
+- [ ] Set `samesite=Strict` or `Lax` depending on use
+- [ ] Controlled rotation of `SESSION_SECRET` (manual or scheduled)
 
-### 🛡 Protezione HTTP
-- [ ] Headers di sicurezza:
+### 🛡 HTTP Protection
+- [ ] Security headers:
   - [ ] `Content-Security-Policy`
   - [ ] `Strict-Transport-Security`
   - [ ] `X-Frame-Options`
   - [ ] `X-Content-Type-Options`
   - [ ] `Referrer-Policy`
-- [ ] Abilitare TLS tramite reverse proxy
-- [ ] Rate limiting aggiuntivo su IP e endpoint sensibili
+- [ ] Enable TLS via reverse proxy
+- [ ] Additional rate limiting on sensitive IPs and endpoints
 
-### 🔥 Protezione applicativa
-- [ ] Validazione input DNS/DHCP (hostname, IP, subnet)
-- [ ] Sanitizzazione input contro injection YAML/XML/JSON
-- [ ] Audit log delle modifiche critiche
-- [ ] Protezione contro brute force (ce l’hai già 👍)
+### 🔥 Application protection
+- [ ] DNS/DHCP input validation (hostname, IP, subnet)
+- [ ] Input sanitization against YAML/XML/JSON injection
+- [ ] Audit log of critical changes
+- [ ] Brute force protection (you already have this 👍)
 
 ### 🔧 Backup & Recovery
-- [ ] Backup periodico del DB SQLite
-- [ ] Backup del repository Git su remoto
-- [ ] Backup delle configurazioni generate
+- [ ] Periodic backup of SQLite DB
+- [ ] Remote Git repository backup
+- [ ] Backup of generated configurations
 
 ---
 
-# 👥 Gestione Utenti (RBAC)
+# 👥 User Management (RBAC)
 
-### 🎛 Ruoli previsti
-- [ ] **admin** — accesso completo a tutto  
-- [ ] **operator** — può modificare host/DNS/DHCP ma non gestione utenti  
-- [ ] **viewer** — sola lettura
+### 🎛 Planned roles
+- [ ] **admin** — full access to everything
+- [ ] **operator** — can modify host/DNS/DHCP but not user management
+- [ ] **viewer** — read-only
 
-### 🧩 Funzionalità da implementare
-- [ ] Creazione utenti  
-- [ ] Reset password  
-- [ ] Disabilitazione utenti  
-- [ ] Cambio password admin  
-- [ ] Autenticazione basata su hash (bcrypt o argon2)  
-- [ ] Audit log (chi ha fatto cosa, quando)  
-- [ ] Timeout sessioni  
-- [ ] Protezione contro session hijacking  
-- [ ] Logout globale / invalidazione sessioni
+### 🧩 Features to be implemented
+- [ ] User creation
+- [ ] Password reset
+- [ ] User disabling
+- [ ] Admin password change
+- [ ] Hash-based authentication (bcrypt or argon2)
+- [ ] Audit log (who did what, when)
+- [ ] Session timeout
+- [ ] Protection against session hijacking
+- [ ] Global logout / session invalidation
 
 ---
 
-# ⭐ Checklist finale
+# ⭐ Final checklist
 
-- [ ] Gestione DB ↔ YAML completa
-- [ ] Generazione BIND/Kea con validazione & rollback
-- [ ] Versioning Git
-- [ ] Health-check BIND/Kea
-- [ ] Hardening sicurezza web
-- [ ] Gestione utenti + ruoli
-- [ ] Notifiche (email/webhook)
-- [ ] Backup DB + backup Git
-- [ ] Test automatici
+- [ ] Complete DB ↔ YAML management
+- [ ] BIND/Kea generation with validation & rollback
+- [ ] Git versioning
+- [ ] BIND/Kea health check
+- [ ] Web security hardening
+- [ ] User + role management
+- [ ] Notifications (email/webhook)
+- [ ] DB backup + Git backup
+- [ ] Automatic tests
