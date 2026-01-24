@@ -4,10 +4,10 @@
 # BASEIMG
 # ---------------------------------------------------------
 BASEIMG_NAME = "network-manager-distroless"
-BASEIMG_VERSION = "0.3"
+BASEIMG_VERSION = "0.1"
 
 # ---------------------------------------------------------
 # APP
 # ---------------------------------------------------------
 APP_NAME = "network-manager"
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.0.1"

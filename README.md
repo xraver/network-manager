@@ -17,7 +17,7 @@ This solution allows you to manage hosts, DNS zones, DHCP leases, and certificat
 
 Designed to run easily via **Docker** and **Docker Compose**, with configuration via environment variables.
 
-This project is currently under development. For upcoming tasks and planned improvements, please refer to the [TODO list](TODO.list) file.
+This project is currently under development. For upcoming tasks and planned improvements, please refer to the [TODO list](TODO.md) file.
 
 ---
 
@@ -102,7 +102,7 @@ services:
       ADMIN_USER: "${ADMIN_USER:-admin}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
       ADMIN_PASSWORD_HASH_FILE: "/run/secrets/admin_password_hash"
-      # Session (opzionale)
+      # Session key (optional)
       # SESSION_SECRET: "****ReplaceWithYourSecret*****"
     volumes:
       - ./data:/data
@@ -170,7 +170,7 @@ Generate a strong secret:
 openssl rand -base64 64
 ```
 Then:
-SESSION_SECRET: “paste-the-secret-here”
+`SESSION_SECRET`: “paste-the-secret-here”
 
 ---
 
@@ -204,8 +204,8 @@ docker compose up -d --force-recreate
 
 ---
 ## 🔒 Security Checklist
-- Use *ADMIN_PASSWORD_HASH_FILE* in production
-- Disable *SESSION_SECRET* for automatic generation
-- Set secure=True on cookies if you use HTTPS
+- Use `ADMIN_PASSWORD_HASH_FILE` in production
+- Disable `SESSION_SECRET` for automatic generation
+- Set `secure=True` on cookies if you use HTTPS
 - Use a reverse proxy with TLS
 - Do not put passwords in the repository
