@@ -1,5 +1,7 @@
 # Network Manager
-
+[![Last Commit][last-commit-img]][last-commit-url]
+[![License Status][license-img]][license-url]
+[![BuyMeCoffee][buymecoffee-img]][buymecoffee-url]
 
 ## 🌐 Network management web app
 
@@ -209,3 +211,22 @@ docker compose up -d --force-recreate
 - Set `secure=True` on cookies if you use HTTPS
 - Use a reverse proxy with TLS
 - Do not put passwords in the repository
+
+---  
+## 📄 License
+[MIT](http://opensource.org/licenses/MIT) – see the local [LICENSE](LICENSE) file © Giorgio Ravera
+
+## ☕ Donate
+[![BuyMeCoffee][buymecoffee-button]][buymecoffee-url]
+
+---
+
+[license-img]: https://img.shields.io/github/license/xraver/network-manager
+[license-url]: LICENSE
+[releases-img]: https://img.shields.io/github/v/release/xraver/network-manager
+[releases-url]: https://github.com/xraver/network-manager/releases
+[last-commit-img]: https://img.shields.io/github/last-commit/xraver/network-manager
+[last-commit-url]: https://github.com/xraver/network-manager/commits/master
+[buymecoffee-img]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
+[buymecoffee-button]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
+[buymecoffee-url]: https://www.buymeacoffee.com/raverag
