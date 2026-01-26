@@ -1,4 +1,4 @@
-name: CI (Python)
+name: 🐍 Python CI
 
 on:
   push:
@@ -9,70 +9,120 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.12" ]   # aggiungi "3.11" se vuoi test multi-versione
+        python-version: [ "3.12" ]   # add "3.11" if you want multi-version tests
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: ⤵️ Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: pip
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      # Lint (opzionale: richiede flake8 o ruff in requirements-dev.txt)
-      - name: Lint (flake8 se presente)
+      - name: 🧹 Code hygiene (trailing spaces, control chars, EOL)
+        shell: bash
         run: |
-          if python -c "import flake8" 2>/dev/null; then \
-            flake8 backend || exit 1; \
-          else \
-            echo "flake8 non installato, skip"; \
+          set -euo pipefail
+
+          echo "▶️ Check: trailing whitespace (spaces/tabs at end of line)…"
+          if grep -RInP --exclude-dir={.git,.venv,venv,__pycache__,node_modules,dist,build,tmp,.mypy_cache,.pytest_cache} "[ \t]$" .; then
+            echo "❌ Trailing whitespace detected. Please remove trailing spaces/tabs."; exit 1
+          else
+            echo "✅ No trailing whitespace."
           fi
 
-      # Test (opzionale: richiede pytest)
-      - name: Test (pytest se presente)
+          echo "▶️ Check: non-printable control characters (except TAB and LF)…"
+          # Range: 0x00–0x08, 0x0B, 0x0C, 0x0E–0x1F, 0x7F (DEL)
+          if grep -RInP --binary-files=without-match --exclude-dir={.git,.venv,venv,__pycache__,node_modules,dist,build,tmp,.mypy_cache,.pytest_cache} "[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]" .; then
+            echo "❌ Disallowed control characters found."; exit 1
+          else
+            echo "✅ No disallowed control characters."
+          fi
+
+          echo "▶️ Check: final newline at end of file…"
+          failed=0
+          while IFS= read -r -d '' f; do
+            # Skip binaries
+            if file "$f" | grep -qE 'binary'; then continue; fi
+            # If non-empty file, verify last byte == newline (0x0a)
+            if [ -s "$f" ]; then
+              lastchar=$(tail -c1 "$f" | od -An -t x1 | tr -d ' \n')
+              if [ "$lastchar" != "0a" ]; then
+                echo "❌ Missing final newline: $f"
+                failed=1
+              fi
+            fi
+          done < <(git ls-files -z \
+                    ':!:dist/*' ':!:build/*' ':!:out/*' ':!:node_modules/*' \
+                    ':!:*.png' ':!:*.jpg' ':!:*.jpeg' ':!:*.gif' ':!:*.pdf' ':!:*.ico' \
+                    ':!:*.zip' ':!:*.gz' ':!:*.7z' ':!:*.tar' ':!:*.tgz' ':!:*.mp4' ':!:*.mov')
+          if [ "$failed" -ne 0 ]; then
+            echo "❌ Some files do not end with a newline."; exit 1
+          else
+            echo "✅ All files end with a newline."
+          fi
+
+          echo "▶️ Check: mixed/undesired CRLF line endings…"
+          if git grep -I -n $'\r' -- . ':!*.bat' ':!*.cmd' ':!*.ps1' ':!*.sln' ':!*.vcxproj' ':!*.csproj' ':!node_modules/*' ':!dist/*' ':!build/*' | grep -vE '\.gitattributes:'; then
+            echo "❌ CRLF line endings detected where LF is expected. Consider using .gitattributes."; exit 1
+          else
+            echo "✅ Line endings are consistent."
+          fi
+
+      - name: 🧪 Lint (flake8 if present)
+        run: |
+          if python -c "import flake8" 2>/dev/null; then
+            if [ -d backend ]; then flake8 backend || exit 1; else flake8 . || exit 1; fi
+          else
+            echo "ℹ️ flake8 not installed, skipping"
+          fi
+
+      - name: ✅ Tests (pytest if present)
         env:
           CI: "true"
-          # Esempio: DB temporaneo se serve
-          # DB_PATH: tmp/test.db
         run: |
-          if python -c "import pytest" 2>/dev/null; then \
-            mkdir -p tmp; \
-            pytest -q || exit 1; \
-          else \
-            echo "pytest non installato, skip"; \
+          if python -c "import pytest" 2>/dev/null; then
+            mkdir -p tmp
+            pytest -q || exit 1
+          else
+            echo "ℹ️ pytest not installed, skipping"
           fi
 
-      # Build “immagine” applicativa (se hai uno script di build o raccolta asset)
-      - name: Build (se hai uno script)
+      - name: 🚀 Build (if you have a script)
         run: |
-          if [ -f Makefile ] && grep -q "^build:" Makefile; then \
-            make build; \
-          elif [ -f package.json ]; then \
-            npm ci || true; npm run build --if-present; \
-          else \
-            echo "Nessuna build da eseguire"; \
+          if [ -f Makefile ] && grep -q "^build:" Makefile; then
+            make build
+          elif [ -f package.json ]; then
+            npm ci || true
+            npm run build --if-present
+          else
+            echo "ℹ️ No build to run"
           fi
 
-      # Artifact della build (opzionale)
-      - name: Upload artifact (dist/build)
-        uses: actions/upload-artifact@v6
+      - name: 📦 Upload artifact (dist/build)
+        uses: actions/upload-artifact@v4
         with:
           name: build-${{ github.sha }}
           path: |
