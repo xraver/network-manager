@@ -1,0 +1,82 @@
+name: CI (Python)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.12" ]   # aggiungi "3.11" se vuoi test multi-versione
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      # Lint (opzionale: richiede flake8 o ruff in requirements-dev.txt)
+      - name: Lint (flake8 se presente)
+        run: |
+          if python -c "import flake8" 2>/dev/null; then \
+            flake8 backend || exit 1; \
+          else \
+            echo "flake8 non installato, skip"; \
+          fi
+
+      # Test (opzionale: richiede pytest)
+      - name: Test (pytest se presente)
+        env:
+          CI: "true"
+          # Esempio: DB temporaneo se serve
+          # DB_PATH: tmp/test.db
+        run: |
+          if python -c "import pytest" 2>/dev/null; then \
+            mkdir -p tmp; \
+            pytest -q || exit 1; \
+          else \
+            echo "pytest non installato, skip"; \
+          fi
+
+      # Build “immagine” applicativa (se hai uno script di build o raccolta asset)
+      - name: Build (se hai uno script)
+        run: |
+          if [ -f Makefile ] && grep -q "^build:" Makefile; then \
+            make build; \
+          elif [ -f package.json ]; then \
+            npm ci || true; npm run build --if-present; \
+          else \
+            echo "Nessuna build da eseguire"; \
+          fi
+
+      # Artifact della build (opzionale)
+      - name: Upload artifact (dist/build)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: |
+            dist
+            build
+            out
+          if-no-files-found: ignore
