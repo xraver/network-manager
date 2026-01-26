@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
   packages: write
-  # id-token: write   # <- uncomment if you enable provenance/SBOM
+  id-token: write
 
 env:
   # Lowercase repo name for GHCR robustness
@@ -62,4 +62,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # provenance: true   # <- enable if you granted id-token: write
+          provenance: true
