@@ -8,10 +8,9 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write
+  id-token: write   # required for provenance/SBOM attestations and cosign keyless
 
 env:
-  # Lowercase repo name for GHCR robustness
   IMAGE_REGISTRY: ghcr.io
   IMAGE_OWNER: ${{ github.repository_owner }}
   IMAGE_REPO: ${{ github.event.repository.name }}
@@ -21,29 +20,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: ⤵️ Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GHCR
+      - name: 🔐 Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Optional but recommended: generate tags & labels from Git tag using docker/metadata-action
-      - name: Extract Docker metadata
+      - name: 🏷️ Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
             ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_REPO }}
           tags: |
-            type=ref,event=tag
-            type=raw,value=latest
+            type=ref,event=tag       # v1.2.3
+            type=raw,value=latest    # latest
           flavor: |
             latest=true
           labels: |
@@ -51,15 +49,48 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created=${{ github.run_started_at }}
 
-      - name: Build & Push image
+      - name: 🏗️ Build & Push image (with SBOM + provenance)
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
-          # platforms: linux/amd64,linux/arm64   # <- enable if you want multi-arch
+          # Uncomment if you need multi-arch:
+          # platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          provenance: true
+          provenance: true     # generate and push SLSA/in-toto attestation
+          sbom: true           # generate and push SBOM (SPDX)
+          # outputs provenance & sbom as OCI attestations alongside the image
+          # The digest of the image is in steps.build.outputs.digest
+
+      # --- Sign the image with Cosign (keyless, via OIDC) ---
+      - name: 🔏 Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.4.0'  # pin a recent stable release
+
+      - name: ✍️ Sign image (Cosign keyless)
+        env:
+          COSIGN_EXPERIMENTAL: "true"  # enables keyless OIDC flow in older versions; safe to keep
+          REGISTRY_IMAGE: ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_REPO }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          echo "Signing ${REGISTRY_IMAGE}@${DIGEST}"
+          cosign sign --yes "${REGISTRY_IMAGE}@${DIGEST}"
+
+      # (Optional) Verify signature right after signing (sanity check)
+      - name: ✅ Verify signature
+        env:
+          REGISTRY_IMAGE: ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_REPO }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          echo "Verifying signature for ${REGISTRY_IMAGE}@${DIGEST}"
+          cosign verify "${REGISTRY_IMAGE}@${DIGEST}" \
+            --certificate-identity-regexp "https://github.com/.+/.+/.+/workflows/.+" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
