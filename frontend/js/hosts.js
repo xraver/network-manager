@@ -122,17 +122,19 @@ async function loadHosts() {
         const id = Number(h.id);
 
         tdActions.innerHTML = `
-            <span class="action-icon btn-edit ms-1"
+            <span class="action-icon"
                     role="button" tabindex="0"
                     title="Edit host" aria-label="Edit host"
-                    data-bs-toggle="modal" data-bs-target="#addHostModal" 
+                    data-bs-toggle="modal" data-bs-target="#addHostModal"
+                    data-action="edit"
                     data-host-id="${id}">
                 <i class="bi bi-pencil-fill icon icon-action" aria-hidden="true"></i>
             </span>
-            <span class="action-icon btn-delete ms-1" 
+            <span class="action-icon" 
                     role="button" tabindex="0"
                     title="Delete host" aria-label="Delete host"
                     aria-label="Delete host"
+                    data-action="delete"
                     data-host-id="${id}">
                 <i class="bi bi-trash-fill icon icon-action" aria-hidden="true"></i>
             </span>
@@ -152,6 +154,9 @@ async function loadHosts() {
 // Edit HOST: load data and pre-fill the form
 // -----------------------------
 async function editHost(id) {
+    // Clear form first
+    clearAddHostForm();
+    
     try {
         const res = await fetch(`/api/hosts/${id}`);
         if (!res.ok) throw new Error(`Fetch failed for host ${id}: ${res.status}`);
@@ -253,12 +258,11 @@ async function deleteHost(id) {
 // -----------------------------
 // PREPARE ADD HOST FORM
 // -----------------------------
-function prepareAddHostForm() {
+function clearAddHostForm() {
     // reset edit mode
     editingHostId = null;
     // reset form fields
     document.getElementById('addHostForm')?.reset();
-    console.log("Add Host form reset");
 }
 
 // -----------------------------
@@ -266,8 +270,8 @@ function prepareAddHostForm() {
 // -----------------------------
 async function closeAddHostModal() {
     const modalEl = document.getElementById('addHostModal');
-    const modal = bootstrap.Modal.getInstance(modalEl) 
-            || bootstrap.Modal.getOrCreateInstance(modalEl);
+    const modal = bootstrap.Modal.getInstance(modalEl)
+               || bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.hide();
 }
 
@@ -275,8 +279,9 @@ async function closeAddHostModal() {
 // Handle Add Host Form Submit
 // -----------------------------
 async function handleAddHostSubmit(e) {
+    // Prevent default form submission
     e.preventDefault();
-    // Leggi i campi
+    // Retrieve form data
     const hostData = {
         name:  document.getElementById('hostName').value.trim(),
         ipv4:  document.getElementById('hostIPv4').value.trim(),
@@ -289,7 +294,7 @@ async function handleAddHostSubmit(e) {
     try {
         const ok = await saveHost(hostData);
         if (ok !== false) {
-            // chiudi modale e ricarica tabella
+            // close modal and reload hosts
             closeAddHostModal();
             await loadHosts();
         }
@@ -300,15 +305,16 @@ async function handleAddHostSubmit(e) {
     return false;
 }
 
-async function handleDeleteHost(e) {
-    const btn = e.target.closest('.btn-delete');
-    if (!btn) return;
-
+// -----------------------------
+// Handle delete host action
+// -----------------------------
+async function handleDeleteHost(e, el) {
+    // Prevent default action
     e.preventDefault();
-    const idAttr = btn.getAttribute('data-host-id');
-    const id = idAttr ? Number(idAttr) : NaN;
+    // Get host ID
+    const id = Number(el.dataset.hostId);
     if (!Number.isFinite(id)) {
-        console.warn('Delete: host id not valid for delete:', idAttr);
+        console.warn('Delete: host id not valid for delete:', id);
         showToast('Host id not valid for delete', false);
         return;
     }
@@ -319,6 +325,36 @@ async function handleDeleteHost(e) {
     } catch (err) {
         console.error("Error deleting host:", err);
         showToast("Error deleting host", false);
+    }
+}
+
+// -----------------------------
+// Handle delete host action
+// -----------------------------
+async function handleReloadDNS() {
+    // Execute delete
+    try {
+        //showToast("DNS reloaded successfully");
+        console.warn("DNS reload not yet implemented");
+        showToast("DNS reload not jet implemented", false);
+    } catch (err) {
+        console.error("Error reloading DNS:", err);
+        showToast("Error reloading DNS", false);
+    }
+}
+
+// -----------------------------
+// Handle delete host action
+// -----------------------------
+async function handleReloadDHCP() {
+    // Execute delete
+    try {
+        //showToast("DHCP reloaded successfully");
+        console.warn("DHCP reload not yet implemented");
+        showToast("DHCP reload not jet implemented", false);
+    } catch (err) {
+        console.error("Error reloading DHCP:", err);
+        showToast("Error reloading DHCP", false);
     }
 }
 
@@ -614,6 +650,24 @@ function reloadDHCP() {
 }
 
 // -----------------------------
+// Action Handlers
+// -----------------------------
+const actionHandlers = {
+  async delete(e, el) { handleDeleteHost(e, el); },
+
+  // edit is handled by bootstrap modal show event
+  edit(e, el) { 
+    // no-op o log
+  },
+
+  // Reload DNS
+  async reloadDns()  { handleReloadDNS();  },
+
+  // Reload DHCP
+  async reloadDhcp() { handleReloadDHCP(); },
+};
+
+// -----------------------------
 // DOMContentLoaded: initialize everything
 // -----------------------------
 document.addEventListener("DOMContentLoaded", async () => {
@@ -654,6 +708,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
 
         if (e.key === "Escape" && !isTypingField) {
+            // Prevent default form submission
             e.preventDefault();
             resetSorting();
             clearSearch();
@@ -663,16 +718,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 5) Modal show/hidden events to prepare/reset the form
     const modalEl = document.getElementById('addHostModal');
     if (modalEl) {
+
+        // store who opened the modal
+        let lastTriggerEl = null;
+
         // When shown, determine Add or Edit mode
         modalEl.addEventListener('show.bs.modal', async (ev) => {
-            const triggerEl = ev.relatedTarget; // trigger (Add o Edit)
+            const lastTriggerEl = ev.relatedTarget; // trigger (Add o Edit)
             const formEl = document.getElementById('addHostForm');
 
             // Security check
             if (!formEl) return;
 
             // check Add or Edit mode
-            const idAttr = triggerEl?.getAttribute?.('data-host-id');
+            const idAttr = lastTriggerEl?.getAttribute?.('data-host-id');
             const id = idAttr ? Number(idAttr) : null;
             
             if (Number.isFinite(id)) {  
@@ -685,14 +744,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                     showToast("Error loading host for edit", false);
                     // Close modal
                     const closeOnShown = () => {
-                        closeAddHostModal();
+                        closeAddHostModal(lastTriggerEl);
+                        modalEl.removeEventListener('shown.bs.modal', closeOnShown);
                     };
                     modalEl.addEventListener('shown.bs.modal', closeOnShown);
                 }
             } else {
                 // Add Mode
                 console.log("Modal in CREATE mode");
-                prepareAddHostForm();
+                clearAddHostForm();
                 // Set focus to the first input field when modal is shown
                 const focusOnShown = () => {
                     document.getElementById('hostName')?.focus({ preventScroll: true });
@@ -702,38 +762,58 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
 
+        // When hiding, restore focus to the trigger element
+        modalEl.addEventListener('hide.bs.modal', () => {
+            const active = document.activeElement;
+            if (active && modalEl.contains(active)) {
+                if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
+                    lastTriggerEl.focus({ preventScroll: true });
+                } else {
+                    active.blur(); // fallback: evita warning A11Y
+                }
+            }
+        });
+
         // When hidden, reset the form
         modalEl.addEventListener('hidden.bs.modal', () => {
-            //prepareAddHostForm();
+            // reset form fields
+            clearAddHostForm();
+            // pulizia ref del trigger
+            lastTriggerEl = null;
         });
     }
 
-    // 6) Delete button event delegation (click and keydown)
+    // 6) Button event delegation (click and keydown)
     {
         // Click event
-        document.addEventListener('click', (e) => {
-            // Execute delete
+        document.addEventListener('click', async (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+          
+            const action = el.dataset.action;
+            const handler = actionHandlers[action];
+            if (!handler) return;
+
+            // Execute handler
             try {
-                handleDeleteHost(e);
+                await handler(e, el);
             } catch (err) {
-                console.error("Error deleting host:", err);
-                showToast("Error deleting host", false);
+                console.error('Action error:', err);
+                showToast(err?.message || 'Action error', false);
             }
         });
 
         // Keydown (Enter, Space) for accessibility
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', async (e) => {
             const isEnter = e.key === 'Enter';
             const isSpace = e.key === ' ' || e.key === 'Spacebar';
             if (!isEnter && !isSpace) return;
+            
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
 
-            // Execute delete
-            try {
-                handleDeleteHost(e);
-            } catch (err) {
-                console.error("Error deleting host:", err);
-                showToast("Error deleting host", false);
-            }
+            // Trigger click event
+            el.click(); 
         });
     }
 });

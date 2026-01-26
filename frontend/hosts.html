@@ -75,14 +75,17 @@
 
                 <!-- Bottoni -->
                 <div class="col-12 col-md-auto d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary" title="Add Host" aria-label="Add Host" data-bs-toggle="modal" data-bs-target="#addHostModal">
-                        <i class="bi bi-plus-lg"></i><span class="label">Add Host</span>
+                    <button class="btn btn-primary" title="Add Host" aria-label="Add Host" 
+                            data-bs-toggle="modal" data-bs-target="#addHostModal">
+                        <i class="bi bi-plus-lg"></i><span class="label"> Add Host</span>
                     </button>
-                    <button class="btn btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS" onclick="reloadDNS()">
-                        <i class="bi bi-arrow-repeat"></i><span class="label">Reload DNS</span>
+                    <button class="btn btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS" 
+                            data-action="reloadDns">
+                        <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DNS</span>
                     </button>
-                    <button class="btn btn-primary" title="Reload DHCP (Kea)" aria-label="Reload DHCP" onclick="reloadDHCP()">
-                        <i class="bi bi-arrow-repeat"></i><span class="label">Reload DHCP</span>
+                    <button class="btn btn-primary" title="Reload DHCP (Kea)" aria-label="Reload DHCP" 
+                            data-action="reloadDhcp">
+                        <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DHCP</span>
                     </button>
                 </div>
             </div>

@@ -3,6 +3,7 @@
 // Login function (UX migliorata)
 // -----------------------------
 async function handleLogin(e) {
+    // Prevent default form submission
     e.preventDefault();
 
     // Riferimenti UI
