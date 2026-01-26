@@ -1,7 +1,11 @@
 # Network Manager
+
+[![Latest Release][releases-img]][releases-url]
+[![GHCR Image][ghcr-image-img]][ghcr-image-url]
 [![Last Commit][last-commit-img]][last-commit-url]
-[![License Status][license-img]][license-url]
 [![Check Status][check-status-img]][check-status-url]
+[![Docker Publish][docker-publish-img]][docker-publish-url]
+[![License Status][license-img]][license-url]
 [![BuyMeCoffee][buymecoffee-img]][buymecoffee-url]
 
 ## 🌐 Network management web app
@@ -78,7 +82,7 @@ If SESSION_SECRET is not set, the app generates a random key on each restart -> 
 ```yaml
 services:
   network-manager:
-    image: your-registry/network-manager:latest
+    image: ghcr.io/xraver/network-manager:latest
     container_name: network-manager
     restart: unless-stopped
     ports:
@@ -226,10 +230,17 @@ docker compose up --build -d --force-recreate
 
 ---
 
-[license-img]: https://img.shields.io/github/license/xraver/network-manager
+
+[license-img]: https://img.shields.io/github/license/xraver/network-manager?logo=open-source-initiative
 [license-url]: LICENSE
-[releases-img]: https://img.shields.io/github/v/release/xraver/network-manager
+[releases-img]: https://img.shields.io/github/v/tag/xraver/network-manager?label=release&logo=github
 [releases-url]: https://github.com/xraver/network-manager/releases
+[docker-publish-img]: https://github.com/xraver/network-manager/actions/workflows/docker-publish.yaml/badge.svg
+[docker-publish-url]: https://github.com/xraver/network-manager/actions/workflows/docker-publish.yaml
+[ghcr-image-img]: https://img.shields.io/badge/GHCR-image-blue?logo=docker
+[ghcr-image-url]: https://github.com/xraver/network-manager/pkgs/container/network-manager
+[image-security-img]: https://img.shields.io/badge/SBOM%20%2F%20Provenance-enabled-brightgreen?logo=security
+[image-security-url]: https://github.com/xraver/network-manager
 [last-commit-img]: https://img.shields.io/github/last-commit/xraver/network-manager
 [last-commit-url]: https://github.com/xraver/network-manager/commits/master
 [check-status-img]: https://github.com/xraver/network-manager/actions/workflows/ci.yaml/badge.svg
