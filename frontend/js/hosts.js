@@ -1,3 +1,11 @@
+// -----------------------------
+// Configuration parameters
+// -----------------------------
+let timeoutToast = 3000; // milliseconds
+
+// -----------------------------
+// State variables
+// -----------------------------
 let editingHostId = null;
 let sortDirection = {};
 let lastSort = null; // { colIndex: number, ascending: boolean }
@@ -70,21 +78,21 @@ async function loadHosts() {
 
         // IPv4
         const tdIPv4 = document.createElement("td");
-        const ipv4Raw = (h.ipv4 ?? "").trim();
+        const ipv4Raw = (h.ipv4 ?? "").toString().trim();
         tdIPv4.textContent = ipv4Raw;
         if (ipv4Raw) tdIPv4.setAttribute("data-value", ipv4Raw);
         tr.appendChild(tdIPv4);
 
         // IPv6
         const tdIPv6 = document.createElement("td");
-        const ipv6Raw = (h.ipv6 ?? "").trim();
+        const ipv6Raw = (h.ipv6 ?? "").toString().trim();
         tdIPv6.textContent = ipv6Raw;
         if (ipv6Raw) tdIPv6.setAttribute("data-value", ipv6Raw.toLowerCase());
         tr.appendChild(tdIPv6);
 
         // MAC
         const tdMAC = document.createElement("td");
-        const macRaw = (h.mac ?? "").trim();
+        const macRaw = (h.mac ?? "").toString().trim();
         tdMAC.textContent = macRaw;
         const macNorm = macRaw.toLowerCase().replace(/[\s:\-\.]/g, "");
         if (macNorm) tdMAC.setAttribute("data-value", macNorm);
@@ -99,33 +107,34 @@ async function loadHosts() {
 
         // SSL (icon)
         const tdSSL = document.createElement("td");
-        const sslEnabled = !!h.ssl_enabled; // 1/true -> true
+        const sslEnabled = !!h.ssl_enabled;
+        tdSSL.setAttribute("data-value", sslEnabled ? "true" : "false");
+        tdSSL.setAttribute("aria-label", sslEnabled ? "SSL attivo" : "SSL non attivo");
         if (sslEnabled) {
-            tdSSL.innerHTML = "&#10004;";
-            tdSSL.setAttribute("data-value", "true");
-            tdSSL.setAttribute("aria-label", "SSL attivo");
-        } else {
-            tdSSL.setAttribute("data-value", "false");
-            tdSSL.setAttribute("aria-label", "SSL non attivo");
+            tdSSL.innerHTML = '<i class="bi bi-shield-lock-fill icon icon-static" aria-hidden="true"></i>';
         }
         tr.appendChild(tdSSL);
 
         // Actions
         const tdActions = document.createElement("td");
         tdActions.className = "actions";
+
+        const id = Number(h.id);
+
         tdActions.innerHTML = `
-            <span class="edit-btn" onclick="editHost(${Number(h.id)})">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#007BFF" aria-hidden="true">
-                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 
-                    7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 
-                    0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                </svg>
+            <span class="action-icon btn-edit ms-1"
+                    role="button" tabindex="0"
+                    title="Edit host" aria-label="Edit host"
+                    data-bs-toggle="modal" data-bs-target="#addHostModal" 
+                    data-host-id="${id}">
+                <i class="bi bi-pencil-fill icon icon-action" aria-hidden="true"></i>
             </span>
-            <span class="delete-btn" onclick="deleteHost(${Number(h.id)})">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#0099FF" aria-hidden="true">
-                    <path d="M3 6h18v2H3V6zm2 3h14l-1.5 
-                    12.5h-11L5 9zm5-6h4l1 1h5v2H4V4h5l1-1z"/>
-                </svg>
+            <span class="action-icon btn-delete ms-1" 
+                    role="button" tabindex="0"
+                    title="Delete host" aria-label="Delete host"
+                    aria-label="Delete host"
+                    data-host-id="${id}">
+                <i class="bi bi-trash-fill icon icon-action" aria-hidden="true"></i>
             </span>
         `;
         tr.appendChild(tdActions);
@@ -140,89 +149,55 @@ async function loadHosts() {
 }
 
 // -----------------------------
-// OPEN POPUP IN EDIT MODE
+// Edit HOST: load data and pre-fill the form
 // -----------------------------
 async function editHost(id) {
-    const res = await fetch(`/api/hosts/${id}`);
-    if (!res.ok) {
-        console.error(`Errore nel recupero host ${id}:`, res.status);
-        showToast("Errore nel recupero host", false);
-        return;
+    try {
+        const res = await fetch(`/api/hosts/${id}`);
+        if (!res.ok) throw new Error(`Fetch failed for host ${id}: ${res.status}`);
+
+        const host = await res.json();
+
+        // Store the ID of the host being edited
+        editingHostId = id;
+
+        // Pre-fill the form fields
+        document.getElementById("hostName").value = host.name ?? "";
+        document.getElementById("hostIPv4").value = host.ipv4 ?? "";
+        document.getElementById("hostIPv6").value = host.ipv6 ?? "";
+        document.getElementById("hostMAC").value = host.mac ?? "";
+        document.getElementById("hostNote").value = host.note ?? "";
+        document.getElementById("hostSSL").checked = !!host.ssl_enabled;
+
+    }  catch(err) {
+        throw err;
     }
-    const host = await res.json();
-
-    // Store the ID of the host being edited
-    editingHostId = id;
-
-    // Pre-fill the form fields
-    document.getElementById("hostName").value = host.name;
-    document.getElementById("hostIPv4").value = host.ipv4 || "";
-    document.getElementById("hostIPv6").value = host.ipv6 || "";
-    document.getElementById("hostMAC").value = host.mac || "";
-    document.getElementById("hostNote").value = host.note || "";
-    document.getElementById("hostSSL").checked = !!host.ssl_enabled;
-
-    document.getElementById("addHostModal").style.display = "flex";
-}
-
-// -----------------------------
-// OPEN POPUP IN CREATE MODE
-// -----------------------------
-function openAddHostModal() {
-    editingHostId = null; // Reset edit mode
-
-    // Clear all fields
-    document.getElementById("hostName").value = "";
-    document.getElementById("hostIPv4").value = "";
-    document.getElementById("hostIPv6").value = "";
-    document.getElementById("hostMAC").value = "";
-    document.getElementById("hostNote").value = "";
-    document.getElementById("hostSSL").checked = false;
-
-    document.getElementById("addHostModal").style.display = "flex";
-}
-
-// -----------------------------
-// CLOSE POPUP
-// -----------------------------
-function closeAddHostModal() {
-    editingHostId = null; // Always reset edit mode
-    document.getElementById("addHostModal").style.display = "none";
 }
 
 // -----------------------------
 // SAVE HOST (CREATE OR UPDATE)
 // -----------------------------
-async function saveHost() {
+async function saveHost(hostData) {
     // Validate required fields
-    if (!document.getElementById("hostName").value.trim()) {
+    if (!hostData.name.trim()) {
         showToast("Name is required", false);
-        return; // stop here, do NOT send the request
+        return false;
     }
     // Validate IPv4 format
-    if (!isValidIPv4(document.getElementById("hostIPv4").value)) {
+    if (!isValidIPv4(hostData.ipv4)) {
         showToast("Invalid IPv4 format", false);
-        return;
+        return false;
     }
     // Validate IPv6 format
-    if (!isValidIPv6(document.getElementById("hostIPv6").value)) {
+    if (!isValidIPv6(hostData.ipv6)) {
         showToast("Invalid IPv6 format", false);
-        return;
+        return false;
     }
     // Validate MAC format
-    if (!isValidMAC(document.getElementById("hostMAC").value)) {
+    if (!isValidMAC(hostData.mac)) {
         showToast("Invalid MAC format", false);
-        return;
-    }
-
-    const payload = {
-        name: document.getElementById("hostName").value,
-        ipv4: document.getElementById("hostIPv4").value,
-        ipv6: document.getElementById("hostIPv6").value,
-        mac: document.getElementById("hostMAC").value,
-        note: document.getElementById("hostNote").value,
-        ssl_enabled: document.getElementById("hostSSL").checked ? 1 : 0
-    };
+        return false;
+    } 
 
     try {
         if (editingHostId !== null) {
@@ -230,28 +205,31 @@ async function saveHost() {
             const res = await fetch(`/api/hosts/${editingHostId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(hostData)
             });
-            if (!res.ok) throw new Error(`Update failed: ${res.status}`);
-            showToast("Host updated successfully");
+            if (res.ok) { 
+                showToast("Host updated successfully");
+            } else {
+                throw new Error(`Update failed: ${res.status}`);
+            }
         } else {
             // CREATE NEW HOST
             const res = await fetch("/api/hosts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(hostData)
             });
-            if (!res.ok) throw new Error(`Create failed: ${res.status}`);
-            showToast("Host added successfully");
+            if (res.ok) {
+                showToast("Host added successfully", true);
+            } else {
+                throw new Error(`Create failed: ${res.status}`);
+            }
         }
-
-        closeAddHostModal();
-        await loadHosts();
-
     } catch (err) {
-        console.error(err);
-        showToast("Error while saving host", false);
+        console.error("Error saving host:", err);
+        throw err;
     }
+    return true;
 }
 
 // -----------------------------
@@ -266,11 +244,82 @@ async function deleteHost(id) {
         showToast("Host removed successfully");
 
     } catch (err) {
-        console.error(err);
-        showToast("Error while removing host", false);
+        console.error("Error deleting host:", err);
+        throw err;
+    }
+    await loadHosts();
+}
+
+// -----------------------------
+// PREPARE ADD HOST FORM
+// -----------------------------
+function prepareAddHostForm() {
+    // reset edit mode
+    editingHostId = null;
+    // reset form fields
+    document.getElementById('addHostForm')?.reset();
+    console.log("Add Host form reset");
+}
+
+// -----------------------------
+// CLOSE POPUP
+// -----------------------------
+async function closeAddHostModal() {
+    const modalEl = document.getElementById('addHostModal');
+    const modal = bootstrap.Modal.getInstance(modalEl) 
+            || bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.hide();
+}
+
+// -----------------------------
+// Handle Add Host Form Submit
+// -----------------------------
+async function handleAddHostSubmit(e) {
+    e.preventDefault();
+    // Leggi i campi
+    const hostData = {
+        name:  document.getElementById('hostName').value.trim(),
+        ipv4:  document.getElementById('hostIPv4').value.trim(),
+        ipv6:  document.getElementById('hostIPv6').value.trim(),
+        mac:   document.getElementById('hostMAC').value.trim(),
+        note:  document.getElementById('hostNote').value.trim(),
+        ssl_enabled: document.getElementById('hostSSL').checked ? 1 : 0
+    };
+
+    try {
+        const ok = await saveHost(hostData);
+        if (ok !== false) {
+            // chiudi modale e ricarica tabella
+            closeAddHostModal();
+            await loadHosts();
+        }
+    } catch (err) {
+        console.error("Error saving host:", err);
+        showToast("Error saving host", false);
+    }
+    return false;
+}
+
+async function handleDeleteHost(e) {
+    const btn = e.target.closest('.btn-delete');
+    if (!btn) return;
+
+    e.preventDefault();
+    const idAttr = btn.getAttribute('data-host-id');
+    const id = idAttr ? Number(idAttr) : NaN;
+    if (!Number.isFinite(id)) {
+        console.warn('Delete: host id not valid for delete:', idAttr);
+        showToast('Host id not valid for delete', false);
+        return;
     }
 
-    await loadHosts();
+    // Execute delete
+    try {
+        deleteHost(id);
+    } catch (err) {
+        console.error("Error deleting host:", err);
+        showToast("Error deleting host", false);
+    }
 }
 
 // -----------------------------
@@ -286,7 +335,7 @@ function showToast(message, success = true) {
 
     setTimeout(() => {
         toast.classList.remove("show");
-    }, 2500);
+    }, timeoutToast);
 }
 
 // -----------------------------
@@ -565,7 +614,7 @@ function reloadDHCP() {
 }
 
 // -----------------------------
-// INITIAL TABLE LOAD
+// DOMContentLoaded: initialize everything
 // -----------------------------
 document.addEventListener("DOMContentLoaded", async () => {
     // 1) Init UI sort (aria-sort, arrows)
@@ -575,8 +624,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         await loadHosts();
     } catch (err) {
-        console.error("Errore nel caricamento degli host:", err);
-        showToast("Errore nel caricamento degli host", false);
+        console.error("Error loading hosts:", err);
+        showToast("Error loading hosts:", false);
     }
 
     // 3) search bar
@@ -584,10 +633,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (input) {
         // clean input on load
         input.value = "";
-
         // live filter for each keystroke
         input.addEventListener("input", filterHosts);
-
         // Escape management when focus is in the input
         input.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
@@ -597,13 +644,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 clearSearch();          // svuota input e ricarica tabella (come definito nella tua funzione)
             }
         });
-  }
+    }
 
     // 4) global ESC key listener to clear search and reset sorting
     document.addEventListener("keydown", (e) => {
         // Ignore if focus is in a typing field
         const tag = (e.target.tagName || "").toLowerCase();
-        const isTypingField = tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
+        const isTypingField = 
+            tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
 
         if (e.key === "Escape" && !isTypingField) {
             e.preventDefault();
@@ -611,5 +659,81 @@ document.addEventListener("DOMContentLoaded", async () => {
             clearSearch();
         }
     });
-});
 
+    // 5) Modal show/hidden events to prepare/reset the form
+    const modalEl = document.getElementById('addHostModal');
+    if (modalEl) {
+        // When shown, determine Add or Edit mode
+        modalEl.addEventListener('show.bs.modal', async (ev) => {
+            const triggerEl = ev.relatedTarget; // trigger (Add o Edit)
+            const formEl = document.getElementById('addHostForm');
+
+            // Security check
+            if (!formEl) return;
+
+            // check Add or Edit mode
+            const idAttr = triggerEl?.getAttribute?.('data-host-id');
+            const id = idAttr ? Number(idAttr) : null;
+            
+            if (Number.isFinite(id)) {  
+                // Edit Mode
+                console.log("Modal in EDIT mode for host ID:", id);
+                try {
+                    await editHost(id);
+                } catch (err) {
+                    console.error("Error loading host for edit:", err);
+                    showToast("Error loading host for edit", false);
+                    // Close modal
+                    const closeOnShown = () => {
+                        closeAddHostModal();
+                    };
+                    modalEl.addEventListener('shown.bs.modal', closeOnShown);
+                }
+            } else {
+                // Add Mode
+                console.log("Modal in CREATE mode");
+                prepareAddHostForm();
+                // Set focus to the first input field when modal is shown
+                const focusOnShown = () => {
+                    document.getElementById('hostName')?.focus({ preventScroll: true });
+                    modalEl.removeEventListener('shown.bs.modal', focusOnShown);
+                };
+                modalEl.addEventListener('shown.bs.modal', focusOnShown);
+            }
+        });
+
+        // When hidden, reset the form
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            //prepareAddHostForm();
+        });
+    }
+
+    // 6) Delete button event delegation (click and keydown)
+    {
+        // Click event
+        document.addEventListener('click', (e) => {
+            // Execute delete
+            try {
+                handleDeleteHost(e);
+            } catch (err) {
+                console.error("Error deleting host:", err);
+                showToast("Error deleting host", false);
+            }
+        });
+
+        // Keydown (Enter, Space) for accessibility
+        document.addEventListener('keydown', (e) => {
+            const isEnter = e.key === 'Enter';
+            const isSpace = e.key === ' ' || e.key === 'Spacebar';
+            if (!isEnter && !isSpace) return;
+
+            // Execute delete
+            try {
+                handleDeleteHost(e);
+            } catch (err) {
+                console.error("Error deleting host:", err);
+                showToast("Error deleting host", false);
+            }
+        });
+    }
+});

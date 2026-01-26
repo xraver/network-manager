@@ -27,11 +27,6 @@ router = APIRouter()
 def hosts(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "hosts.html"))
 
-# Serve hosts.css
-@router.get("/css/hosts.css")
-def css_hosts():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/hosts.css"))
-
 # Serve hosts.js
 @router.get("/js/hosts.js")
 def css_hosts():

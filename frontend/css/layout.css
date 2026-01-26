@@ -12,6 +12,13 @@ body {
     margin: 20px;
     padding-top: 60px; /* space for fixed topbar */
     background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+.body-login {
+    margin: 0;
+    padding-top: 0;
+    background: var(--bg-light);
 }
 
 /* ================================
@@ -20,9 +27,6 @@ body {
 .topbar {
     width: 100%;
     background: var(--bg-dark);
-    padding: 0;
-    display: flex;
-    align-items: center;
     border-bottom: 3px solid var(--accent);
     position: fixed;
     top: 0;
@@ -33,7 +37,7 @@ body {
 .topbar-inner {
     width: 100%;
     margin: 0 auto;
-    padding: 14px 26px;
+    padding: 10px 26px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -79,69 +83,211 @@ body {
 }
 
 /* ================================
-   Buttons (pfSense style)
+   Login page
    ================================ */
-.btn-primary {
-    background-color: var(--accent);
-    color: white;
+.login-wrapper {
+    min-height: 100vh;
+    min-height: 100svh; /* mobile moderni */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    background: var(--bg-light);
+}
+
+.login-box {
+    background: #fff;
+    width: 100%;
+    max-width: 320px;
+    padding: 24px 28px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent);
+    box-shadow: 0 4px 14px var(--shadow-soft);
+}
+
+.login-box-header {
+    background: var(--bg-dark);
+    padding: 10px 14px;
+    margin: -24px -28px 16px -28px; /* stacca dal box e abbraccia i bordi */
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.login-box-header span {
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.login-box h2 {
+    margin: 0 0 16px;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.login-box .form-control {
+    background: var(--bg-light);
+}
+
+/*GRGR*/
+.placeholder-italic::placeholder {
+    font-style: italic;
+}
+
+/* ================================
+    Buttons
+   ================================ */
+.btn {
+    font-weight: 600;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     border: none;
     padding: 6px 14px;
     font-size: 0.95rem;
-    font-weight: 600;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease, filter 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    line-height: 1;
 }
 
-.btn-primary:hover {
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
     background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
     filter: brightness(0.96);
 }
 
-.frame-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.btn-outline-primary {
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: transparent;
 }
 
-.frame-row h2 {
-    margin-right: auto;
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #fff;
+    background-color: var(--accent);
+    border-color: var(--accent);
 }
 
-/* ================================
-   Typography
-   ================================ */
-h1 {
-    margin-bottom: 20px;
-}
-
-/* ================================
-   Table styling
-   ================================ */
-table {
-    border-collapse: collapse;
+.btn-primary.btn-login {
     width: 100%;
-    background-color: white;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+    padding: 8px 0;
+    box-shadow: none;
 }
 
-th, td {
+.btn-primary.btn-login:hover,
+.btn-primary.btn-login:focus,
+.btn-primary.btn-login:active {
+    box-shadow: none;
+}
+
+.btn-primary.btn-login:disabled {
+    opacity: .65;
+    box-shadow: none;
+    filter: none;
+}
+
+/* ================================
+   Form controls
+   ================================ */
+.form-control,
+.form-select {
     border: 1px solid var(--border-light);
-    padding: 10px 12px;
-    text-align: left;
-    vertical-align: middle;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    height: auto;
+    line-height: 1.1;
 }
 
-th {
+.form-label {
+    font-size: 0.80rem;          /* più piccina */
+    margin-bottom: 2px;          /* Bootstrap usa 8px; lo riduciamo */
+}
+
+/* ================================
+   Focus globale per controlli form
+   ================================ */
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-select:focus,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+    outline: none;
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    box-shadow: none;
+    border-color: #dc3545; /* rosso Bootstrap */
+}
+
+.form-control.is-valid:focus,
+.form-select.is-valid:focus {
+    box-shadow: none;
+    border-color: #198754; /* verde Bootstrap */
+}
+
+.form-check-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+    outline: none;
+}
+
+/* ================================
+   Icons
+   ================================ */
+.icon {
+    color: var(--icon-color);
+    display: inline-flex;
+    align-items: center;
+}
+
+.icon:hover {
+    color: var(--icon-color-hover);
+}
+
+.icon-static {
+    --icon-color-hover: var(--icon-color);
+}
+
+.icon-action {
+    cursor: pointer;
+}
+
+/* ================================
+   Table
+   ================================ */
+.table {
+    background-color: #fff;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+    border-color: var(--border-light);
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    border-color: var(--border-light);
+}
+
+.table thead th {
     background-color: #eee;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
     user-select: none;
     position: relative;
 }
 
-th:hover::after {
+.table thead th:hover::after {
     content: "";
     position: absolute;
     left: 0;
@@ -151,17 +297,48 @@ th:hover::after {
     background: var(--accent);
 }
 
+/* Sort arrows */
 .sort-arrow {
-    margin-left: 6px;
-    font-size: 12px;
-    opacity: 0.6;
     display: inline-block;
-    width: 12px;
+    width: 1em;
     text-align: center;
+    margin-left: .25rem;
+    color: var(--text-dark);
+}
+
+.sort-arrow.asc::after {
+    content: "▲";
+}
+
+.sort-arrow.desc::after {
+    content: "▼";
 }
 
 /* ================================
-   Toast notification
+   Actions column
+   ================================ */
+td.actions {
+    white-space: nowrap;
+    text-align: left;
+}
+
+.actions span {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    margin-right: 8px;
+}
+
+/* removed due to background with icons
+.actions span:hover {
+    background-color: #e0f0ff;
+}*/
+
+/* ================================
+   Toast
    ================================ */
 .toast {
     position: fixed;
@@ -232,31 +409,74 @@ th:hover::after {
     margin-top: 18px;
 }
 
-.cancel-btn {
-    background: #ccc;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+/* ================================
+   Modal "Add Host"
+================================ */
+.addhost-modal {
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-strong);
 }
 
-.save-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
+.addhost-header {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    border-bottom: none;               /* più pulita */
+    padding: 10px 14px;
 }
 
-.save-btn:hover {
-    background: var(--accent-hover);
+.addhost-header .modal-title {
+    font-weight: 600;
+    font-size: 1rem;                   /* compatto */
+}
+
+.addhost-header .btn-close {
+    filter: invert(1);                 /* icona chiara su bg scuro */
+    opacity: .85;
+}
+
+.addhost-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* Body & footer compatti come il resto dell'app */
+.addhost-modal .modal-body {
+    padding: 14px 16px;
+}
+
+.addhost-modal .modal-footer {
+    border-top: none;
+    padding: 10px 14px 14px;
+}
+
+/* Label & inputs: usano già i tuoi override globali (form-control compatto) */
+.addhost-modal .form-label {
+    font-size: 0.80rem;
+    margin-bottom: 2px;
+}
+
+/* Title icon coerente con l'header */
+.addhost-header .title-icon {
+    font-size: 1.2em;
+    line-height: 1;
+    display: inline-flex;
+    transform: translateY(-1px);
 }
 
 /* ================================
-   SVG icons
+   Responsive
    ================================ */
-svg {
-    display: block;
-    pointer-events: none;
+@media (max-width: 640px) {
+    body {
+        padding-top: 48px; /* topbar più compatta su mobile */
+    }
+
+    /* Toolbar: su schermi molto stretti mostra solo le icone dei bottoni */
+    .btn .label {
+        display: none;
+    }
+
+    .btn .icon {
+        margin-right: 0;
+    }
 }

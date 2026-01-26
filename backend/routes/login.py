@@ -37,11 +37,6 @@ def check_rate_limit(ip: str):
 def login_page(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "login.html"))
 
-# Serve login.css
-@router.get("/css/login.css")
-def css_login():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/login.css"))
-
 # Serve login.js
 @router.get("/js/login.js")
 def css_login():
