@@ -15,11 +15,11 @@ router = APIRouter()
 def about():
     return {
         "app": {
-            "version": settings.APP_VERSION
+            "version": settings.APP_VERSION,
         },
         "baseimg": {
-            "name": settings.BASEIMG_NAME, 
-            "version": settings.BASEIMG_VERSION
+            "name": settings.BASEIMG_NAME,
+            "version": settings.BASEIMG_VERSION,
         },
         "domain": settings.DOMAIN,
         "admin_hash_loaded": settings.ADMIN_PASSWORD_HASH is not None,

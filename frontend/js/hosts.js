@@ -130,7 +130,7 @@ async function loadHosts() {
                     data-host-id="${id}">
                 <i class="bi bi-pencil-fill icon icon-action" aria-hidden="true"></i>
             </span>
-            <span class="action-icon" 
+            <span class="action-icon"
                     role="button" tabindex="0"
                     title="Delete host" aria-label="Delete host"
                     aria-label="Delete host"
@@ -156,7 +156,7 @@ async function loadHosts() {
 async function editHost(id) {
     // Clear form first
     clearAddHostForm();
-    
+
     try {
         const res = await fetch(`/api/hosts/${id}`);
         if (!res.ok) throw new Error(`Fetch failed for host ${id}: ${res.status}`);
@@ -202,7 +202,7 @@ async function saveHost(hostData) {
     if (!isValidMAC(hostData.mac)) {
         showToast("Invalid MAC format", false);
         return false;
-    } 
+    }
 
     try {
         if (editingHostId !== null) {
@@ -212,7 +212,7 @@ async function saveHost(hostData) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(hostData)
             });
-            if (res.ok) { 
+            if (res.ok) {
                 showToast("Host updated successfully");
             } else {
                 throw new Error(`Update failed: ${res.status}`);
@@ -656,7 +656,7 @@ const actionHandlers = {
   async delete(e, el) { handleDeleteHost(e, el); },
 
   // edit is handled by bootstrap modal show event
-  edit(e, el) { 
+  edit(e, el) {
     // no-op o log
   },
 
@@ -704,7 +704,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.addEventListener("keydown", (e) => {
         // Ignore if focus is in a typing field
         const tag = (e.target.tagName || "").toLowerCase();
-        const isTypingField = 
+        const isTypingField =
             tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
 
         if (e.key === "Escape" && !isTypingField) {
@@ -733,8 +733,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             // check Add or Edit mode
             const idAttr = lastTriggerEl?.getAttribute?.('data-host-id');
             const id = idAttr ? Number(idAttr) : null;
-            
-            if (Number.isFinite(id)) {  
+
+            if (Number.isFinite(id)) {
                 // Edit Mode
                 console.log("Modal in EDIT mode for host ID:", id);
                 try {
@@ -789,7 +789,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.addEventListener('click', async (e) => {
             const el = e.target.closest('[data-action]');
             if (!el) return;
-          
+
             const action = el.dataset.action;
             const handler = actionHandlers[action];
             if (!handler) return;
@@ -808,12 +808,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             const isEnter = e.key === 'Enter';
             const isSpace = e.key === ' ' || e.key === 'Spacebar';
             if (!isEnter && !isSpace) return;
-            
+
             const el = e.target.closest('[data-action]');
             if (!el) return;
 
             // Trigger click event
-            el.click(); 
+            el.click();
         });
     }
 });

@@ -13,7 +13,7 @@ from settings.settings import settings
 # Create Router
 router = APIRouter()
 
-# IP -> lista timestamp tentativi 
+# IP -> lista timestamp tentativi
 login_attempts = {}
 
 def check_rate_limit(ip: str):
@@ -59,7 +59,7 @@ def api_login(request: Request, data: dict, response: Response):
     pwd = data.get("password")
 
     if verify_login(user, pwd):
-        # reset tentativi su IP 
+        # reset tentativi su IP
         login_attempts.pop(ip, None)
 
         apply_session(response, username=user)

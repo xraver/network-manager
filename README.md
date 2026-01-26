@@ -217,7 +217,7 @@ docker compose up --build -d --force-recreate
 - Use a reverse proxy with TLS
 - Do not put passwords in the repository
 
----  
+---
 ## 📄 License
 [MIT](http://opensource.org/licenses/MIT) – see the local [LICENSE](LICENSE) file © Giorgio Ravera
 

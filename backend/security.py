@@ -82,7 +82,7 @@ def is_logged_in(request: Request) -> bool:
 # -----------------------------
 def close_session(response):
     logger = get_logger(__name__)
-    
+
     response.delete_cookie(
         key="session",
         path="/"
