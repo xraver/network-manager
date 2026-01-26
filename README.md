@@ -233,7 +233,7 @@ docker compose up --build -d --force-recreate
 [last-commit-img]: https://img.shields.io/github/last-commit/xraver/network-manager
 [last-commit-url]: https://github.com/xraver/network-manager/commits/master
 [check-status-img]: https://github.com/xraver/network-manager/actions/workflows/ci.yaml/badge.svg
-[check-status-img]: https://github.com/xraver/network-manager/actions/workflows/ci.yaml
+[check-status-url]: https://github.com/xraver/network-manager/actions/workflows/ci.yaml
 [buymecoffee-img]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
 [buymecoffee-button]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
 [buymecoffee-url]: https://www.buymeacoffee.com/raverag
