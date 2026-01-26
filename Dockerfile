@@ -48,10 +48,5 @@ COPY --from=builder /app/settings settings
 # Ensure Python sees the installed packages 
 ENV PYTHONPATH="/usr/local/lib/python3.12/site-packages"
 
-ENV HTTP_PORT=8000
-
-# Expose the port dynamically
-EXPOSE ${HTTP_PORT}
-
 ENTRYPOINT ["/app/entrypoint.py"]
 CMD ["python3", "-u", "-m", "backend.main"]
