@@ -110,17 +110,24 @@ async function loadHosts() {
         const sslEnabled = !!h.ssl_enabled;
         tdSSL.setAttribute("data-value", sslEnabled ? "true" : "false");
         tdSSL.setAttribute("aria-label", sslEnabled ? "SSL attivo" : "SSL non attivo");
+        // center icon
+        tdSSL.style.textAlign = "center";
+        tdSSL.style.verticalAlign = "middle";
         if (sslEnabled) {
-            tdSSL.innerHTML = '<i class="bi bi-shield-lock-fill icon icon-static" aria-hidden="true"></i>';
+            const icon = document.createElement("i");
+            icon.className = "bi bi-shield-lock-fill icon icon-static";
+            icon.setAttribute("aria-hidden", "true");
+            tdSSL.appendChild(icon);
         }
         tr.appendChild(tdSSL);
 
         // Actions
         const tdActions = document.createElement("td");
         tdActions.className = "actions";
-
         const id = Number(h.id);
-
+        // center icons
+        tdActions.style.textAlign = "center";
+        tdActions.style.verticalAlign = "middle";
         tdActions.innerHTML = `
             <span class="action-icon"
                     role="button" tabindex="0"
