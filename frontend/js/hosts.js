@@ -56,104 +56,182 @@ function isValidMAC(mac) {
 // LOAD ALL HOSTS INTO THE TABLE
 // -----------------------------
 async function loadHosts() {
-    const res = await fetch("/api/hosts");
-    if (!res.ok) {
-        showToast("Errore nel caricamento degli host", false);
+    let hosts = [];
+    try {
+        const res = await fetch("/api/hosts");
+        if (!res.ok) {
+            const err = new Error(`Error loading hosts: ${res.status} ${res.statusText}`);
+            err.status = res.status;
+            throw err;
+        }
+        // check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            throw new Error("Answer is not JSON");
+        }
+
+        // parse data
+        const data = await res.json();
+        hosts = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        // debug log
+        //console.log("Hosts:", hosts);
+
+    } catch (err) {
+        console.error(err?.message || "Error loading hosts");
+        showToast(err?.message || "Error loading hosts", false);
+        hosts = [];
+    }
+
+    // DOM Reference
+    const tbody = document.querySelector("#hosts-table tbody");
+    if (!tbody) {
+        console.warn('Element "#hosts-table tbody" not found in DOM.');
+    return;
+    }
+
+    // Svuota la tabella
+    tbody.innerHTML = "";
+
+    // if no hosts, show an empty row
+    if (!hosts.length) {
+        const trEmpty = document.createElement("tr");
+        const tdEmpty = document.createElement("td");
+        tdEmpty.colSpan = 6;
+        tdEmpty.textContent = "No hosts available.";
+        tdEmpty.style.textAlign = "center";
+        trEmpty.appendChild(tdEmpty);
+        tbody.appendChild(trEmpty);
         return;
     }
-    const hosts = await res.json();
 
-    const tbody = document.querySelector("#hosts-table tbody");
-    tbody.innerHTML = "";
+    // fragment per performance
+    const frag = document.createDocumentFragment();
 
     hosts.forEach(h => {
         const tr = document.createElement("tr");
 
         // Name
-        const tdName = document.createElement("td");
-        const nameVal = (h.name ?? "").toString();
-        tdName.textContent = nameVal;
-        if (nameVal) tdName.setAttribute("data-value", nameVal.toLowerCase());
-        tr.appendChild(tdName);
+        {
+            const td = document.createElement("td");
+            const val = (h.name ?? "").toString();
+            td.textContent = val;
+            if (val) td.setAttribute("data-value", val.toLowerCase());
+            tr.appendChild(td);
+        }
 
         // IPv4
-        const tdIPv4 = document.createElement("td");
-        const ipv4Raw = (h.ipv4 ?? "").toString().trim();
-        tdIPv4.textContent = ipv4Raw;
-        if (ipv4Raw) tdIPv4.setAttribute("data-value", ipv4Raw);
-        tr.appendChild(tdIPv4);
+        {
+            const td = document.createElement("td");
+            const raw = (h.ipv4 ?? "").toString().trim();
+            td.textContent = raw;
+            if (raw) td.setAttribute("data-value", raw);
+            tr.appendChild(td);
+        }
 
         // IPv6
-        const tdIPv6 = document.createElement("td");
-        const ipv6Raw = (h.ipv6 ?? "").toString().trim();
-        tdIPv6.textContent = ipv6Raw;
-        if (ipv6Raw) tdIPv6.setAttribute("data-value", ipv6Raw.toLowerCase());
-        tr.appendChild(tdIPv6);
+        {
+            const td = document.createElement("td");
+            const raw = (h.ipv6 ?? "").toString().trim();
+            td.textContent = raw;
+            if (raw) td.setAttribute("data-value", raw.toLowerCase());
+            tr.appendChild(td);
+        }
 
         // MAC
-        const tdMAC = document.createElement("td");
-        const macRaw = (h.mac ?? "").toString().trim();
-        tdMAC.textContent = macRaw;
-        const macNorm = macRaw.toLowerCase().replace(/[\s:\-\.]/g, "");
-        if (macNorm) tdMAC.setAttribute("data-value", macNorm);
-        tr.appendChild(tdMAC);
+        {
+            const td = document.createElement("td");
+            const raw = (h.mac ?? "").toString().trim();
+            td.textContent = raw;
+            const norm = raw.toLowerCase().replace(/[\s:\-\.]/g, "");
+            if (norm) td.setAttribute("data-value", norm);
+            tr.appendChild(td);
+        }
 
         // Note
-        const tdNote = document.createElement("td");
-        const noteVal = (h.note ?? "").toString();
-        tdNote.textContent = noteVal;
-        if (noteVal) tdNote.setAttribute("data-value", noteVal.toLowerCase());
-        tr.appendChild(tdNote);
+        {
+            const td = document.createElement("td");
+            const val = (h.note ?? "").toString();
+            td.textContent = val;
+            if (val) td.setAttribute("data-value", val.toLowerCase());
+            tr.appendChild(td);
+        }
 
         // SSL (icon)
-        const tdSSL = document.createElement("td");
-        const sslEnabled = !!h.ssl_enabled;
-        tdSSL.setAttribute("data-value", sslEnabled ? "true" : "false");
-        tdSSL.setAttribute("aria-label", sslEnabled ? "SSL attivo" : "SSL non attivo");
-        // center icon
-        tdSSL.style.textAlign = "center";
-        tdSSL.style.verticalAlign = "middle";
-        if (sslEnabled) {
-            const icon = document.createElement("i");
-            icon.className = "bi bi-shield-lock-fill icon icon-static";
-            icon.setAttribute("aria-hidden", "true");
-            tdSSL.appendChild(icon);
+        {
+            const td = document.createElement("td");
+            const sslEnabled = !!h.ssl_enabled;
+            td.setAttribute("data-value", sslEnabled ? "true" : "false");
+            td.setAttribute("aria-label", sslEnabled ? "SSL attivo" : "SSL non attivo");
+            td.style.textAlign = "center";
+            td.style.verticalAlign = "middle";
+            if (sslEnabled) {
+                const icon = document.createElement("i");
+                icon.className = "bi bi-shield-lock-fill icon icon-static";
+                icon.setAttribute("aria-hidden", "true");
+                td.appendChild(icon);
+            }
+            tr.appendChild(td);
         }
-        tr.appendChild(tdSSL);
 
-        // Actions
-        const tdActions = document.createElement("td");
-        tdActions.className = "actions";
+    // Actions
+    {
+        const td = document.createElement("td");
+        td.className = "actions";
+        td.style.textAlign = "center";
+        td.style.verticalAlign = "middle";
+
         const id = Number(h.id);
-        // center icons
-        tdActions.style.textAlign = "center";
-        tdActions.style.verticalAlign = "middle";
-        tdActions.innerHTML = `
-            <span class="action-icon"
-                    role="button" tabindex="0"
-                    title="Edit host" aria-label="Edit host"
-                    data-bs-toggle="modal" data-bs-target="#addHostModal"
-                    data-action="edit"
-                    data-host-id="${id}">
-                <i class="bi bi-pencil-fill icon icon-action" aria-hidden="true"></i>
-            </span>
-            <span class="action-icon"
-                    role="button" tabindex="0"
-                    title="Delete host" aria-label="Delete host"
-                    aria-label="Delete host"
-                    data-action="delete"
-                    data-host-id="${id}">
-                <i class="bi bi-trash-fill icon icon-action" aria-hidden="true"></i>
-            </span>
-        `;
-        tr.appendChild(tdActions);
 
-        tbody.appendChild(tr);
+        // Usa elementi reali invece di innerHTML con entity
+        const editSpan = document.createElement("span");
+        editSpan.className = "action-icon";
+        editSpan.setAttribute("role", "button");
+        editSpan.tabIndex = 0;
+        editSpan.title = "Edit host";
+        editSpan.setAttribute("aria-label", "Edit host");
+        editSpan.setAttribute("data-bs-toggle", "modal");
+        editSpan.setAttribute("data-bs-target", "#addHostModal");
+        editSpan.setAttribute("data-action", "edit");
+        editSpan.setAttribute("data-host-id", String(id));
+        {
+            const i = document.createElement("i");
+            i.className = "bi bi-pencil-fill icon icon-action";
+            i.setAttribute("aria-hidden", "true");
+            editSpan.appendChild(i);
+        }
+
+        const delSpan = document.createElement("span");
+        delSpan.className = "action-icon";
+        delSpan.setAttribute("role", "button");
+        delSpan.tabIndex = 0;
+        delSpan.title = "Delete host";
+        delSpan.setAttribute("aria-label", "Delete host");
+        delSpan.setAttribute("data-action", "delete");
+        delSpan.setAttribute("data-host-id", String(id));
+        {
+            const i = document.createElement("i");
+            i.className = "bi bi-trash-fill icon icon-action";
+            i.setAttribute("aria-hidden", "true");
+            delSpan.appendChild(i);
+        }
+
+        td.appendChild(editSpan);
+        td.appendChild(delSpan);
+        tr.appendChild(td);
+    }
+
+    frag.appendChild(tr);
     });
 
-    if (lastSort) {
-        sortDirection[lastSort.colIndex] = !lastSort.ascending;
-        sortTable(lastSort.colIndex);
+    // publish all rows
+    tbody.appendChild(frag);
+
+    // apply last sorting
+    if (typeof lastSort === "object" && lastSort && Array.isArray(sortDirection)) {
+        if (Number.isInteger(lastSort.colIndex)) {
+            sortDirection[lastSort.colIndex] = !lastSort.ascending;
+            sortTable(lastSort.colIndex);
+        }
     }
 }
 
@@ -336,32 +414,68 @@ async function handleDeleteHost(e, el) {
 }
 
 // -----------------------------
-// Handle delete host action
+// Handle reload DNS action
 // -----------------------------
 async function handleReloadDNS() {
-    // Execute delete
     try {
-        //showToast("DNS reloaded successfully");
-        console.warn("DNS reload not yet implemented");
-        showToast("DNS reload not jet implemented", false);
+        const res = await fetch(`/api/dns/reload`, { method: "GET" });
+        if (!res.ok) {
+            const err = new Error(`Error reloading DNS: ${res.status} ${res.statusText}`);
+            err.status = res.status;
+            throw err;
+        }
+        // check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            throw new Error("Answer is not JSON");
+        }
+
+        const data = await res.json();
+        if(data.code !== "DNS_RELOAD_OK"){
+            const err = new Error(`Error reloading DNS: ${data.code} ${data.message}`);
+            err.status = data.code;
+            throw err;
+        }
+
+        //console.info("DNS Reload:", data);
+        showToast(data.message, true);
+
     } catch (err) {
-        console.error("Error reloading DNS:", err);
-        showToast("Error reloading DNS", false);
+        console.error(err?.message || "Error reloading DNS");
+        showToast(err?.message || "Error reloading DNS", false);
     }
 }
 
 // -----------------------------
-// Handle delete host action
+// Handle reload DHCP action
 // -----------------------------
 async function handleReloadDHCP() {
-    // Execute delete
     try {
-        //showToast("DHCP reloaded successfully");
-        console.warn("DHCP reload not yet implemented");
-        showToast("DHCP reload not jet implemented", false);
+        const res = await fetch(`/api/dhcp/reload`, { method: "GET" });
+        if (!res.ok) {
+            const err = new Error(`Error reloading DHCP: ${res.status} ${res.statusText}`);
+            err.status = res.status;
+            throw err;
+        }
+        // check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            throw new Error("Answer is not JSON");
+        }
+
+        const data = await res.json();
+        if(data.code !== "DHCP_RELOAD_OK"){
+            const err = new Error(`Error reloading DHCP: ${data.code} ${data.message}`);
+            err.status = data.code;
+            throw err;
+        }
+
+        //console.info("DHCP Reload:", data);
+        showToast(data.message, true);
+
     } catch (err) {
-        console.error("Error reloading DHCP:", err);
-        showToast("Error reloading DHCP", false);
+        console.error(err?.message || "Error reloading DHCP");
+        showToast(err?.message || "Error reloading DHCP", false);
     }
 }
 
@@ -805,7 +919,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
                 await handler(e, el);
             } catch (err) {
-                console.error('Action error:', err);
+                console.error(err?.message || 'Action error', false);
                 showToast(err?.message || 'Action error', false);
             }
         });

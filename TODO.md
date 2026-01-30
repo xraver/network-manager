@@ -107,6 +107,9 @@
 - [ ] Remote Git repository backup
 - [ ] Backup of generated configurations
 
+### 🌍 Language
+- [ ] Localization
+
 ---
 
 # 👥 User Management (RBAC)

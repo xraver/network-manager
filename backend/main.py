@@ -12,6 +12,8 @@ from backend.routes.about import router as about_router
 from backend.routes.health import router as health_router
 from backend.routes.login import router as login_router
 from backend.routes.hosts import router as hosts_router
+from backend.routes.dns import router as dns_router
+from backend.routes.dhcp import router as dhcp_router
 # Import Security
 from backend.security import is_logged_in, apply_session
 # Import Settings
@@ -95,6 +97,8 @@ app.include_router(about_router)
 app.include_router(health_router)
 app.include_router(login_router)
 app.include_router(hosts_router)
+app.include_router(dns_router)
+app.include_router(dhcp_router)
 
 # ------------------------------------------------------------------------------
 # CORS
