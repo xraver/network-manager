@@ -26,7 +26,7 @@ async def apt_dhcp_reload(request: Request):
     end_ns = time.monotonic_ns()
     took_ms = (end_ns - start_ns)
 
-    return {   
+    return {
         "code": "DHCP_RELOAD_OK",
         "status": "success",
         "message": "DHCP configuration reload successfully",

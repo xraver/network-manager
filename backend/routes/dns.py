@@ -26,7 +26,7 @@ async def apt_dns_reload(request: Request):
     end_ns = time.monotonic_ns()
     took_ms = (end_ns - start_ns)
 
-    return {   
+    return {
         "code": "DNS_RELOAD_OK",
         "status": "success",
         "message": "DNS configuration reload successfully",
