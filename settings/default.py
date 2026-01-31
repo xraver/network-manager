@@ -38,3 +38,11 @@ LOGIN_WINDOW_SECONDS = "600"
 ADMIN_USER = "admin"
 ADMIN_PASSWORD = "admin"
 ADMIN_PASSWORD_HASH_FILE = "/run/secrets/admin_password_hash"
+
+# ---------------------------------------------------------
+# DNS
+# ---------------------------------------------------------
+DNS_CFG_PATH="/dns/etc"
+DNS_HOST_FILE=f"{DOMAIN}/hosts.inc"
+DNS_ALIAS_FILE=f"{DOMAIN}/alias.inc"
+DNS_REVERSE_FILE="reverse/hosts.inc"

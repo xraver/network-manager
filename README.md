@@ -127,21 +127,25 @@ secrets:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FRONTEND_DIR` | /app/frontend | Frontend directory |
-| `DB_FILE` | /data/database.db |  SQLite file |
-| `DB_RESET` | false |  Reset DB on every startup |
-| `LOG_LEVEL` | info |  Log level |
-| `LOG_TO_FILE` | false |  Enable file logging |
-| `LOG_FILE` | /data/app.log |  Application log file |
-| `LOG_ACCESS_FILE` | /data/access.log |  HTTP access log |
-| `DOMAIN` | example.com |  Public domain |
-| `PUBLIC_IP` | 127.0.0.1 |  Public IP |
-| `HTTP_PORT` | 8000 |  Internal HTTP port |
-| `LOGIN_MAX_ATTEMPTS` | 5 |  Login attempts |
-| `LOGIN_WINDOW_SECONDS` | 600 |  Attempt window |
+| `DB_FILE` | /data/database.db | SQLite file |
+| `DB_RESET` | false | Reset DB on every startup |
+| `LOG_LEVEL` | info | Log level |
+| `LOG_TO_FILE` | false | Enable file logging |
+| `LOG_FILE` | /data/app.log | Application log file |
+| `LOG_ACCESS_FILE` | /data/access.log | HTTP access log |
+| `DOMAIN` | example.com | Public domain |
+| `PUBLIC_IP` | 127.0.0.1 | Public IP |
+| `HTTP_PORT` | 8000 | Internal HTTP port |
+| `LOGIN_MAX_ATTEMPTS` | 5 | Login attempts |
+| `LOGIN_WINDOW_SECONDS` | 600 | Attempt window |
 | `ADMIN_USER` | admin |  Admin username |
-| `ADMIN_PASSWORD` | admin |  Admin password (development) |
+| `ADMIN_PASSWORD` | admin | Admin password (development) |
 | `ADMIN_PASSWORD_HASH_FILE` | /run/secrets/admin_password_hash |  Admin password hash |
 | `SESSION_SECRET` | (auto-generated) |  Session secret |
+| `DNS_CFG_PATH` | /dns/etc | Bind9 Configuration folder |
+| `DNS_HOST_FILE` | {DOMAIN}/hosts.inc | BIND9 Hosts file |
+| `DNS_ALIAS_FILE` | {DOMAIN}/alias.inc | BIND9 Alias file |
+| `DNS_REVERSE_FILE` | reverse/hosts.inc | BIND9 Reverse Hosts file |
 
 ---
 

@@ -432,7 +432,7 @@ async function handleReloadDNS() {
 
         const data = await res.json();
         if(data.code !== "DNS_RELOAD_OK"){
-            const err = new Error(`Error reloading DNS: ${data.code} ${data.message}`);
+            const err = new Error(`Error reloading DNS: ${data.message}`);
             err.status = data.code;
             throw err;
         }
@@ -465,7 +465,7 @@ async function handleReloadDHCP() {
 
         const data = await res.json();
         if(data.code !== "DHCP_RELOAD_OK"){
-            const err = new Error(`Error reloading DHCP: ${data.code} ${data.message}`);
+            const err = new Error(`Error reloading DHCP: ${data.message}`);
             err.status = data.code;
             throw err;
         }

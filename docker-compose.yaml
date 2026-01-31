@@ -9,6 +9,7 @@ services:
       - TZ=${DOCKER_TZ}
     volumes:
       - ${DOCKER_CFG_DIR}/network:/data
+      - ${DOCKER_CFG_DIR}/bind9:/dns
     networks:
       - proxy
 

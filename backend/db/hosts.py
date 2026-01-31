@@ -16,9 +16,11 @@ from log.log import get_logger
 # -----------------------------
 def get_hosts():
     conn = get_db()
-    cur = conn.execute("SELECT * FROM hosts ORDER BY name")
-    rows = cur.fetchall()
-    return [dict(r) for r in rows]
+    cur = conn.execute("SELECT * FROM hosts")
+    rows = [dict(r) for r in cur.fetchall()]
+    # Sort by IPv4
+    rows.sort(key=lambda h: ipaddress.IPv4Address(h['ipv4']))
+    return rows
 
 # -----------------------------
 # SELECT SINGLE HOST

@@ -55,6 +55,10 @@ def print_welcome():
         "Users: admin=%s | password=%s | hash=%s | hash_file=%s",
         settings.ADMIN_USER, safe_admin_pwd, safe_admin_hash, settings.ADMIN_PASSWORD_HASH_FILE
     )
+    logger.info(
+        "DNS: path=%s | host file=%s | alias file=%s | reverse file=%s",
+        settings.DNS_CFG_PATH, settings.DNS_HOST_FILE, settings.DNS_ALIAS_FILE, settings.DNS_REVERSE_FILE
+    )
 
 # ------------------------------------------------------------------------------
 # Shutdown log

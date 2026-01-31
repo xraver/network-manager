@@ -84,6 +84,12 @@ class Settings(BaseModel):
         (os.getenv("ADMIN_PASSWORD_HASH") or _read_text_if_exists(os.getenv("ADMIN_PASSWORD_HASH_FILE", default.ADMIN_PASSWORD_HASH_FILE)) or None)
     ))
 
+    # DNS
+    DNS_CFG_PATH: str = Field(default_factory=lambda: os.getenv("DNS_CFG_PATH", default.DNS_CFG_PATH))
+    DNS_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DNS_HOST_FILE", default.DNS_HOST_FILE))
+    DNS_ALIAS_FILE: str = Field(default_factory=lambda: os.getenv("DNS_ALIAS_FILE", default.DNS_ALIAS_FILE))
+    DNS_REVERSE_FILE: str = Field(default_factory=lambda: os.getenv("DNS_REVERSE_FILE", default.DNS_REVERSE_FILE))
+
     def model_post_init(self, __context) -> None:
         if self.DEVEL:
             ts = datetime.datetime.now().strftime("%Y%m%d-%H%M")
@@ -91,6 +97,14 @@ class Settings(BaseModel):
         else:
             object.__setattr__(self, "APP_VERSION", self.APP_VERSION)
 
+        # Update Files
+        if self.DOMAIN.lower() != default.DOMAIN.lower():
+            self.DNS_HOST_FILE    = self.DNS_HOST_FILE.replace(default.DOMAIN, self.DOMAIN)
+            self.DNS_ALIAS_FILE   = self.DNS_ALIAS_FILE.replace(default.DOMAIN, self.DOMAIN)
+            self.DNS_REVERSE_FILE = self.DNS_REVERSE_FILE.replace(default.DOMAIN, self.DOMAIN)
+        self.DNS_HOST_FILE    = self.DNS_CFG_PATH + "/" + self.DNS_HOST_FILE
+        self.DNS_ALIAS_FILE   = self.DNS_CFG_PATH + "/" + self.DNS_ALIAS_FILE
+        self.DNS_REVERSE_FILE = self.DNS_CFG_PATH + "/" + self.DNS_REVERSE_FILE
 # ---------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------
