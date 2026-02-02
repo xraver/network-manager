@@ -6,9 +6,14 @@
 FRONTEND_DIR = "/app/frontend"
 
 # ---------------------------------------------------------
+# Data Path (DB + Backup)
+# ---------------------------------------------------------
+DATA_PATH = "/data"
+
+# ---------------------------------------------------------
 # Database
 # ---------------------------------------------------------
-DB_FILE = "/data/database.db"
+DB_FILE = "database.db"
 DB_RESET = False
 
 # ---------------------------------------------------------
@@ -16,8 +21,8 @@ DB_RESET = False
 # ---------------------------------------------------------
 LOG_LEVEL = "INFO"
 LOG_TO_FILE = False
-LOG_FILE = "/data/app.log"
-LOG_ACCESS_FILE = "/data/access.log"
+LOG_FILE = "app.log"
+LOG_ACCESS_FILE = "access.log"
 
 # ---------------------------------------------------------
 # Host
@@ -46,3 +51,10 @@ DNS_CFG_PATH="/dns/etc"
 DNS_HOST_FILE=f"{DOMAIN}/hosts.inc"
 DNS_ALIAS_FILE=f"{DOMAIN}/alias.inc"
 DNS_REVERSE_FILE="reverse/hosts.inc"
+
+# ---------------------------------------------------------
+# DHCP
+# ---------------------------------------------------------
+DHCP_CFG_PATH="/dhcp/etc"
+DHCP4_HOST_FILE="hosts-ipv4.json"
+DHCP6_HOST_FILE="hosts-ipv6.json"

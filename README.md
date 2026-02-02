@@ -127,12 +127,13 @@ secrets:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FRONTEND_DIR` | /app/frontend | Frontend directory |
-| `DB_FILE` | /data/database.db | SQLite file |
+| `DATA_PATH`| /data | Data Path for DB and Backups |
+| `DB_FILE` | database.db | SQLite file |
 | `DB_RESET` | false | Reset DB on every startup |
 | `LOG_LEVEL` | info | Log level |
 | `LOG_TO_FILE` | false | Enable file logging |
-| `LOG_FILE` | /data/app.log | Application log file |
-| `LOG_ACCESS_FILE` | /data/access.log | HTTP access log |
+| `LOG_FILE` | app.log | Application log file |
+| `LOG_ACCESS_FILE` | access.log | HTTP access log |
 | `DOMAIN` | example.com | Public domain |
 | `PUBLIC_IP` | 127.0.0.1 | Public IP |
 | `HTTP_PORT` | 8000 | Internal HTTP port |
@@ -146,6 +147,9 @@ secrets:
 | `DNS_HOST_FILE` | {DOMAIN}/hosts.inc | BIND9 Hosts file |
 | `DNS_ALIAS_FILE` | {DOMAIN}/alias.inc | BIND9 Alias file |
 | `DNS_REVERSE_FILE` | reverse/hosts.inc | BIND9 Reverse Hosts file |
+| `DHCP_CFG_PATH` | /dns/etc | KEA Configuration folder |
+| `DHCP4_HOST_FILE` | hosts-ipv4.json | KEA-DHCP4 Hosts file |
+| `DHCP6_HOST_FILE` | hosts-ipv6.json | KEA-DHCP6 Hosts file |
 
 ---
 

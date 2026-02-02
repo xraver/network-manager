@@ -1,4 +1,4 @@
-# backend/routes/dns.py
+# backend/routes/backup.py
 
 # import standard modules
 from fastapi import APIRouter, Request, Response
@@ -19,7 +19,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------
-@router.get("/api/dns/reload")
+@router.get("/api/backup")
 async def apt_dns_reload(request: Request):
     start_ns = time.monotonic_ns()
 
@@ -28,43 +28,33 @@ async def apt_dns_reload(request: Request):
     message = None
     code = None
     status = None
+    dns_hosts = []
+    dns_reverse = []
 
     try:
         # Get Hosts List
         hosts = get_hosts()
 
-        # Save DNS Hosts Configuration
-        path = settings.DNS_HOST_FILE
+        # Backup Hosts DB
+        path = settings.DATA_PATH + "/hosts.json"
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
-                line = f"{h.get('name')}\t\t IN\tA\t{h.get('ipv4')}\n"
-                f.write(line)
-
-        # Save DNS Reverse Configuration
-        path = settings.DNS_REVERSE_FILE
-        with open(path, "w", encoding="utf-8") as f:
-            for h in hosts:
-                ip = h.get('ipv4')
-                if ip:
-                    parts = ip.split(".")
-                    rev = f"{parts[-1]}.{parts[-2]}"
-                    line = f"{rev}\t\t IN PTR\t{h.get('name')}.{settings.DOMAIN}\n"
-                    f.write(line)
+                f.write(json.dumps(h, ensure_ascii=False) + "\n")
 
     except Exception as err:
         error = True
         message = str(err).strip()
 
     if error:
-        code = "DNS_RELOAD_ERROR"
+        code = "BACKUP_ERROR"
         # default del messaggio se vuoto o None
         if not message:
-            message = "DNS reload error"
+            message = "BACKUP error"
         status = "failure"
         #http_status = 500
     else:
-        code = "DNS_RELOAD_OK"
-        message = "DNS configuration reload successfully"
+        code = "BACKUP_OK"
+        message = "BACKUP executed successfully"
         status = "success"
         #http_status = 200
 

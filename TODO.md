@@ -22,7 +22,13 @@
 - [ ] Perform **commit + push** on Git
 - [ ] Regenerate **from scratch**:
   - [ ] **BIND (DNS)** configuration
-  - [ ] **Kea (DHCP)** configuration
+    - [X] hosts configuration
+    - [ ] alias configuration
+    - [X] reverse configuration
+    - [ ] IPv6 configuration
+  - [X] **Kea (DHCP)** configuration
+    - [X] IPv4 configuration
+    - [X] IPv6 configuration
 - [ ] Reload services:
   - [ ] BIND
   - [ ] Kea

@@ -9,6 +9,7 @@ import logging
 import os
 # Import Routers
 from backend.routes.about import router as about_router
+from backend.routes.backup import router as backup_router
 from backend.routes.health import router as health_router
 from backend.routes.login import router as login_router
 from backend.routes.hosts import router as hosts_router
@@ -59,6 +60,10 @@ def print_welcome():
         "DNS: path=%s | host file=%s | alias file=%s | reverse file=%s",
         settings.DNS_CFG_PATH, settings.DNS_HOST_FILE, settings.DNS_ALIAS_FILE, settings.DNS_REVERSE_FILE
     )
+    logger.info(
+        "DHCP: path=%s | ipv4 host file=%s | ipv6 host file=%s",
+        settings.DHCP_CFG_PATH, settings.DHCP4_HOST_FILE, settings.DHCP6_HOST_FILE
+    )
 
 # ------------------------------------------------------------------------------
 # Shutdown log
@@ -98,6 +103,7 @@ app = FastAPI(
 # Routers
 # ------------------------------------------------------------------------------
 app.include_router(about_router)
+app.include_router(backup_router)
 app.include_router(health_router)
 app.include_router(login_router)
 app.include_router(hosts_router)

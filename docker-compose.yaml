@@ -10,6 +10,7 @@ services:
     volumes:
       - ${DOCKER_CFG_DIR}/network:/data
       - ${DOCKER_CFG_DIR}/bind9:/dns
+      - ${DOCKER_CFG_DIR}/kea:/dhcp
     networks:
       - proxy
 

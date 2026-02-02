@@ -51,6 +51,9 @@ class Settings(BaseModel):
     BASEIMG_NAME: str = Field(default_factory=lambda: config.BASEIMG_NAME)
     BASEIMG_VERSION: str = Field(default_factory=lambda: config.BASEIMG_VERSION)
 
+    # DATA_PATH
+    DATA_PATH: str = Field(default_factory=lambda: os.getenv("DATA_PATH", default.DATA_PATH))
+
     # Frontend
     FRONTEND_DIR: str = Field(default_factory=lambda: os.getenv("FRONTEND_DIR", default.FRONTEND_DIR))
 
@@ -89,6 +92,10 @@ class Settings(BaseModel):
     DNS_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DNS_HOST_FILE", default.DNS_HOST_FILE))
     DNS_ALIAS_FILE: str = Field(default_factory=lambda: os.getenv("DNS_ALIAS_FILE", default.DNS_ALIAS_FILE))
     DNS_REVERSE_FILE: str = Field(default_factory=lambda: os.getenv("DNS_REVERSE_FILE", default.DNS_REVERSE_FILE))
+    # DHCP
+    DHCP_CFG_PATH: str = Field(default_factory=lambda: os.getenv("DHCP_CFG_PATH", default.DHCP_CFG_PATH))
+    DHCP4_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP4_HOST_FILE", default.DHCP4_HOST_FILE))
+    DHCP6_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_HOST_FILE", default.DHCP6_HOST_FILE))
 
     def model_post_init(self, __context) -> None:
         if self.DEVEL:
@@ -97,7 +104,12 @@ class Settings(BaseModel):
         else:
             object.__setattr__(self, "APP_VERSION", self.APP_VERSION)
 
-        # Update Files
+        # Database
+        self.DB_FILE         = self.DATA_PATH + "/" + self.DB_FILE
+        self.LOG_FILE        = self.DATA_PATH + "/" + self.LOG_FILE
+        self.LOG_ACCESS_FILE = self.DATA_PATH + "/" + self.LOG_ACCESS_FILE
+
+        # Update DNS Files
         if self.DOMAIN.lower() != default.DOMAIN.lower():
             self.DNS_HOST_FILE    = self.DNS_HOST_FILE.replace(default.DOMAIN, self.DOMAIN)
             self.DNS_ALIAS_FILE   = self.DNS_ALIAS_FILE.replace(default.DOMAIN, self.DOMAIN)
@@ -105,6 +117,11 @@ class Settings(BaseModel):
         self.DNS_HOST_FILE    = self.DNS_CFG_PATH + "/" + self.DNS_HOST_FILE
         self.DNS_ALIAS_FILE   = self.DNS_CFG_PATH + "/" + self.DNS_ALIAS_FILE
         self.DNS_REVERSE_FILE = self.DNS_CFG_PATH + "/" + self.DNS_REVERSE_FILE
+
+        # Update DHCP Files
+        self.DHCP4_HOST_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP4_HOST_FILE
+        self.DHCP6_HOST_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP6_HOST_FILE
+
 # ---------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------
