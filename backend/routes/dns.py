@@ -12,6 +12,8 @@ import time
 from backend.db.hosts import get_hosts
 # Import Settings
 from settings.settings import settings
+# Import Logging
+from log.log import setup_logging, get_logger
 
 # Create Router
 router = APIRouter()
@@ -52,8 +54,9 @@ async def apt_dns_reload(request: Request):
                     f.write(line)
 
     except Exception as err:
+        get_logger("dns").exception("Error reloading DNS: " + str(err).strip())
         error = True
-        message = str(err).strip()
+        #message = str(err).strip()
 
     if error:
         code = "DNS_RELOAD_ERROR"

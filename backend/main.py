@@ -32,9 +32,9 @@ logger = get_logger("backend.main")
 # Welcome log
 # ------------------------------------------------------------------------------
 def print_welcome():
-    safe_secret = "****" if settings.SECRET_KEY else "undefined"
-    safe_admin_pwd = "****" if settings.ADMIN_PASSWORD else "undefined"
-    safe_admin_hash = "****" if settings.ADMIN_PASSWORD_HASH else "undefined"
+    masked_secret = "****" if settings.SECRET_KEY else "undefined"
+    masked_admin_pwd = "****" if settings.ADMIN_PASSWORD else "undefined"
+    masked_admin_hash = "****" if settings.ADMIN_PASSWORD_HASH else "undefined"
 
     logger.info(
         "%s starting | app_version=%s | baseimg_version=%s",
@@ -42,7 +42,7 @@ def print_welcome():
     )
     logger.info(
         "App settings: frontend=%s | port=%d | secret=%s",
-        settings.FRONTEND_DIR, settings.HTTP_PORT, safe_secret
+        settings.FRONTEND_DIR, settings.HTTP_PORT, masked_secret
     )
     logger.info(
         "Database: file=%s | reset=%s",
@@ -54,7 +54,7 @@ def print_welcome():
     )
     logger.info(
         "Users: admin=%s | password=%s | hash=%s | hash_file=%s",
-        settings.ADMIN_USER, safe_admin_pwd, safe_admin_hash, settings.ADMIN_PASSWORD_HASH_FILE
+        settings.ADMIN_USER, masked_admin_pwd, masked_admin_hash, settings.ADMIN_PASSWORD_HASH_FILE
     )
     logger.info(
         "DNS: path=%s | host file=%s | alias file=%s | reverse file=%s",

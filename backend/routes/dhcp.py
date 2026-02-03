@@ -12,6 +12,8 @@ import time
 from backend.db.hosts import get_hosts
 # Import Settings
 from settings.settings import settings
+# Import Logging
+from log.log import setup_logging, get_logger
 
 # Create Router
 router = APIRouter()
@@ -39,30 +41,33 @@ async def apt_dhcp_reload(request: Request):
         for h in hosts:
             if h.get("ipv4") and h.get("mac"):
                 kea4_hosts.append({
-                    "hostname": h.get("name"),
                     "hw-address": h.get("mac"),
                     "ip-address": h.get("ipv4"),
+                    "hostname": h.get("name"),
             })
             if h.get("ipv6") and h.get("mac"):
                 kea6_hosts.append({
-                   "hostname": h.get("name"),
-                    "hw-address": h.get("mac"),
-                    "ip-address": h.get("ipv6"),
+                    "duid": h.get("mac"),
+                    "ip-addresses": h.get("ipv6"),
+                    "hostname": h.get("name"),
             })
 
         # Save DHCP4 Configuration
         path = settings.DHCP4_HOST_FILE
+        data = {"hosts": kea4_hosts}
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(kea4_hosts, f, indent=4, ensure_ascii=False)
+            json.dump(data, f, indent=4, ensure_ascii=False)
 
         # Save DHCP6 Configuration
         path = settings.DHCP6_HOST_FILE
+        data = {"hosts": kea6_hosts}
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(kea6_hosts, f, indent=4, ensure_ascii=False)
+            json.dump(data, f, indent=4, ensure_ascii=False)
 
     except Exception as err:
+        get_logger("dhcp").exception("Error reloading DHCP: " + str(err).strip())
         error = True
-        message = str(err).strip()
+        #message = str(err).strip()
 
     if error:
         code = "DHCP_RELOAD_ERROR"

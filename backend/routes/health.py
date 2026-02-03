@@ -7,6 +7,8 @@ import time
 import os
 # Import Settings
 from settings.settings import settings
+# Import Logging
+from log.log import setup_logging, get_logger
 
 # Create Router
 router = APIRouter()
@@ -37,9 +39,10 @@ def health():
 
         db_size = round(os.path.getsize(settings.DB_FILE) / (1024 * 1024), 2)
 
-    except Exception as e:
+    except Exception as err:
+        get_logger("health").exception("Database health check failed: " + str(err).strip())
         db_status = "error"
-        db_version = str(e)
+        db_version = None
 
     latency = round((time.time() - start) * 1000, 2)
 

@@ -75,9 +75,6 @@ def init_db_users_table(cur):
         "active"
     ))
 
-    logger.info("USERS DB: Admin user: %s with password %s - %s" ,
-                settings.ADMIN_USER, settings.ADMIN_PASSWORD, settings.ADMIN_PASSWORD_HASH)
-
 # -----------------------------
 # Create User
 # -----------------------------
