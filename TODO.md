@@ -50,13 +50,13 @@
 ## 🧩 Configuration Generation
 
 ### 🧪 BIND (DNS)
-- [ ] Rebuild forward and reverse zones
+- [X] Rebuild forward and reverse zones
 - [ ] Rebuild all records (A, AAAA, CNAME)
 - [ ] Syntax validation (`named-checkconf`, `named-checkzone`)
 - [ ] Rollback management in case of errors
 
 ### 🧪 Kea (DHCP)
-- [ ] Regenerate subnets, pools, global options, and host reservations
+- [X] Regenerate subnets, pools, global options, and host reservations
 - [ ] Validate JSON configuration (`kea-dhcp4 -t`)
 - [ ] Rollback if syntax is invalid
 
