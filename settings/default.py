@@ -47,16 +47,14 @@ ADMIN_PASSWORD_HASH_FILE = "/run/secrets/admin_password_hash"
 # ---------------------------------------------------------
 # DNS
 # ---------------------------------------------------------
-DNS_CFG_PATH="/dns/etc"
-DNS_HOST_FILE=f"{DOMAIN}/hosts.inc"
-DNS_ALIAS_FILE=f"{DOMAIN}/alias.inc"
-DNS_REVERSE_FILE="reverse/hosts.inc"
+DNS_HOST_FILE=f"/dns/etc/{DOMAIN}/hosts.inc"
+DNS_ALIAS_FILE=f"/dns/etc/{DOMAIN}/alias.inc"
+DNS_REVERSE_FILE="/dns/etc/reverse/hosts.inc"
 
 # ---------------------------------------------------------
 # DHCP
 # ---------------------------------------------------------
-DHCP_CFG_PATH="/dhcp/etc"
-DHCP4_HOST_FILE="hosts-ipv4.json"
-DHCP4_LEASES_FILE="dhcp4.leases"
-DHCP6_HOST_FILE="hosts-ipv6.json"
-DHCP6_LEASES_FILE="dhcp6.leases"
+DHCP4_HOST_FILE="/dhcp/etc/hosts-ipv4.json"
+DHCP4_LEASES_FILE="/dhcp/lib/dhcp4.leases"
+DHCP6_HOST_FILE="/dhcp/etc/hosts-ipv6.json"
+DHCP6_LEASES_FILE="/dhcp/lib/dhcp6.leases"

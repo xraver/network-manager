@@ -88,12 +88,10 @@ class Settings(BaseModel):
     ))
 
     # DNS
-    DNS_CFG_PATH: str = Field(default_factory=lambda: os.getenv("DNS_CFG_PATH", default.DNS_CFG_PATH))
     DNS_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DNS_HOST_FILE", default.DNS_HOST_FILE))
     DNS_ALIAS_FILE: str = Field(default_factory=lambda: os.getenv("DNS_ALIAS_FILE", default.DNS_ALIAS_FILE))
     DNS_REVERSE_FILE: str = Field(default_factory=lambda: os.getenv("DNS_REVERSE_FILE", default.DNS_REVERSE_FILE))
     # DHCP
-    DHCP_CFG_PATH: str = Field(default_factory=lambda: os.getenv("DHCP_CFG_PATH", default.DHCP_CFG_PATH))
     DHCP4_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP4_HOST_FILE", default.DHCP4_HOST_FILE))
     DHCP4_LEASES_FILE: str = Field(default_factory=lambda: os.getenv("DHCP4_LEASES_FILE", default.DHCP4_LEASES_FILE))
     DHCP6_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_HOST_FILE", default.DHCP6_HOST_FILE))
@@ -115,16 +113,6 @@ class Settings(BaseModel):
         if self.DOMAIN.lower() != default.DOMAIN.lower():
             self.DNS_HOST_FILE    = self.DNS_HOST_FILE.replace(default.DOMAIN, self.DOMAIN)
             self.DNS_ALIAS_FILE   = self.DNS_ALIAS_FILE.replace(default.DOMAIN, self.DOMAIN)
-            self.DNS_REVERSE_FILE = self.DNS_REVERSE_FILE.replace(default.DOMAIN, self.DOMAIN)
-        self.DNS_HOST_FILE    = self.DNS_CFG_PATH + "/" + self.DNS_HOST_FILE
-        self.DNS_ALIAS_FILE   = self.DNS_CFG_PATH + "/" + self.DNS_ALIAS_FILE
-        self.DNS_REVERSE_FILE = self.DNS_CFG_PATH + "/" + self.DNS_REVERSE_FILE
-
-        # Update DHCP Files
-        self.DHCP4_HOST_FILE    = self.DHCP_CFG_PATH + "/" + self.DHCP4_HOST_FILE
-        self.DHCP4_LEASES_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP4_LEASES_FILE
-        self.DHCP6_HOST_FILE    = self.DHCP_CFG_PATH + "/" + self.DHCP6_HOST_FILE
-        self.DHCP6_LEASES_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP6_LEASES_FILE
 
 # ---------------------------------------------------------
 # Singleton

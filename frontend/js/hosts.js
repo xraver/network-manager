@@ -418,7 +418,7 @@ async function handleDeleteHost(e, el) {
 // -----------------------------
 async function handleReloadDNS() {
     try {
-        const res = await fetch(`/api/dns/reload`, { method: "GET" });
+        const res = await fetch(`/api/dns/reload`, { method: "POST" });
         if (!res.ok) {
             const err = new Error(`Error reloading DNS: ${res.status} ${res.statusText}`);
             err.status = res.status;
@@ -451,7 +451,7 @@ async function handleReloadDNS() {
 // -----------------------------
 async function handleReloadDHCP() {
     try {
-        const res = await fetch(`/api/dhcp/reload`, { method: "GET" });
+        const res = await fetch(`/api/dhcp/reload`, { method: "POST" });
         if (!res.ok) {
             const err = new Error(`Error reloading DHCP: ${res.status} ${res.statusText}`);
             err.status = res.status;

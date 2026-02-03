@@ -19,17 +19,13 @@ from log.log import setup_logging, get_logger
 router = APIRouter()
 
 # ---------------------------------------------------------
-# API ENDPOINTS
+# Reload
 # ---------------------------------------------------------
-@router.get("/api/dns/reload")
-async def apt_dns_reload(request: Request):
-    start_ns = time.monotonic_ns()
+@router.post("/api/dns/reload")
+async def api_dns_reload(request: Request):
 
     # Inizializzazioni
-    error = False
-    message = None
-    code = None
-    status = None
+    start_ns = time.monotonic_ns()
 
     try:
         # Get Hosts List
@@ -46,40 +42,32 @@ async def apt_dns_reload(request: Request):
         path = settings.DNS_REVERSE_FILE
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
-                ip = h.get('ipv4')
+                ip = h.get("ipv4")
                 if ip:
                     parts = ip.split(".")
                     rev = f"{parts[-1]}.{parts[-2]}"
                     line = f"{rev}\t\t IN PTR\t{h.get('name')}.{settings.DOMAIN}\n"
                     f.write(line)
 
-    except Exception as err:
-        get_logger("dns").exception("Error reloading DNS: " + str(err).strip())
-        error = True
-        #message = str(err).strip()
+        # RELOAD DNS
 
-    if error:
-        code = "DNS_RELOAD_ERROR"
-        # default del messaggio se vuoto o None
-        if not message:
-            message = "DNS reload error"
-        status = "failure"
-        #http_status = 500
-    else:
-        code = "DNS_RELOAD_OK"
-        message = "DNS configuration reload successfully"
-        status = "success"
-        #http_status = 200
-
-    took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-
-    payload = {
-        "code": code,
-        "status": status,
-        "message": message,
-        "details": {
-            "took_ms": took_ms
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        payload = {
+            "code": "DNS_RELOAD_OK",
+            "status": "success",
+            "message": "DNS configuration reload successfully",
+            "details": {"took_ms": took_ms}
         }
-    }
-    return JSONResponse(content=payload)
-    #return JSONResponse(content=payload, status_code=http_status)
+        return JSONResponse(content=payload, status_code=200)
+
+    except Exception as err:
+        get_logger("dns").exception("Error reloading DNS: %s", str(err).strip())
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+
+        payload = {
+            "code": "DNS_RELOAD_ERROR",
+            "status": "failure",
+            "message": "Error reloading DNS",
+            "details": {"took_ms": took_ms, "error": str(err).strip()}
+        }
+        return JSONResponse(content=payload, status_code=500)

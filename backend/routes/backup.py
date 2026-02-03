@@ -20,7 +20,7 @@ router = APIRouter()
 # API ENDPOINTS
 # ---------------------------------------------------------
 @router.get("/api/backup")
-async def apt_dns_reload(request: Request):
+async def api_dns_reload(request: Request):
     start_ns = time.monotonic_ns()
 
     # Inizializzazioni

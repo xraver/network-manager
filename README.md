@@ -143,15 +143,13 @@ secrets:
 | `ADMIN_PASSWORD` | admin | Admin password (development) |
 | `ADMIN_PASSWORD_HASH_FILE` | /run/secrets/admin_password_hash |  Admin password hash |
 | `SESSION_SECRET` | (auto-generated) |  Session secret |
-| `DNS_CFG_PATH` | /dns/etc | Bind9 Configuration folder |
-| `DNS_HOST_FILE` | {DOMAIN}/hosts.inc | BIND9 Hosts file |
-| `DNS_ALIAS_FILE` | {DOMAIN}/alias.inc | BIND9 Alias file |
-| `DNS_REVERSE_FILE` | reverse/hosts.inc | BIND9 Reverse Hosts file |
-| `DHCP_CFG_PATH` | /dns/etc | KEA Configuration folder |
-| `DHCP4_HOST_FILE` | hosts-ipv4.json | KEA-DHCP4 Hosts file |
-| `DHCP4_LEASES_FILE` | dhcp4.leases | KEA-DHCP4 leases file |
-| `DHCP6_HOST_FILE` | hosts-ipv6.json | KEA-DHCP6 Hosts file |
-| `DHCP6_LEASES_FILE` | dhcp6.leases | KEA-DHCP6 leases file |
+| `DNS_HOST_FILE` | /dns/etc/{DOMAIN}/hosts.inc | BIND9 Hosts file |
+| `DNS_ALIAS_FILE` | /dns/etc/{DOMAIN}/alias.inc | BIND9 Alias file |
+| `DNS_REVERSE_FILE` | /dns/etc/reverse/hosts.inc | BIND9 Reverse Hosts file |
+| `DHCP4_HOST_FILE` | /dhcp/etc/hosts-ipv4.json | KEA-DHCP4 Hosts file |
+| `DHCP4_LEASES_FILE` | /dhcp/lib/dhcp4.leases | KEA-DHCP4 leases file |
+| `DHCP6_HOST_FILE` | /dhcp/etc/hosts-ipv6.json | KEA-DHCP6 Hosts file |
+| `DHCP6_LEASES_FILE` | /dhcp/lib/dhcp6.leases | KEA-DHCP6 leases file |
 
 ---
 

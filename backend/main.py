@@ -57,12 +57,12 @@ def print_welcome():
         settings.ADMIN_USER, masked_admin_pwd, masked_admin_hash, settings.ADMIN_PASSWORD_HASH_FILE
     )
     logger.info(
-        "DNS: path=%s | host file=%s | alias file=%s | reverse file=%s",
-        settings.DNS_CFG_PATH, settings.DNS_HOST_FILE, settings.DNS_ALIAS_FILE, settings.DNS_REVERSE_FILE
+        "DNS: host file=%s | alias file=%s | reverse file=%s",
+        settings.DNS_HOST_FILE, settings.DNS_ALIAS_FILE, settings.DNS_REVERSE_FILE
     )
     logger.info(
-        "DHCP: path=%s | ipv4 host file=%s | ipv6 host file=%s",
-        settings.DHCP_CFG_PATH, settings.DHCP4_HOST_FILE, settings.DHCP6_HOST_FILE
+        "DHCP: ipv4 host file=%s | ipv4 leases file=%s | ipv6 host file=%s | ipv6 leases file=%s",
+        settings.DHCP4_HOST_FILE, settings.DHCP4_LEASES_FILE, settings.DHCP6_HOST_FILE, settings.DHCP6_LEASES_FILE
     )
 
 # ------------------------------------------------------------------------------
