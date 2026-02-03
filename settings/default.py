@@ -57,4 +57,6 @@ DNS_REVERSE_FILE="reverse/hosts.inc"
 # ---------------------------------------------------------
 DHCP_CFG_PATH="/dhcp/etc"
 DHCP4_HOST_FILE="hosts-ipv4.json"
+DHCP4_LEASES_FILE="dhcp4.leases"
 DHCP6_HOST_FILE="hosts-ipv6.json"
+DHCP6_LEASES_FILE="dhcp6.leases"

@@ -95,7 +95,9 @@ class Settings(BaseModel):
     # DHCP
     DHCP_CFG_PATH: str = Field(default_factory=lambda: os.getenv("DHCP_CFG_PATH", default.DHCP_CFG_PATH))
     DHCP4_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP4_HOST_FILE", default.DHCP4_HOST_FILE))
+    DHCP4_LEASES_FILE: str = Field(default_factory=lambda: os.getenv("DHCP4_LEASES_FILE", default.DHCP4_LEASES_FILE))
     DHCP6_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_HOST_FILE", default.DHCP6_HOST_FILE))
+    DHCP6_LEASES_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_LEASES_FILE", default.DHCP6_LEASES_FILE))
 
     def model_post_init(self, __context) -> None:
         if self.DEVEL:
@@ -119,8 +121,10 @@ class Settings(BaseModel):
         self.DNS_REVERSE_FILE = self.DNS_CFG_PATH + "/" + self.DNS_REVERSE_FILE
 
         # Update DHCP Files
-        self.DHCP4_HOST_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP4_HOST_FILE
-        self.DHCP6_HOST_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP6_HOST_FILE
+        self.DHCP4_HOST_FILE    = self.DHCP_CFG_PATH + "/" + self.DHCP4_HOST_FILE
+        self.DHCP4_LEASES_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP4_LEASES_FILE
+        self.DHCP6_HOST_FILE    = self.DHCP_CFG_PATH + "/" + self.DHCP6_HOST_FILE
+        self.DHCP6_LEASES_FILE  = self.DHCP_CFG_PATH + "/" + self.DHCP6_LEASES_FILE
 
 # ---------------------------------------------------------
 # Singleton

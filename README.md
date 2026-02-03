@@ -149,7 +149,9 @@ secrets:
 | `DNS_REVERSE_FILE` | reverse/hosts.inc | BIND9 Reverse Hosts file |
 | `DHCP_CFG_PATH` | /dns/etc | KEA Configuration folder |
 | `DHCP4_HOST_FILE` | hosts-ipv4.json | KEA-DHCP4 Hosts file |
+| `DHCP4_LEASES_FILE` | dhcp4.leases | KEA-DHCP4 leases file |
 | `DHCP6_HOST_FILE` | hosts-ipv6.json | KEA-DHCP6 Hosts file |
+| `DHCP6_LEASES_FILE` | dhcp6.leases | KEA-DHCP6 leases file |
 
 ---
 
