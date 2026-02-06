@@ -2,7 +2,7 @@
 
 # import standard modules
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse, Response
 import logging
@@ -155,7 +155,12 @@ async def session_middleware(request: Request, call_next):
     if path.startswith("/api"):
         if not is_logged_in(request):
             logger.error("API access denied - not logged in")
-            return JSONResponse({"error": "Unauthorized"}, status_code=401)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail={
+                    "error": "Unauthorized"
+                },
+            )
         response = await call_next(request)
         # Sliding expiration
         apply_session(response, username=None, token=token)

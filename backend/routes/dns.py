@@ -1,7 +1,7 @@
 # backend/routes/dns.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 import asyncio
 import json
@@ -52,22 +52,27 @@ async def api_dns_reload(request: Request):
         # RELOAD DNS
 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        payload = {
-            "code": "DNS_RELOAD_OK",
-            "status": "success",
-            "message": "DNS configuration reload successfully",
-            "details": {"took_ms": took_ms}
-        }
-        return JSONResponse(content=payload, status_code=200)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+                content={
+                "code": "DNS_RELOAD_OK",
+                "status": "success",
+                "message": "DNS configuration reload successfully",
+                "took_ms": took_ms,
+            },
+        )
 
     except Exception as err:
-        get_logger("dns").exception("Error reloading DNS: %s", str(err).strip())
+        logger = get_logger("dns")
+        logger.exception("Error reloading DNS: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
-        payload = {
-            "code": "DNS_RELOAD_ERROR",
-            "status": "failure",
-            "message": "Error reloading DNS",
-            "details": {"took_ms": took_ms, "error": str(err).strip()}
-        }
-        return JSONResponse(content=payload, status_code=500)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "code": "DNS_RELOAD_ERROR",
+                "status": "failure",
+                "message": "Internal error reloading DNS",
+                "took_ms": took_ms,
+            },
+        )

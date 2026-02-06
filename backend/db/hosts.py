@@ -4,12 +4,73 @@
 import ipaddress
 import logging
 import os
+import re
+import sqlite3
 # Import local modules
 from backend.db.db import get_db, register_init
 # Import Settings
 from settings.settings import settings
 # Import Log
 from log.log import get_logger
+
+# Regex for MAC check
+MAC_RE = re.compile(r"^([0-9A-Fa-f]{2}([:\-])){5}([0-9A-Fa-f]{2})$")
+
+# -----------------------------
+# Check Data Input
+# -----------------------------
+def validate_data(data: dict) -> dict:
+    if "name" not in data:
+        raise ValueError("Missing required field: name")
+
+    name = str(data["name"]).strip()
+    if not name:
+        raise ValueError("Field 'name' cannot be empty")
+
+    ipv4 = data.get("ipv4")
+    if ipv4:
+        try:
+            ipaddress.IPv4Address(ipv4)
+        except ValueError:
+            raise ValueError(f"Invalid IPv4 address: {ipv4}")
+
+    ipv6 = data.get("ipv6")
+    if ipv6:
+        try:
+            ipaddress.IPv6Address(ipv6)
+        except ValueError:
+            raise ValueError(f"Invalid IPv6 address: {ipv6}")
+
+    mac = data.get("mac")
+    if mac and not MAC_RE.match(mac):
+        raise ValueError(f"Invalid MAC address: {mac}")
+
+    note = data.get("note")
+
+    # Normalizzazione boolean per DB (0/1)
+    ssl_enabled = int(bool(data.get("ssl_enabled", 0)))
+
+    return {
+        "name": name,
+        "ipv4": ipv4,
+        "ipv6": ipv6,
+        "mac": mac,
+        "note": note,
+        "ssl_enabled": ssl_enabled,
+    }
+
+# -----------------------------
+# Sorting hosts
+# -----------------------------
+def ipv4_sort_key(h: dict):
+    v = (h.get('ipv4') or '').strip()
+    if not v:
+        # no ip at the end
+        return (1, 0)
+    try:
+        return (0, int(ipaddress.IPv4Address(v)))
+    except ValueError:
+        return (0, float('inf'))
 
 # -----------------------------
 # SELECT ALL HOSTS
@@ -18,8 +79,7 @@ def get_hosts():
     conn = get_db()
     cur = conn.execute("SELECT * FROM hosts")
     rows = [dict(r) for r in cur.fetchall()]
-    # Sort by IPv4
-    rows.sort(key=lambda h: ipaddress.IPv4Address(h['ipv4']))
+    rows.sort(key=ipv4_sort_key)
     return rows
 
 # -----------------------------
@@ -32,53 +92,92 @@ def get_host(host_id: int):
     return dict(row) if row else None
 
 # -----------------------------
-# INSERT HOST
+# ADD HOST
 # -----------------------------
 def add_host(data: dict):
+
+    # Validate input
+    cleaned = validate_data(data)
+
     conn = get_db()
-    cur = conn.execute(
-        "INSERT INTO hosts (name, ipv4, ipv6, mac, note, ssl_enabled) VALUES (?, ?, ?, ?, ?, ?)",
-        (
-            data["name"],
-            data.get("ipv4"),
-            data.get("ipv6"),
-            data.get("mac"),
-            data.get("note"),
-            data.get("ssl_enabled", 0)
+    try:
+        cur = conn.execute(
+            "INSERT INTO hosts (name, ipv4, ipv6, mac, note, ssl_enabled) VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                cleaned["name"],
+                cleaned["ipv4"],
+                cleaned["ipv6"],
+                cleaned["mac"],
+                cleaned["note"],
+                cleaned["ssl_enabled"],
+            )
         )
-    )
-    conn.commit()
-    last_id = cur.lastrowid
-    return last_id
+        conn.commit()
+        return cur.lastrowid
+    
+    except sqlite3.IntegrityError as e:
+        conn.rollback()
+        return -1
+
+    except Exception as e:
+        conn.rollback()
+        raise
 
 # -----------------------------
 # UPDATE HOST
 # -----------------------------
-def update_host(host_id: int, data: dict):
+def update_host(host_id: int, data: dict) -> bool:
+
+    # Validate input
+    cleaned = validate_data(data)
+
     conn = get_db()
-    conn.execute(
-        "UPDATE hosts SET name=?, ipv4=?, ipv6=?, mac=?, note=?, ssl_enabled=? WHERE id=?",
-        (
-            data["name"],
-            data.get("ipv4"),
-            data.get("ipv6"),
-            data.get("mac"),
-            data.get("note"),
-            data.get("ssl_enabled", 0),
-            host_id
+    try:
+        cur = conn.execute(
+            """
+            UPDATE hosts
+            SET name=?, ipv4=?, ipv6=?, mac=?, note=?, ssl_enabled=?
+            WHERE id=?
+            """,
+            (
+                cleaned["name"],
+                cleaned["ipv4"],
+                cleaned["ipv6"],
+                cleaned["mac"],
+                cleaned["note"],
+                cleaned["ssl_enabled"],
+                host_id,
+            )
         )
-    )
-    conn.commit()
-    return True
+        conn.commit()
+        return cur.rowcount > 0
+
+    except Exception:
+        conn.rollback()
+        raise
 
 # -----------------------------
 # DELETE HOST
 # -----------------------------
-def delete_host(host_id: int):
+def delete_host(host_id: int) -> bool:
+
+    # Validate input
+    if host_id is None:
+        raise ValueError("host_id cannot be None")
+
     conn = get_db()
-    conn.execute("DELETE FROM hosts WHERE id = ?", (host_id,))
-    conn.commit()
-    return True
+    try:
+        cur = conn.execute(
+            "DELETE FROM hosts WHERE id = ?",
+            (host_id,)
+        )
+        conn.commit()
+
+        return cur.rowcount > 0
+
+    except Exception:
+        conn.rollback()
+        raise
 
 # -----------------------------
 # Initialize Hosts DB Table

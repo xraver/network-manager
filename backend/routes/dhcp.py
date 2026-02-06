@@ -1,7 +1,7 @@
 # backend/routes/dhcp.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 import asyncio
 import csv
@@ -69,25 +69,29 @@ async def api_dhcp_reload(request: Request):
         # RELOAD DHCP
 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        payload = {
-            "code": "DHCP_RELOAD_OK",
-            "status": "success",
-            "message": "DHCP configuration reload successfully",
-            "details": {"took_ms": took_ms}
-        }
-        return JSONResponse(content=payload, status_code=200)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+                content={
+                "code": "DHCP_RELOAD_OK",
+                "status": "success",
+                "message": "DHCP configuration reload successfully",
+                "took_ms": took_ms,
+            },
+        )
 
     except Exception as err:
-        get_logger("dhcp").exception("Error reloading DHCP: %s", str(err).strip())
+        logger = get_logger("dhcp")
+        logger.exception("Error reloading DHCP: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-
-        payload = {
-            "code": "DHCP_RELOAD_ERROR",
-            "status": "failure",
-            "message": "Error reloading DHCP",
-            "details": {"took_ms": took_ms, "error": str(err).strip()}
-        }
-        return JSONResponse(content=payload, status_code=500)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "code": "DHCP_RELOAD_ERROR",
+                "status": "failure",
+                "message": "Internal error reloading DHCP",
+                "took_ms": took_ms,
+            },
+        )
 
 # ---------------------------------------------------------
 # Get Leases
@@ -101,12 +105,13 @@ def api_dhcp_leases(request: Request):
     try:
         path = Path(settings.DHCP4_LEASES_FILE)
         if not path.exists():
-            return JSONResponse(
-                content={"code": "DHCP_LEASES_NOT_FOUND",
-                         "status": "failure",
-                         "message": f"DHCP leases file not found: {str(path)}",
-                         "details": {}},
-                status_code=404
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "code": "DHCP_LEASES_NOT_FOUND",
+                    "status": "failure",
+                    "message": "File not found: " + str(path),
+                },
             )
 
         def _to_int(v: str):
@@ -143,7 +148,12 @@ def api_dhcp_leases(request: Request):
         with path.open("r", encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             if not reader.fieldnames:
-                return JSONResponse(content={"total": 0, "items": []}, status_code=200)
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={
+                        "total": 0, "items": []
+                    },
+                )
 
             for raw in reader:
                 rec = { _norm(k): (v if v is not None else "") for k, v in raw.items() }
@@ -164,14 +174,22 @@ def api_dhcp_leases(request: Request):
                 }
                 items.append(item)
 
-        return JSONResponse(content={"total": len(items), "items": items}, status_code=200)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "total": len(items), 
+                "items": items
+            },
+        )
 
     except Exception as err:
-        get_logger("dhcp").exception("Error reading DHCP leases: %s", str(err).strip())
-        payload = {
-            "code": "DHCP_LEASES_ERROR",
-            "status": "failure",
-            "message": "Error reading DHCP leases",
-            "details": {"error": str(err).strip()}
-        }
-        return JSONResponse(content=payload, status_code=500)
+        logger = get_logger("dhcp")
+        logger.exception("Error reading DHCP leases: %s", str(err).strip())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "code": "DHCP_LEASES_ERROR",
+                "status": "failure",
+                "message": "Internal error reading DHCP leases",
+            },
+        )

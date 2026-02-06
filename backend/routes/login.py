@@ -1,7 +1,7 @@
 # backend/routes/login.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response, HTTPException
+from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse, RedirectResponse
 import os
 import time
@@ -23,7 +23,12 @@ def check_rate_limit(ip: str):
     attempts = [t for t in attempts if now - t < settings.LOGIN_WINDOW_SECONDS]
 
     if len(attempts) >= settings.LOGIN_MAX_ATTEMPTS:
-        raise HTTPException(status_code=429, detail="Too many login attempts")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, 
+            detail={
+                "error": "Too many login attempts"
+            },
+        )
 
     # registra nuovo tentativo
     attempts.append(now)

@@ -1,7 +1,7 @@
 # backend/routes/backup.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 import asyncio
 import json
@@ -41,32 +41,27 @@ async def api_dns_reload(request: Request):
             for h in hosts:
                 f.write(json.dumps(h, ensure_ascii=False) + "\n")
 
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "code": "BACKUP_OK",
+                "status": "success",
+                "message": "BACKUP executed successfully",
+                "took_ms": took_ms,
+            },
+        )
+
     except Exception as err:
-        error = True
-        message = str(err).strip()
-
-    if error:
-        code = "BACKUP_ERROR"
-        # default del messaggio se vuoto o None
-        if not message:
-            message = "BACKUP error"
-        status = "failure"
-        #http_status = 500
-    else:
-        code = "BACKUP_OK"
-        message = "BACKUP executed successfully"
-        status = "success"
-        #http_status = 200
-
-    took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-
-    payload = {
-        "code": code,
-        "status": status,
-        "message": message,
-        "details": {
-            "took_ms": took_ms
-        }
-    }
-    return JSONResponse(content=payload)
-    #return JSONResponse(content=payload, status_code=http_status)
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        logger = get_logger("hosts")
+        logger.exception("Error executing backup: %s", str(e).strip())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "code": "BACKUP_ERROR",
+                "status": "failure",
+                "message": "Internal error executing backup",
+                "took_ms": took_ms,
+            },
+        )

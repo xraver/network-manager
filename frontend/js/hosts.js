@@ -58,23 +58,37 @@ function isValidMAC(mac) {
 async function loadHosts() {
     let hosts = [];
     try {
-        const res = await fetch("/api/hosts");
-        if (!res.ok) {
-            const err = new Error(`Error loading hosts: ${res.status} ${res.statusText}`);
+        // Fetch data
+        const res = await fetch(`/api/hosts`, {
+            headers: { Accept: 'application/json' },
+        });
+
+        // Check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const err = new Error(`${res.status}: ${res.statusText}`);
             err.status = res.status;
             throw err;
         }
-        // check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            throw new Error("Answer is not JSON");
+
+        // Check JSON
+        let data;
+        try {
+            data = await res.json();
+            hosts = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+
+        } catch {
+            throw new Error('Invalid JSON payload');
         }
 
-        // parse data
-        const data = await res.json();
-        hosts = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
-        // debug log
-        //console.log("Hosts:", hosts);
+        // Check JSON errors
+        if (!res.ok) {
+            const serverMsg = data?.detail?.message?.trim();
+            const base = `Error loading hosts`;
+            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+            err.status = res.status;
+            throw err;
+        }
 
     } catch (err) {
         console.error(err?.message || "Error loading hosts");
@@ -86,7 +100,7 @@ async function loadHosts() {
     const tbody = document.querySelector("#hosts-table tbody");
     if (!tbody) {
         console.warn('Element "#hosts-table tbody" not found in DOM.');
-    return;
+        return;
     }
 
     // Svuota la tabella
@@ -96,7 +110,7 @@ async function loadHosts() {
     if (!hosts.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
-        tdEmpty.colSpan = 6;
+        tdEmpty.colSpan = 7;
         tdEmpty.textContent = "No hosts available.";
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
@@ -242,26 +256,46 @@ async function editHost(id) {
     // Clear form first
     clearAddHostForm();
 
-    try {
-        const res = await fetch(`/api/hosts/${id}`);
-        if (!res.ok) throw new Error(`Fetch failed for host ${id}: ${res.status}`);
+    // Fetch host
+    const res = await fetch(`/api/hosts/${id}`, {
+        headers: { Accept: 'application/json' },
+    });
 
-        const host = await res.json();
-
-        // Store the ID of the host being edited
-        editingHostId = id;
-
-        // Pre-fill the form fields
-        document.getElementById("hostName").value = host.name ?? "";
-        document.getElementById("hostIPv4").value = host.ipv4 ?? "";
-        document.getElementById("hostIPv6").value = host.ipv6 ?? "";
-        document.getElementById("hostMAC").value = host.mac ?? "";
-        document.getElementById("hostNote").value = host.note ?? "";
-        document.getElementById("hostSSL").checked = !!host.ssl_enabled;
-
-    }  catch(err) {
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Fetch failed for host ${id}: ${res.statusText}`);
+        err.status = res.status;
         throw err;
     }
+
+    // Check JSON
+    let host;
+    try {
+        host = await res.json();
+    } catch {
+        throw new Error(`Fetch failed for host ${id}: Invalid JSON payload`);
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg = host?.detail?.message?.trim();
+        const base = `Fetch failed for host ${id}`;
+        const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Store the ID of the host being edited
+    editingHostId = id;
+
+    // Pre-fill the form fields
+    document.getElementById("hostName").value = host.name ?? "";
+    document.getElementById("hostIPv4").value = host.ipv4 ?? "";
+    document.getElementById("hostIPv6").value = host.ipv6 ?? "";
+    document.getElementById("hostMAC").value = host.mac ?? "";
+    document.getElementById("hostNote").value = host.note ?? "";
+    document.getElementById("hostSSL").checked = !!host.ssl_enabled;
 }
 
 // -----------------------------
@@ -289,55 +323,92 @@ async function saveHost(hostData) {
         return false;
     }
 
-    try {
-        if (editingHostId !== null) {
-            // UPDATE EXISTING HOST
-            const res = await fetch(`/api/hosts/${editingHostId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(hostData)
-            });
-            if (res.ok) {
-                showToast("Host updated successfully");
-            } else {
-                throw new Error(`Update failed: ${res.status}`);
-            }
-        } else {
-            // CREATE NEW HOST
-            const res = await fetch("/api/hosts", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(hostData)
-            });
-            if (res.ok) {
-                showToast("Host added successfully", true);
-            } else {
-                throw new Error(`Create failed: ${res.status}`);
-            }
-        }
-    } catch (err) {
-        console.error("Error saving host:", err);
-        throw err;
-    }
-    return true;
-}
+    if (editingHostId !== null) {
+        // UPDATE EXISTING HOST
+        const res = await fetch(`/api/hosts/${editingHostId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(hostData)
+        });
 
-// -----------------------------
-// DELETE HOST
-// -----------------------------
-async function deleteHost(id) {
-    try {
-        const res = await fetch(`/api/hosts/${id}`, { method: "DELETE" });
+        // Success without JSON
+        if (res.status === 204) {
+            showToast('Host updated successfully', true);
+            return true;
+        }
+
+        // Check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const err = new Error(`${res.status}: ${res.statusText}`);
+            err.status = res.status;
+            throw err;
+        }
+
+        // Check JSON
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error('Invalid JSON payload');
+        }
+        
+        // Check JSON errors
         if (!res.ok) {
-            throw new Error("Delete failed");
+            const serverMsg = data?.detail?.message?.trim();
+            const base = `Error updating host`;
+            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+            err.status = res.status;
+            throw err;
         }
-        showToast("Host removed successfully");
 
-    } catch (err) {
-        console.error("Error deleting host:", err);
-        throw err;
+        // Success
+        showToast(data?.message || 'Host updated successfully', true);
+        return true;
+
+    } else {
+        // CREATE NEW HOST
+        const res = await fetch(`/api/hosts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(hostData)
+        });
+
+        // Success without JSON
+        if (res.status === 204) {
+            showToast('Host created successfully', true);
+            return true;
+        }
+
+        // Check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const err = new Error(`${res.status}: ${res.statusText}`);
+            err.status = res.status;
+            throw err;
+        }
+
+        // Check JSON
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error('Invalid JSON payload');
+        }
+
+        // Check JSON errors
+        if (!res.ok) {
+            const serverMsg = data?.detail?.message?.trim();
+            const base = `Error adding host`;
+            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+            err.status = res.status;
+            throw err;
+        }
+
+        // Success
+        showToast(data?.message || 'Host created successfully', true);
+        return true
     }
-    await loadHosts();
 }
 
 // -----------------------------
@@ -366,6 +437,7 @@ async function closeAddHostModal() {
 async function handleAddHostSubmit(e) {
     // Prevent default form submission
     e.preventDefault();
+
     // Retrieve form data
     const hostData = {
         name:  document.getElementById('hostName').value.trim(),
@@ -382,11 +454,14 @@ async function handleAddHostSubmit(e) {
             // close modal and reload hosts
             closeAddHostModal();
             await loadHosts();
+            return true
         }
+
     } catch (err) {
-        console.error("Error saving host:", err);
-        showToast("Error saving host", false);
+        console.error(err?.message || "Error saving host");
+        showToast(err?.message || "Error saving host", false);
     }
+
     return false;
 }
 
@@ -396,6 +471,7 @@ async function handleAddHostSubmit(e) {
 async function handleDeleteHost(e, el) {
     // Prevent default action
     e.preventDefault();
+
     // Get host ID
     const id = Number(el.dataset.hostId);
     if (!Number.isFinite(id)) {
@@ -406,11 +482,50 @@ async function handleDeleteHost(e, el) {
 
     // Execute delete
     try {
-        deleteHost(id);
+        // Fetch data
+        const res = await fetch(`/api/hosts/${id}`, { 
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json' },
+        });
+
+        // Check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const err = new Error(`${res.status}: ${res.statusText}`);
+            err.status = res.status;
+            throw err;
+        }
+
+        // Check JSON
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error('Invalid JSON payload');
+        }
+
+        // Check JSON errors
+        if (!res.ok) {
+            const serverMsg = data?.detail?.message?.trim();
+            const base = `Error deleting host`;
+            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+            err.status = res.status;
+            throw err;
+        }
+
+        // Success
+        showToast(data?.message || 'Host deleted successfully', true);
+
+        // Reload hosts
+        await loadHosts();
+        return true;
+
     } catch (err) {
-        console.error("Error deleting host:", err);
-        showToast("Error deleting host", false);
+        console.error(err?.message || "Error deleting host");
+        showToast(err?.message || "Error deleting host", false);
     }
+
+    return false;
 }
 
 // -----------------------------
@@ -418,32 +533,53 @@ async function handleDeleteHost(e, el) {
 // -----------------------------
 async function handleReloadDNS() {
     try {
-        const res = await fetch(`/api/dns/reload`, { method: "POST" });
-        if (!res.ok) {
-            const err = new Error(`Error reloading DNS: ${res.status} ${res.statusText}`);
+        // Fetch data
+        const res = await fetch(`/api/dns/reload`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+        });
+
+        // Success without JSON
+        if (res.status === 204) {
+            showToast('DNS reload successfully', true);
+            return true;
+        }
+
+        // Check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const err = new Error(`${res.status}: ${res.statusText}`);
             err.status = res.status;
             throw err;
         }
-        // check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            throw new Error("Answer is not JSON");
+
+        // Check JSON
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error('Invalid JSON payload');
         }
 
-        const data = await res.json();
-        if(data.code !== "DNS_RELOAD_OK"){
-            const err = new Error(`Error reloading DNS: ${data.message}`);
-            err.status = data.code;
+        // Check JSON errors
+        if (!res.ok) {
+            const serverMsg = data?.detail?.message?.trim();
+            const base = `Error reloading DNS`;
+            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+            err.status = res.status;
             throw err;
         }
 
-        //console.info("DNS Reload:", data);
-        showToast(data.message, true);
+        // Success
+        showToast(data?.message || 'DNS reload successfully', true);
+        return true;
 
     } catch (err) {
         console.error(err?.message || "Error reloading DNS");
         showToast(err?.message || "Error reloading DNS", false);
     }
+
+    return false;
 }
 
 // -----------------------------
@@ -451,32 +587,53 @@ async function handleReloadDNS() {
 // -----------------------------
 async function handleReloadDHCP() {
     try {
-        const res = await fetch(`/api/dhcp/reload`, { method: "POST" });
-        if (!res.ok) {
-            const err = new Error(`Error reloading DHCP: ${res.status} ${res.statusText}`);
+        // Fetch data
+        const res = await fetch(`/api/dhcp/reload`, { 
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+        });
+
+        // Success without JSON
+        if (res.status === 204) {
+            showToast('DHCP reload successfully', true);
+            return true;
+        }
+
+        // Check content-type to avoid parsing errors
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const err = new Error(`${res.status}: ${res.statusText}`);
             err.status = res.status;
             throw err;
         }
-        // check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            throw new Error("Answer is not JSON");
+
+        // Check JSON
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error('Error reloading DHCP: Invalid JSON payload');
         }
 
-        const data = await res.json();
-        if(data.code !== "DHCP_RELOAD_OK"){
-            const err = new Error(`Error reloading DHCP: ${data.message}`);
-            err.status = data.code;
+        // Check JSON errors
+        if (!res.ok) {
+            const serverMsg = data?.detail?.message?.trim();
+            const base = `Error reloadin DHCP`;
+            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+            err.status = res.status;
             throw err;
         }
 
-        //console.info("DHCP Reload:", data);
-        showToast(data.message, true);
+        // Success
+        showToast(data?.message || 'DHCP reload successfully', true);
+        return true;
 
     } catch (err) {
         console.error(err?.message || "Error reloading DHCP");
         showToast(err?.message || "Error reloading DHCP", false);
     }
+
+    return false;
 }
 
 // -----------------------------
@@ -861,8 +1018,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 try {
                     await editHost(id);
                 } catch (err) {
-                    console.error("Error loading host for edit:", err);
-                    showToast("Error loading host for edit", false);
+                    showToast(err?.message || "Error loading host for edit", false);
                     // Close modal
                     const closeOnShown = () => {
                         closeAddHostModal(lastTriggerEl);
