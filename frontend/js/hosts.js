@@ -352,7 +352,7 @@ async function saveHost(hostData) {
         } catch {
             throw new Error('Invalid JSON payload');
         }
-        
+
         // Check JSON errors
         if (!res.ok) {
             const serverMsg = data?.detail?.message?.trim();
@@ -483,7 +483,7 @@ async function handleDeleteHost(e, el) {
     // Execute delete
     try {
         // Fetch data
-        const res = await fetch(`/api/hosts/${id}`, { 
+        const res = await fetch(`/api/hosts/${id}`, {
             method: 'DELETE',
             headers: { 'Accept': 'application/json' },
         });
@@ -588,7 +588,7 @@ async function handleReloadDNS() {
 async function handleReloadDHCP() {
     try {
         // Fetch data
-        const res = await fetch(`/api/dhcp/reload`, { 
+        const res = await fetch(`/api/dhcp/reload`, {
             method: 'POST',
             headers: { 'Accept': 'application/json' },
         });

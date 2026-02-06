@@ -24,7 +24,7 @@ def check_rate_limit(ip: str):
 
     if len(attempts) >= settings.LOGIN_MAX_ATTEMPTS:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, 
+            status_code=status.HTTP_409_CONFLICT,
             detail={
                 "error": "Too many login attempts"
             },

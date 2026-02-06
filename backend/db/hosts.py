@@ -114,7 +114,7 @@ def add_host(data: dict):
         )
         conn.commit()
         return cur.lastrowid
-    
+
     except sqlite3.IntegrityError as e:
         conn.rollback()
         return -1

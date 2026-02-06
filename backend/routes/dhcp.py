@@ -177,7 +177,7 @@ def api_dhcp_leases(request: Request):
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={
-                "total": len(items), 
+                "total": len(items),
                 "items": items
             },
         )
