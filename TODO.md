@@ -23,7 +23,7 @@
 - [ ] Regenerate **from scratch**:
   - [ ] **BIND (DNS)** configuration
     - [X] hosts configuration
-    - [ ] alias configuration
+    - [X] alias configuration
     - [X] reverse configuration
     - [ ] IPv6 configuration
   - [X] **Kea (DHCP)** configuration
@@ -51,7 +51,7 @@
 
 ### 🧪 BIND (DNS)
 - [X] Rebuild forward and reverse zones
-- [ ] Rebuild all records (A, AAAA, CNAME)
+- [X] Rebuild all records (A, AAAA, CNAME)
 - [ ] Syntax validation (`named-checkconf`, `named-checkzone`)
 - [ ] Rollback management in case of errors
 
