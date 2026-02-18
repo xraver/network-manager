@@ -52,7 +52,7 @@
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon">🖧</span>
                         <!--<i class="bi bi-hdd-network"></i>-->
-                        <span class="section-title">Host List</span>
+                        <span class="section-title">Aliases List</span>
                     </h2>
                 </div>
 
@@ -66,18 +66,18 @@
                             type="text"
                             id="searchInput"
                             placeholder="Ricerca..."
-                            oninput="filterHosts()"
+                            oninput="filterAliases()"
                             class="form-control form-control-sm"
-                            aria-label="Search hosts"
+                            aria-label="Search alias"
                         >
                     </div>
                 </div>
 
                 <!-- Bottoni -->
                 <div class="col-12 col-md-auto d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary" title="Add Host" aria-label="Add Host"
-                            data-bs-toggle="modal" data-bs-target="#addHostModal">
-                        <i class="bi bi-plus-lg"></i><span class="label"> Add Host</span>
+                    <button class="btn btn-primary" title="Add Alias" aria-label="Add Alias"
+                            data-bs-toggle="modal" data-bs-target="#addAliasModal">
+                        <i class="bi bi-plus-lg"></i><span class="label"> Add Alias</span>
                     </button>
                     <button class="btn btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS"
                             data-action="reloadDns">
@@ -96,19 +96,17 @@
     <table id="hosts-table" class="table table-bordered table-hover align-middle">
         <thead class="table-light">
             <tr>
-                <th data-type="string" onclick="sortTable(0)">Hostname <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv4"   onclick="sortTable(1)">IPv4     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv6"   onclick="sortTable(2)">IPv6     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="mac"    onclick="sortTable(3)">MAC      <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(4)">Note     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(5)">SSL      <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" onclick="sortTable(0)">Alias  <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" onclick="sortTable(1)">Target <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" onclick="sortTable(2)">Note   <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" onclick="sortTable(3)">SSL    <span class="sort-arrow" aria-hidden="true"></span></th>
                 <th data-type="string">Actions <span class="sort-arrow" aria-hidden="true"></span></th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
-    <div class="modal fade" id="addHostModal" tabindex="-1" aria-labelledby="addHostTitle" aria-hidden="true">
+    <div class="modal fade" id="addAliasModal" tabindex="-1" aria-labelledby="addAliasTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
             <div class="modal-content addhost-modal">
                 <!-- Header scuro con logo/brand -->
@@ -116,47 +114,37 @@
                     <div class="d-flex align-items-center gap-2">
                         <!-- Emoji o icona -->
                         <span class="title-icon" aria-hidden="true">🖧</span>
-                        <h5 class="modal-title mb-0" id="addHostTitle">Aggiungi Host</h5>
+                        <h5 class="modal-title mb-0" id="addAliasTitle">Aggiungi Alias</h5>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                 </div>
 
                 <div class="modal-body">
-                    <form id="addHostForm" onsubmit="return handleAddHostSubmit(event)">
+                    <form id="addAliasForm" onsubmit="return handleAddAliasSubmit(event)">
                         <div class="mb-2">
-                            <label for="hostName" class="form-label">Hostname</label>
-                            <input type="text" id="hostName" class="form-control" required>
+                            <label for="aliasName" class="form-label">Alias</label>
+                            <input type="text" id="aliasName" class="form-control" required>
                         </div>
 
                         <div class="mb-2">
-                            <label for="hostIPv4" class="form-label">IPv4</label>
-                            <input type="text" id="hostIPv4" class="form-control" inputmode="decimal" placeholder="es. 192.168.1.10">
+                            <label for="aliasTarget" class="form-label">Target</label>
+                            <input type="text" id="aliasTarget" class="form-control" required>
                         </div>
 
                         <div class="mb-2">
-                            <label for="hostIPv6" class="form-label">IPv6</label>
-                            <input type="text" id="hostIPv6" class="form-control" placeholder="es. fe80::1">
-                        </div>
-
-                        <div class="mb-2">
-                            <label for="hostMAC" class="form-label">MAC Address</label>
-                            <input type="text" id="hostMAC" class="form-control" placeholder="es. AA:BB:CC:DD:EE:FF">
-                        </div>
-
-                        <div class="mb-2">
-                            <label for="hostNote" class="form-label">Note</label>
-                            <input type="text" id="hostNote" class="form-control">
+                            <label for="aliasNote" class="form-label">Note</label>
+                            <input type="text" id="aliasNote" class="form-control">
                         </div>
 
                         <div class="form-check my-2">
-                            <input class="form-check-input" type="checkbox" id="hostSSL">
-                            <label class="form-check-label" for="hostSSL">SSL?</label>
+                            <input class="form-check-input" type="checkbox" id="aliasSSL">
+                            <label class="form-check-label" for="aliasSSL">SSL?</label>
                         </div>
                     </form>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" form="addHostForm" class="btn btn-primary">
+                    <button type="submit" form="addAliasForm" class="btn btn-primary">
                         <i class="bi bi-check2"></i>
                     </button>
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
@@ -168,7 +156,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/hosts.js"></script>
+    <script src="js/aliases.js"></script>
     <script src="js/session.js"></script>
 
     <!-- Bootstrap JS -->

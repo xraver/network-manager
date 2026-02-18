@@ -20,13 +20,14 @@ MAC_RE = re.compile(r"^([0-9A-Fa-f]{2}([:\-])){5}([0-9A-Fa-f]{2})$")
 # Check Data Input
 # -----------------------------
 def validate_data(data: dict) -> dict:
+    # Check name
     if "name" not in data:
         raise ValueError("Missing required field: name")
-
     name = str(data["name"]).strip()
     if not name:
         raise ValueError("Field 'name' cannot be empty")
 
+    # Check IPv4
     ipv4 = data.get("ipv4")
     if ipv4:
         try:
@@ -34,6 +35,7 @@ def validate_data(data: dict) -> dict:
         except ValueError:
             raise ValueError(f"Invalid IPv4 address: {ipv4}")
 
+    # Check IPv6
     ipv6 = data.get("ipv6")
     if ipv6:
         try:
@@ -45,6 +47,7 @@ def validate_data(data: dict) -> dict:
     if mac and not MAC_RE.match(mac):
         raise ValueError(f"Invalid MAC address: {mac}")
 
+    # Check note
     note = data.get("note")
 
     # Normalizzazione boolean per DB (0/1)
@@ -209,19 +212,6 @@ def init_db_hosts_table(cur):
         );
     """)
     cur.execute("CREATE INDEX idx_hosts_name ON hosts(name);")
-
-    # ALIASES TABLE
-    cur.execute("""
-        CREATE TABLE aliases (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            host_id INTEGER NOT NULL,
-            alias TEXT NOT NULL,
-            note TEXT,
-            ssl_enabled INTEGER NOT NULL DEFAULT 0,
-            FOREIGN KEY (host_id) REFERENCES hosts(id)
-        );
-    """)
-    cur.execute("CREATE INDEX idx_aliases_host ON aliases(host_id);")
 
     # TXT TABLE
     cur.execute("""

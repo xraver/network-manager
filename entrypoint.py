@@ -7,8 +7,9 @@ import sys
 import argparse
 # Import local modules
 from backend.db.db import init_db
-import backend.db.hosts
 import backend.db.users
+import backend.db.hosts
+import backend.db.aliases
 # Import Settings
 from settings.settings import settings
 # Import Log

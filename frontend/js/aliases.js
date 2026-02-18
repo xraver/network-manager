@@ -6,60 +6,19 @@ let timeoutToast = 3000; // milliseconds
 // -----------------------------
 // State variables
 // -----------------------------
-let editingHostId = null;
+let editingAliasId = null;
 let sortDirection = {};
 let lastSort = null; // { colIndex: number, ascending: boolean }
 const stringCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
 // -----------------------------
-// Validate the IPv4 address format
+// Load all aliases into the table
 // -----------------------------
-function isValidIPv4(ip) {
-    if (!ip || !ip.trim()) return true; // empty is allowed
-    const ipv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
-    return ipv4.test(ip);
-}
-
-// -----------------------------
-// Validate the IPv6 address format
-// -----------------------------
-function isValidIPv6(ip) {
-    if (!ip || !ip.trim()) return true; // empty is allowed
-    // Parser robusto (gestisce '::')
-    let s = ip.toLowerCase().trim();
-    const dbl = s.indexOf("::");
-    let parts = [];
-    if (dbl >= 0) {
-        const left = s.slice(0, dbl).split(":").filter(Boolean);
-        const right = s.slice(dbl + 2).split(":").filter(Boolean);
-        const missing = 8 - (left.length + right.length);
-        if (missing < 0) return false;
-        parts = [...left, ...Array(missing).fill("0"), ...right];
-    } else {
-        parts = s.split(":");
-        if (parts.length !== 8) return false;
-    }
-    return parts.every(p => /^[0-9a-f]{1,4}$/.test(p));
-}
-
-// -----------------------------
-// Validate the MAC address format
-// -----------------------------
-function isValidMAC(mac) {
-  const s = (mac ?? "").trim().toLowerCase().replace(/[\s:\-\.]/g, "");
-  // vuoto consentito
-  if (s === "") return true;
-  return /^[0-9a-f]{12}$/.test(s);
-}
-
-// -----------------------------
-// Load all hosts into the table
-// -----------------------------
-async function loadHosts() {
-    let hosts = [];
+async function loadAliases() {
+    let aliases = [];
     try {
         // Fetch data
-        const res = await fetch(`/api/hosts`, {
+        const res = await fetch(`/api/aliases`, {
             headers: { Accept: 'application/json' },
         });
 
@@ -75,7 +34,7 @@ async function loadHosts() {
         let data;
         try {
             data = await res.json();
-            hosts = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+            aliases = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
 
         } catch {
             throw new Error('Invalid JSON payload');
@@ -84,16 +43,16 @@ async function loadHosts() {
         // Check JSON errors
         if (!res.ok) {
             const serverMsg = data?.detail?.message?.trim();
-            const base = `Error loading hosts`;
+            const base = `Error loading aliases`;
             const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
             err.status = res.status;
             throw err;
         }
 
     } catch (err) {
-        console.error(err?.message || "Error loading hosts");
-        showToast(err?.message || "Error loading hosts", false);
-        hosts = [];
+        console.error(err?.message || "Error loading aliases");
+        showToast(err?.message || "Error loading aliase", false);
+        aliases = [];
     }
 
     // DOM Reference
@@ -106,12 +65,12 @@ async function loadHosts() {
     // Svuota la tabella
     tbody.innerHTML = "";
 
-    // if no hosts, show an empty row
-    if (!hosts.length) {
+    // if no aliases, show an empty row
+    if (!aliases.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
-        tdEmpty.textContent = "No hosts available.";
+        tdEmpty.textContent = "No alias available.";
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
@@ -121,7 +80,7 @@ async function loadHosts() {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    hosts.forEach(h => {
+    aliases.forEach(h => {
         const tr = document.createElement("tr");
 
         // Name
@@ -133,31 +92,12 @@ async function loadHosts() {
             tr.appendChild(td);
         }
 
-        // IPv4
+        // Target
         {
             const td = document.createElement("td");
-            const raw = (h.ipv4 ?? "").toString().trim();
-            td.textContent = raw;
-            if (raw) td.setAttribute("data-value", raw);
-            tr.appendChild(td);
-        }
-
-        // IPv6
-        {
-            const td = document.createElement("td");
-            const raw = (h.ipv6 ?? "").toString().trim();
-            td.textContent = raw;
-            if (raw) td.setAttribute("data-value", raw.toLowerCase());
-            tr.appendChild(td);
-        }
-
-        // MAC
-        {
-            const td = document.createElement("td");
-            const raw = (h.mac ?? "").toString().trim();
-            td.textContent = raw;
-            const norm = raw.toLowerCase().replace(/[\s:\-\.]/g, "");
-            if (norm) td.setAttribute("data-value", norm);
+            const val = (h.target ?? "").toString();
+            td.textContent = val;
+            if (val) td.setAttribute("data-value", val.toLowerCase());
             tr.appendChild(td);
         }
 
@@ -201,12 +141,12 @@ async function loadHosts() {
         editSpan.className = "action-icon";
         editSpan.setAttribute("role", "button");
         editSpan.tabIndex = 0;
-        editSpan.title = "Edit host";
-        editSpan.setAttribute("aria-label", "Edit host");
+        editSpan.title = "Edit alias";
+        editSpan.setAttribute("aria-label", "Edit alias");
         editSpan.setAttribute("data-bs-toggle", "modal");
-        editSpan.setAttribute("data-bs-target", "#addHostModal");
+        editSpan.setAttribute("data-bs-target", "#addAliasModal");
         editSpan.setAttribute("data-action", "edit");
-        editSpan.setAttribute("data-host-id", String(id));
+        editSpan.setAttribute("data-alias-id", String(id));
         {
             const i = document.createElement("i");
             i.className = "bi bi-pencil-fill icon icon-action";
@@ -218,10 +158,10 @@ async function loadHosts() {
         delSpan.className = "action-icon";
         delSpan.setAttribute("role", "button");
         delSpan.tabIndex = 0;
-        delSpan.title = "Delete host";
-        delSpan.setAttribute("aria-label", "Delete host");
+        delSpan.title = "Delete alias";
+        delSpan.setAttribute("aria-label", "Delete alias");
         delSpan.setAttribute("data-action", "delete");
-        delSpan.setAttribute("data-host-id", String(id));
+        delSpan.setAttribute("data-alias-id", String(id));
         {
             const i = document.createElement("i");
             i.className = "bi bi-trash-fill icon icon-action";
@@ -250,21 +190,21 @@ async function loadHosts() {
 }
 
 // -----------------------------
-// Edit Host: load data and pre-fill the form
+// Edit Alias: load data and pre-fill the form
 // -----------------------------
-async function editHost(id) {
+async function editAlias(id) {
     // Clear form first
-    clearAddHostForm();
+    clearAddAliasForm();
 
-    // Fetch host
-    const res = await fetch(`/api/hosts/${id}`, {
+    // Fetch alias
+    const res = await fetch(`/api/aliases/${id}`, {
         headers: { Accept: 'application/json' },
     });
 
     // Check content-type to avoid parsing errors
     const contentType = res.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-        const err = new Error(`Fetch failed for host ${id}: ${res.statusText}`);
+        const err = new Error(`Fetch failed for alias ${id}: ${res.statusText}`);
         err.status = res.status;
         throw err;
     }
@@ -274,66 +214,54 @@ async function editHost(id) {
     try {
         data = await res.json();
     } catch {
-        throw new Error(`Fetch failed for host ${id}: Invalid JSON payload`);
+        throw new Error(`Fetch failed for alias ${id}: Invalid JSON payload`);
     }
 
     // Check JSON errors
     if (!res.ok) {
         const serverMsg = data?.detail?.message?.trim();
-        const base = `Fetch failed for host ${id}`;
+        const base = `Fetch failed for alias ${id}`;
         const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
         err.status = res.status;
         throw err;
     }
 
-    // Store the ID of the host being edited
-    editingHostId = id;
+    // Store the ID of the alias being edited
+    editingAliasId = id;
 
     // Pre-fill the form fields
-    document.getElementById("hostName").value = data.name ?? "";
-    document.getElementById("hostIPv4").value = data.ipv4 ?? "";
-    document.getElementById("hostIPv6").value = data.ipv6 ?? "";
-    document.getElementById("hostMAC").value = data.mac ?? "";
-    document.getElementById("hostNote").value = data.note ?? "";
-    document.getElementById("hostSSL").checked = !!data.ssl_enabled;
+    document.getElementById("aliasName").value = data.name ?? "";
+    document.getElementById("aliasTarget").value = data.target ?? "";
+    document.getElementById("aliasNote").value = data.note ?? "";
+    document.getElementById("aliasSSL").checked = !!data.ssl_enabled;
 }
 
 // -----------------------------
-// Save host (CREATE OR UPDATE)
+// Save alias (CREATE OR UPDATE)
 // -----------------------------
-async function saveHost(hostData) {
-    // Validate hostname
-    if (!hostData.name.trim()) {
-        showToast("Hostname is required", false);
+async function saveAlias(aliasData) {
+    // Validate alias
+    if (!aliasData.name.trim()) {
+        showToast("Alias is required", false);
         return false;
     }
-    // Validate IPv4 format
-    if (!isValidIPv4(hostData.ipv4)) {
-        showToast("Invalid IPv4 format", false);
-        return false;
-    }
-    // Validate IPv6 format
-    if (!isValidIPv6(hostData.ipv6)) {
-        showToast("Invalid IPv6 format", false);
-        return false;
-    }
-    // Validate MAC format
-    if (!isValidMAC(hostData.mac)) {
-        showToast("Invalid MAC format", false);
+    // Validate Target
+    if (!aliasData.target.trim()) {
+        showToast("Target is required", false);
         return false;
     }
 
-    if (editingHostId !== null) {
-        // Update existing host
-        const res = await fetch(`/api/hosts/${editingHostId}`, {
+    if (editingAliasId !== null) {
+        // Update existing alias
+        const res = await fetch(`/api/aliases/${editingAliasId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(hostData)
+            body: JSON.stringify(aliasData)
         });
 
         // Success without JSON
         if (res.status === 204) {
-            showToast('Host updated successfully', true);
+            showToast('Alias updated successfully', true);
             return true;
         }
 
@@ -356,27 +284,27 @@ async function saveHost(hostData) {
         // Check JSON errors
         if (!res.ok) {
             const serverMsg = data?.detail?.message?.trim();
-            const base = `Error updating host`;
+            const base = `Error updating alias`;
             const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
             err.status = res.status;
             throw err;
         }
 
         // Success
-        showToast(data?.message || 'Host updated successfully', true);
+        showToast(data?.message || 'Alias updated successfully', true);
         return true;
 
     } else {
-        // Create new host
-        const res = await fetch(`/api/hosts`, {
+        // Create new alias
+        const res = await fetch(`/api/aliases`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(hostData)
+            body: JSON.stringify(aliasData)
         });
 
         // Success without JSON
         if (res.status === 204) {
-            showToast('Host created successfully', true);
+            showToast('Alias created successfully', true);
             return true;
         }
 
@@ -399,91 +327,89 @@ async function saveHost(hostData) {
         // Check JSON errors
         if (!res.ok) {
             const serverMsg = data?.detail?.message?.trim();
-            const base = `Error adding host`;
+            const base = `Error adding alias`;
             const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
             err.status = res.status;
             throw err;
         }
 
         // Success
-        showToast(data?.message || 'Host created successfully', true);
+        showToast(data?.message || 'Alias created successfully', true);
         return true
     }
 }
 
 // -----------------------------
-// Prepare add host form
+// Prepare add alias form
 // -----------------------------
-function clearAddHostForm() {
+function clearAddAliasForm() {
     // reset edit mode
-    editingHostId = null;
+    editingAliasId = null;
     // reset form fields
-    document.getElementById('addHostForm')?.reset();
+    document.getElementById('addAliasForm')?.reset();
 }
 
 // -----------------------------
 // Close popup
 // -----------------------------
-async function closeAddHostModal() {
-    const modalEl = document.getElementById('addHostModal');
+async function closeAddAliasModal() {
+    const modalEl = document.getElementById('addAliasModal');
     const modal = bootstrap.Modal.getInstance(modalEl)
                || bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.hide();
 }
 
 // -----------------------------
-// Handle Add host form submit
+// Handle Add alias form submit
 // -----------------------------
-async function handleAddHostSubmit(e) {
+async function handleAddAliasSubmit(e) {
     // Prevent default form submission
     e.preventDefault();
 
     try {
         // Retrieve form data
         const data = {
-            name:  document.getElementById('hostName').value.trim(),
-            ipv4:  document.getElementById('hostIPv4').value.trim(),
-            ipv6:  document.getElementById('hostIPv6').value.trim(),
-            mac:   document.getElementById('hostMAC').value.trim(),
-            note:  document.getElementById('hostNote').value.trim(),
-            ssl_enabled: document.getElementById('hostSSL').checked ? 1 : 0
+            name:  document.getElementById('aliasName').value.trim(),
+            target: document.getElementById('aliasTarget').value.trim(),
+            note:   document.getElementById('aliasNote').value.trim(),
+            ssl_enabled: document.getElementById('aliasSSL').checked ? 1 : 0
         };
 
-        const ok = await saveHost(data);
+        const ok = await saveAlias(data);
         if (ok !== false) {
-            // close modal and reload hosts
-            closeAddHostModal();
-            await loadHosts();
+            // close modal and reload aliases
+            closeAddAliasModal();
+            await loadAliases();
             return true
         }
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+        console.error(err?.message || "Error saving alias");
+        showToast(err?.message || "Error saving alias", false);
     }
 
     return false;
 }
 
 // -----------------------------
-// Handle delete host action
+// Handle delete alias action
 // -----------------------------
-async function handleDeleteHost(e, el) {
+async function handleDeleteAlias(e, el) {
     // Prevent default action
     e.preventDefault();
 
-    // Get host ID
-    const id = Number(el.dataset.hostId);
+    // Get alias ID
+    const id = Number(el.dataset.aliasId);
     if (!Number.isFinite(id)) {
-        console.warn('Delete: host id not valid for delete:', id);
-        showToast('Host id not valid for delete', false);
+        console.warn('Delete: alias id not valid for delete:', id);
+        showToast('Alias id not valid for delete', false);
         return;
     }
 
     // Execute delete
     try {
         // Fetch data
-        const res = await fetch(`/api/hosts/${id}`, {
+        const res = await fetch(`/api/aliases/${id}`, {
             method: 'DELETE',
             headers: { 'Accept': 'application/json' },
         });
@@ -507,22 +433,22 @@ async function handleDeleteHost(e, el) {
         // Check JSON errors
         if (!res.ok) {
             const serverMsg = data?.detail?.message?.trim();
-            const base = `Error deleting host`;
+            const base = `Error deleting alias`;
             const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
             err.status = res.status;
             throw err;
         }
 
         // Success
-        showToast(data?.message || 'Host deleted successfully', true);
+        showToast(data?.message || 'Alias deleted successfully', true);
 
-        // Reload hosts
-        await loadHosts();
+        // Reload aliases
+        await loadAliases();
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error deleting host");
-        showToast(err?.message || "Error deleting host", false);
+        console.error(err?.message || "Error deleting alias");
+        showToast(err?.message || "Error deleting alias", false);
     }
 
     return false;
@@ -653,9 +579,9 @@ function showToast(message, success = true) {
 }
 
 // -----------------------------
-// filter hosts in the table
+// filter aliases in the table
 // -----------------------------
-function filterHosts() {
+function filterAliases() {
     const query = document.getElementById("searchInput").value.toLowerCase();
     const rows = document.querySelectorAll("#hosts-table tbody tr");
 
@@ -672,7 +598,7 @@ async function clearSearch() {
     const input = document.getElementById("searchInput");
     input.value = "";
     input.blur();
-    await loadHosts();
+    await loadAliases();
 }
 
 /**
@@ -931,7 +857,7 @@ function reloadDHCP() {
 // Action Handlers
 // -----------------------------
 const actionHandlers = {
-  async delete(e, el) { handleDeleteHost(e, el); },
+  async delete(e, el) { handleDeleteAlias(e, el); },
 
   // edit is handled by bootstrap modal show event
   edit(e, el) {
@@ -952,12 +878,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 1) Init UI sort (aria-sort, arrows)
     initSortableTable();
 
-    // 2) Load data (hosts)
+    // 2) Load data (aliases)
     try {
-        await loadHosts();
+        await loadAliases();
     } catch (err) {
-        console.error("Error loading hosts:", err);
-        showToast("Error loading hosts:", false);
+        console.error("Error loading aliases:", err);
+        showToast("Error loading aliases:", false);
     }
 
     // 3) search bar
@@ -966,7 +892,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // clean input on load
         input.value = "";
         // live filter for each keystroke
-        input.addEventListener("input", filterHosts);
+        input.addEventListener("input", filterAliases);
         // Escape management when focus is in the input
         input.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
@@ -994,7 +920,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // 5) Modal show/hidden events to prepare/reset the form
-    const modalEl = document.getElementById('addHostModal');
+    const modalEl = document.getElementById('addAliasModal');
     if (modalEl) {
 
         // store who opened the modal
@@ -1003,25 +929,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         // When shown, determine Add or Edit mode
         modalEl.addEventListener('show.bs.modal', async (ev) => {
             const lastTriggerEl = ev.relatedTarget; // trigger (Add o Edit)
-            const formEl = document.getElementById('addHostForm');
+            const formEl = document.getElementById('addAliasForm');
 
             // Security check
             if (!formEl) return;
 
             // check Add or Edit mode
-            const idAttr = lastTriggerEl?.getAttribute?.('data-host-id');
+            const idAttr = lastTriggerEl?.getAttribute?.('data-alias-id');
             const id = idAttr ? Number(idAttr) : null;
 
             if (Number.isFinite(id)) {
                 // Edit Mode
-                console.log("Modal in EDIT mode for host ID:", id);
+                console.log("Modal in EDIT mode for alias ID:", id);
                 try {
-                    await editHost(id);
+                    await editAlias(id);
                 } catch (err) {
-                    showToast(err?.message || "Error loading host for edit", false);
+                    showToast(err?.message || "Error loading alias for edit", false);
                     // Close modal
                     const closeOnShown = () => {
-                        closeAddHostModal(lastTriggerEl);
+                        closeAddAliasModal(lastTriggerEl);
                         modalEl.removeEventListener('shown.bs.modal', closeOnShown);
                     };
                     modalEl.addEventListener('shown.bs.modal', closeOnShown);
@@ -1029,10 +955,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             } else {
                 // Add Mode
                 console.log("Modal in CREATE mode");
-                clearAddHostForm();
+                clearAddAliasForm();
                 // Set focus to the first input field when modal is shown
                 const focusOnShown = () => {
-                    document.getElementById('hostName')?.focus({ preventScroll: true });
+                    document.getElementById('aliasName')?.focus({ preventScroll: true });
                     modalEl.removeEventListener('shown.bs.modal', focusOnShown);
                 };
                 modalEl.addEventListener('shown.bs.modal', focusOnShown);
@@ -1054,7 +980,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // When hidden, reset the form
         modalEl.addEventListener('hidden.bs.modal', () => {
             // reset form fields
-            clearAddHostForm();
+            clearAddAliasForm();
             // pulizia ref del trigger
             lastTriggerEl = null;
         });
