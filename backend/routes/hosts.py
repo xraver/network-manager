@@ -32,7 +32,7 @@ def hosts(request: Request):
 
 # Serve hosts.js
 @router.get("/js/hosts.js")
-def css_hosts():
+def js_hosts():
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/hosts.js"))
 
 # ---------------------------------------------------------

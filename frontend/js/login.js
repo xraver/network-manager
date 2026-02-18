@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('loginForm');
     if (!form) return;
-    
+
     // Un solo AbortController per submit in corso
     let inFlightController = null;
-    
+
     form.addEventListener('submit', async (e) => {
         // Prevent default form submission
         e.preventDefault();
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // in caso di credenziali errate, metti focus
             if (focus === 'username') userEl?.focus();
             else if (focus === 'password') passEl?.focus();
-            
+
             // aggiungi classe is-invalid se vuoi la resa Bootstrap
             if (markUser) userEl?.classList.add('is-invalid');
             if (markPass) passEl?.classList.add('is-invalid');
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Pulizia
         hideError();
-    
+
         // Normalizza input
         const user = userEl?.value?.trim() ?? '';
         const pass = passEl?.value ?? '';
@@ -64,14 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           return;
         }
-	
+
         // Evita submit multipli
         if (btn?.disabled) return;
 
         // Annulla eventuale richiesta precedente
         inFlightController?.abort();
         inFlightController = new AbortController();
-    
+
         // Disabilita UI + spinner
         const originalBtnHTML = btn.innerHTML;
 	if(btn) {

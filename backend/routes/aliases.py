@@ -32,7 +32,7 @@ def aliases(request: Request):
 
 # Serve aliases.js
 @router.get("/js/aliases.js")
-def css_aliases():
+def js_aliases():
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/aliases.js"))
 
 # ---------------------------------------------------------

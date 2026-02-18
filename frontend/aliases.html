@@ -66,7 +66,6 @@
                             type="text"
                             id="searchInput"
                             placeholder="Ricerca..."
-                            oninput="filterAliases()"
                             class="form-control form-control-sm"
                             aria-label="Search alias"
                         >
@@ -93,14 +92,14 @@
     </section>
 
     <!-- Tabella -->
-    <table id="hosts-table" class="table table-bordered table-hover align-middle">
+    <table id="dataTable" class="table table-bordered table-hover align-middle">
         <thead class="table-light">
             <tr>
-                <th data-type="string" onclick="sortTable(0)">Alias  <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(1)">Target <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(2)">Note   <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(3)">SSL    <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string">Actions <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Alias    <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Target   <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Note     <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">SSL      <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Actions <span class="sort-arrow" aria-hidden="true"></span></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -120,7 +119,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="addAliasForm" onsubmit="return handleAddAliasSubmit(event)">
+                    <form id="addAliasForm">
                         <div class="mb-2">
                             <label for="aliasName" class="form-label">Alias</label>
                             <input type="text" id="aliasName" class="form-control" required>
@@ -156,8 +155,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/aliases.js"></script>
-    <script src="js/session.js"></script>
+    <script type="module" src="js/aliases.js"></script>
+    <script type="module" src="js/session.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

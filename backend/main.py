@@ -282,6 +282,21 @@ def css_variables(request: Request):
 def css_layout(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/layout.css"))
 
+# JS Common
+@app.get("/js/common.js")
+def js_common(request: Request):
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/common.js"))
+
+# JS Services
+@app.get("/js/services.js")
+def js_services(request: Request):
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/services.js"))
+
+# favicon
+@app.get("/favicon.ico")
+def favicon(request: Request):
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "favicon.ico"))
+
 # ------------------------------------------------------------------------------
 # Entry-point
 # ------------------------------------------------------------------------------

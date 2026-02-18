@@ -10,6 +10,7 @@ import ipaddress
 import time
 # Import local modules
 from backend.db.hosts import get_hosts
+from backend.db.aliases import get_aliases
 # Import Settings
 from settings.settings import settings
 # Import Logging
@@ -48,6 +49,16 @@ async def api_dns_reload(request: Request):
                     rev = f"{parts[-1]}.{parts[-2]}"
                     line = f"{rev}\t\t IN PTR\t{h.get('name')}.{settings.DOMAIN}\n"
                     f.write(line)
+
+        # Get Aliases List
+        hosts = get_aliases()
+
+        # Save DNS Aliases Configuration
+        path = settings.DNS_ALIAS_FILE
+        with open(path, "w", encoding="utf-8") as f:
+            for h in hosts:
+                line = f"{h.get('name')}\t\t IN\tCNAME\t{h.get('target')}\n"
+                f.write(line)
 
         # RELOAD DNS
 

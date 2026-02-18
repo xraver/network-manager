@@ -66,7 +66,6 @@
                             type="text"
                             id="searchInput"
                             placeholder="Ricerca..."
-                            oninput="filterHosts()"
                             class="form-control form-control-sm"
                             aria-label="Search hosts"
                         >
@@ -93,16 +92,16 @@
     </section>
 
     <!-- Tabella -->
-    <table id="hosts-table" class="table table-bordered table-hover align-middle">
+    <table id="dataTable" class="table table-bordered table-hover align-middle">
         <thead class="table-light">
             <tr>
-                <th data-type="string" onclick="sortTable(0)">Hostname <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv4"   onclick="sortTable(1)">IPv4     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv6"   onclick="sortTable(2)">IPv6     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="mac"    onclick="sortTable(3)">MAC      <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(4)">Note     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" onclick="sortTable(5)">SSL      <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string">Actions <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Hostname <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="ipv4"   data-sortable="true">IPv4     <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="ipv6"   data-sortable="true">IPv6     <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="mac"    data-sortable="true">MAC      <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Note     <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">SSL      <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Actions <span class="sort-arrow" aria-hidden="true"></span></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -122,7 +121,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="addHostForm" onsubmit="return handleAddHostSubmit(event)">
+                    <form id="addHostForm">
                         <div class="mb-2">
                             <label for="hostName" class="form-label">Hostname</label>
                             <input type="text" id="hostName" class="form-control" required>
@@ -168,8 +167,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/hosts.js"></script>
-    <script src="js/session.js"></script>
+    <script type="module" src="js/hosts.js"></script>
+    <script type="module" src="js/session.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
