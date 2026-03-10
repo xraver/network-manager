@@ -36,7 +36,23 @@
                 <span>Network Manager</span>
             </div>
 
-            <button id="logoutBtn" class="btn btn-primary">Logout</button>
+            <!-- Spacer -->
+            <div class="col d-none d-md-block"></div>
+
+            <nav class="navbar navbar-expand-md px-3">
+                <!-- Bottone hamburger -->
+                <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#menuNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <!-- Menu -->
+                <div class="collapse navbar-collapse" id="menuNav">
+                    <div class="navbar-nav ms-auto gap-2">
+                        <a href="/hosts"   id="hostsBtn"   class="btn btn-primary active" aria-current="page">Hostname</a>
+                        <a href="/aliases" id="aliasesBtn" class="btn btn-primary"        aria-current="page">Alias</a>
+                        <button id="logoutBtn" class="btn btn-primary">Logout</button>
+                    </div>
+                </div>
+            </nav>
         </div>
     </header>
 
@@ -65,8 +81,8 @@
                         <input
                             type="text"
                             id="searchInput"
-                            placeholder="Ricerca..."
-                            class="form-control form-control-sm"
+                            placeholder="Search..."
+                            class="form-control form-control-sm placeholder-italic"
                             aria-label="Search alias"
                         >
                     </div>
