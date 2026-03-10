@@ -197,7 +197,7 @@ def init_db_hosts_table(cur):
         );
     """)
     cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("domain", settings.DOMAIN))
-    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("external_ipv4", settings.PUBLIC_IP))
+    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("external_name", settings.EXTERNAL_NAME))
 
     # HOSTS TABLE
     cur.execute("""
@@ -227,4 +227,4 @@ def init_db_hosts_table(cur):
     cur.execute("CREATE INDEX idx_txt_host ON txt_records(host_id);")
 
     logger.info("HOSTS DB: Database initialized successfully for %s", settings.DOMAIN)
-    logger.info("HOSTS DB: Public IP: %s", settings.PUBLIC_IP)
+    logger.info("HOSTS DB: Public IP: %s", settings.EXTERNAL_NAME)

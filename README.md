@@ -61,7 +61,7 @@ project/
 ```dotenv
 # --- Host & Web ---
 DOMAIN=example.com
-PUBLIC_IP=127.0.0.1
+EXTERNAL_NAME=dyndns.example.com
 HTTP_PORT=8000
 # --- Admin ---
 ADMIN_USER=admin
@@ -100,7 +100,7 @@ services:
       LOG_ACCESS_FILE: "/data/access.log"
       # Host
       DOMAIN: "${DOMAIN:-example.com}"
-      PUBLIC_IP: "${PUBLIC_IP:-127.0.0.1}"
+      EXTERNAL_NAME: "${EXTERNAL_NAME:-dyndns.example.com}"
       # Web
       HTTP_PORT: "${HTTP_PORT:-8000}"
       LOGIN_MAX_ATTEMPTS: "${LOGIN_MAX_ATTEMPTS:-5}"
@@ -135,7 +135,7 @@ secrets:
 | `LOG_FILE` | app.log | Application log file |
 | `LOG_ACCESS_FILE` | access.log | HTTP access log |
 | `DOMAIN` | example.com | Public domain |
-| `PUBLIC_IP` | 127.0.0.1 | Public IP |
+| `EXTERNAL_NAME` | dyndns.example.com | External Name |
 | `HTTP_PORT` | 8000 | Internal HTTP port |
 | `LOGIN_MAX_ATTEMPTS` | 5 | Login attempts |
 | `LOGIN_WINDOW_SECONDS` | 600 | Attempt window |

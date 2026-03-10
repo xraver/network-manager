@@ -28,7 +28,7 @@ LOG_ACCESS_FILE = "access.log"
 # Host
 # ---------------------------------------------------------
 DOMAIN = "example.com"
-PUBLIC_IP = "127.0.0.1"
+EXTERNAL_NAME = "dyndns.example.com"
 
 # ---------------------------------------------------------
 # Web

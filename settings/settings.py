@@ -69,7 +69,7 @@ class Settings(BaseModel):
 
     # Hosts
     DOMAIN: str = Field(default_factory=lambda: os.getenv("DOMAIN", default.DOMAIN))
-    PUBLIC_IP: str = Field(default_factory=lambda: os.getenv("PUBLIC_IP", default.DOMAIN))
+    EXTERNAL_NAME: str = Field(default_factory=lambda: os.getenv("EXTERNAL_NAME", default.DOMAIN))
 
     # Web
     HTTP_PORT: int = Field(default_factory=lambda: int(os.getenv("HTTP_PORT", default.HTTP_PORT)))

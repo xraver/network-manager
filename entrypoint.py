@@ -22,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--reset", action="store_true")
     parser.add_argument("--domain")
-    parser.add_argument("--public-ip")
+    parser.add_argument("--external-name")
     parser.add_argument("cmd", nargs=argparse.REMAINDER)
     return parser.parse_args()
 
@@ -67,8 +67,8 @@ def main():
         settings.DB_RESET = True
     if args.domain:
         settings.DOMAIN = args.domain
-    if args.public_ip:
-        settings.PUBLIC_IP = args.public_ip
+    if args.external_name:
+        settings.EXTERNAL_NAME = args.EXTERNAL_NAME
 
     # Create or update database
     docker_create_db(logger)
