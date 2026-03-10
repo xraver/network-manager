@@ -266,10 +266,16 @@ select.form-select:focus,
 
 .icon-static {
     --icon-color-hover: var(--icon-color);
+    margin-right: 6px;
 }
 
 .icon-action {
     cursor: pointer;
+}
+
+.icon-placeholder {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* ================================

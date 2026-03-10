@@ -208,7 +208,9 @@ def init_db_hosts_table(cur):
             ipv6 TEXT,
             mac TEXT,
             note TEXT,
-            ssl_enabled INTEGER NOT NULL DEFAULT 0
+            ssl_enabled INTEGER NOT NULL DEFAULT 0,
+            external_mode INTEGER NOT NULL DEFAULT 0,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
     cur.execute("CREATE INDEX idx_hosts_name ON hosts(name);")

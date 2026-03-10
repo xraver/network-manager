@@ -126,71 +126,113 @@ async function loadHosts() {
             tr.appendChild(td);
         }
 
-        // SSL (icon)
+        // Options (icons)
         {
             const td = document.createElement("td");
+            td.style.textAlign = "center";
+            td.style.verticalAlign = "middle";
+
+            //
+            // SSL icon
+            //
             const sslEnabled = !!h.ssl_enabled;
             td.setAttribute("data-value", sslEnabled ? "true" : "false");
             td.setAttribute("aria-label", sslEnabled ? "SSL attivo" : "SSL non attivo");
-            td.style.textAlign = "center";
-            td.style.verticalAlign = "middle";
+            const icon = document.createElement("i");
             if (sslEnabled) {
-                const icon = document.createElement("i");
                 icon.className = "bi bi-shield-lock-fill icon icon-static";
                 icon.setAttribute("aria-hidden", "true");
+                icon.setAttribute("title", "SSL certificate enabled");
+            } else {
+                icon.className = "bi bi-shield-lock-fill icon icon-static icon-placeholder";
+                icon.setAttribute("aria-hidden", "true");
+            }
+            td.appendChild(icon);
+
+            //
+            // external_mode icon
+            //
+            const ext = (h.external_mode ?? "").toString();
+            let aria = "";
+            let iconClass = "";
+            switch (ext) {
+                case "0":
+                    // Only local (A record internally resolved)
+                    aria = "Only local (A record internally resolved)";
+                    iconClass = "bi bi-hdd-network";
+                    break;
+
+                case "1":
+                    // Local and external (A record internally resolved, A externally)
+                    aria = "Internal and external are identical";
+                    iconClass = "bi bi-globe2";
+                    break;
+
+                case "2":
+                    // CNAME -> DDNS / external_name
+                    aria = "External is a CNAME to external_name";
+                    iconClass = "bi bi-link-45deg";
+                    break;
+            }
+            if (iconClass) {
+                const icon = document.createElement("i");
+                icon.className = iconClass + " icon icon-static";
+                icon.setAttribute("aria-hidden", "true");
+                icon.setAttribute("title", aria);
                 td.appendChild(icon);
             }
+
             tr.appendChild(td);
         }
 
-    // Actions
-    {
-        const td = document.createElement("td");
-        td.className = "actions";
-        td.style.textAlign = "center";
-        td.style.verticalAlign = "middle";
-
-        const id = Number(h.id);
-
-        // Usa elementi reali invece di innerHTML con entity
-        const editSpan = document.createElement("span");
-        editSpan.className = "action-icon";
-        editSpan.setAttribute("role", "button");
-        editSpan.tabIndex = 0;
-        editSpan.title = "Edit host";
-        editSpan.setAttribute("aria-label", "Edit host");
-        editSpan.setAttribute("data-bs-toggle", "modal");
-        editSpan.setAttribute("data-bs-target", "#addHostModal");
-        editSpan.setAttribute("data-action", "edit");
-        editSpan.setAttribute("data-host-id", String(id));
+        // Actions
         {
-            const i = document.createElement("i");
-            i.className = "bi bi-pencil-fill icon icon-action";
-            i.setAttribute("aria-hidden", "true");
-            editSpan.appendChild(i);
+            const td = document.createElement("td");
+            td.className = "actions";
+            td.style.textAlign = "center";
+            td.style.verticalAlign = "middle";
+
+            const id = Number(h.id);
+
+            // Usa elementi reali invece di innerHTML con entity
+            const editSpan = document.createElement("span");
+            editSpan.className = "action-icon";
+            editSpan.setAttribute("role", "button");
+            editSpan.tabIndex = 0;
+            editSpan.title = "Edit host";
+            editSpan.setAttribute("aria-label", "Edit host");
+            editSpan.setAttribute("data-bs-toggle", "modal");
+            editSpan.setAttribute("data-bs-target", "#addHostModal");
+            editSpan.setAttribute("data-action", "edit");
+            editSpan.setAttribute("data-host-id", String(id));
+            {
+                const i = document.createElement("i");
+                i.className = "bi bi-pencil-fill icon icon-action";
+                i.setAttribute("aria-hidden", "true");
+                editSpan.appendChild(i);
+            }
+
+            const delSpan = document.createElement("span");
+            delSpan.className = "action-icon";
+            delSpan.setAttribute("role", "button");
+            delSpan.tabIndex = 0;
+            delSpan.title = "Delete host";
+            delSpan.setAttribute("aria-label", "Delete host");
+            delSpan.setAttribute("data-action", "delete");
+            delSpan.setAttribute("data-host-id", String(id));
+            {
+                const i = document.createElement("i");
+                i.className = "bi bi-trash-fill icon icon-action";
+                i.setAttribute("aria-hidden", "true");
+                delSpan.appendChild(i);
+            }
+
+            td.appendChild(editSpan);
+            td.appendChild(delSpan);
+            tr.appendChild(td);
         }
 
-        const delSpan = document.createElement("span");
-        delSpan.className = "action-icon";
-        delSpan.setAttribute("role", "button");
-        delSpan.tabIndex = 0;
-        delSpan.title = "Delete host";
-        delSpan.setAttribute("aria-label", "Delete host");
-        delSpan.setAttribute("data-action", "delete");
-        delSpan.setAttribute("data-host-id", String(id));
-        {
-            const i = document.createElement("i");
-            i.className = "bi bi-trash-fill icon icon-action";
-            i.setAttribute("aria-hidden", "true");
-            delSpan.appendChild(i);
-        }
-
-        td.appendChild(editSpan);
-        td.appendChild(delSpan);
-        tr.appendChild(td);
-    }
-
-    frag.appendChild(tr);
+        frag.appendChild(tr);
     });
 
     // publish all rows

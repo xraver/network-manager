@@ -160,10 +160,12 @@ def init_db_alias_table(cur):
             name TEXT NOT NULL UNIQUE,
             target TEXT NOT NULL,
             note TEXT,
-            ssl_enabled INTEGER NOT NULL DEFAULT 0
+            ssl_enabled INTEGER NOT NULL DEFAULT 0,
+            external_mode INTEGER NOT NULL DEFAULT 0,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
     cur.execute("CREATE INDEX idx_aliases_name ON aliases(name);")
 
     logger.info("ALIASES DB: Database initialized successfully for %s", settings.DOMAIN)
-    logger.info("ALIASES DB: Public IP: %s", settings.PUBLIC_IP)
+    logger.info("ALIASES DB: Public IP: %s", settings.EXTERNAL_NAME)
