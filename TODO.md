@@ -5,19 +5,19 @@
 
 ### 🔄 DB management at startup
 
-- [ ] **If the database is empty**
-  - Import initial YAML
-  - Populate the database
+- [X] **If the database is empty**
+  - [ ] Import initial YAML
+  - [X] Populate the database
 
-- [ ] **If the database exists**
-  - Ignore YAML **unless the repository file has changed**
-  - If YAML has changed → update the DB
+- [X] **If the database exists**
+  - [ ] Ignore YAML **unless the repository file has changed**
+  - [ ] If YAML has changed → update the DB
 
 ---
 
 ### 🛠️ Updates made by the Webapp
 
-- [ ] Apply changes to the database
+- [X] Apply changes to the database
 - [ ] Regenerate YAML from the DB
 - [ ] Perform **commit + push** on Git
 - [ ] Regenerate **from scratch**:
@@ -52,8 +52,13 @@
 ### 🧪 BIND (DNS)
 - [X] Rebuild forward and reverse zones
 - [X] Rebuild all records (A, AAAA, CNAME)
+- [X] Support DNS views (local, global, alias -> CNAME to dyndns/external IP)
 - [ ] Syntax validation (`named-checkconf`, `named-checkzone`)
 - [ ] Rollback management in case of errors
+- [ ] Update external DNS
+  - [ ] Dedicated file
+  - [ ] OVH
+  - [ ] Cloudflare
 
 ### 🧪 Kea (DHCP)
 - [X] Regenerate subnets, pools, global options, and host reservations
@@ -109,6 +114,7 @@
 - [ ] Brute force protection (you already have this 👍)
 
 ### 🔧 Backup & Recovery
+- [X] Backup generation
 - [ ] Periodic backup of SQLite DB
 - [ ] Remote Git repository backup
 - [ ] Backup of generated configurations
