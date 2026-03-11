@@ -1,52 +1,45 @@
-# ---------- STAGE 1: BUILD ----------
-FROM python:3.12-slim AS builder
+# ---------- STAGE 1: Alpine Build ----------
+FROM python:3.12-alpine AS builder
 
 # Install build dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends sqlite3 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --prefix=/install -r requirements.txt
+RUN apk add --no-cache build-base libffi-dev openssl-dev
 
 WORKDIR /app
 
-# Copy backend, frontend, entrypoint
+# Copy dependency list
+COPY requirements.txt .
+
+# Build wheels to avoid building in final image
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+
+# Copy full application
 COPY backend backend
 COPY frontend frontend
-COPY entrypoint.py entrypoint.py
 COPY log log
 COPY settings settings
-RUN chmod 755 entrypoint.py
 
-# ---------- STAGE 2: DISTROLESS ----------
-FROM gcr.io/distroless/base-debian13
+# ---------- STAGE 2: Alpine Runtime ----------
+FROM python:3.12-alpine
 
-# Copy Python runtime from builder
-COPY --from=builder /usr/local /usr/local
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8
 
-# Copy libs
-COPY --from=builder /lib/x86_64-linux-gnu/libsqlite3.so.0 /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libbz2.so.1.0 /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/liblzma.so.5 /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/
-
-# Copy installed Python packages
-COPY --from=builder /install /usr/local
+# librerie runtime
+RUN apk add --no-cache libffi openssl sqlite-libs
 
 WORKDIR /app
 
-# Copy application
-COPY --from=builder /app/backend backend
-COPY --from=builder /app/frontend frontend
-COPY --from=builder /app/entrypoint.py entrypoint.py
-COPY --from=builder /app/log log
-COPY --from=builder /app/settings settings
+# Copy application and deps
+COPY --from=builder /app /app
+COPY --from=builder /wheels /wheels
 
-# Ensure Python sees the installed packages
-ENV PYTHONPATH="/usr/local/lib/python3.12/site-packages"
+# Install dependencies inside distroless environment
+RUN pip install --no-cache-dir --no-compile /wheels/* && \
+    rm -rf /wheels && \
+    find /usr/local/lib/python3.12/site-packages -regex '.*\(tests\|test\|docs\|examples\).*' -type d -prune -exec rm -rf {} + && \
+    rm -rf /root/.cache
 
-ENTRYPOINT ["/app/entrypoint.py"]
-CMD ["python3", "-u", "-m", "backend.main"]
+RUN find /usr/local/lib/python3.12 -name '__pycache__' -type d -exec rm -rf {} +
+
+ENTRYPOINT ["python", "-u", "-m", "backend.main"]
