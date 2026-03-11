@@ -33,6 +33,7 @@ EXTERNAL_NAME = "dyndns.example.com"
 # ---------------------------------------------------------
 # Web
 # ---------------------------------------------------------
+HTTP_HOST = "0.0.0.0"
 HTTP_PORT = "8000"
 LOGIN_MAX_ATTEMPTS = "5"
 LOGIN_WINDOW_SECONDS = "600"

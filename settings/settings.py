@@ -47,10 +47,6 @@ class Settings(BaseModel):
     APP_VERSION: str = Field(default_factory=lambda: config.APP_VERSION)
     DEVEL: bool = Field(default_factory=lambda: _to_bool(os.getenv("DEV", False)))
 
-    # Base Image / Docker Image
-    BASEIMG_NAME: str = Field(default_factory=lambda: config.BASEIMG_NAME)
-    BASEIMG_VERSION: str = Field(default_factory=lambda: config.BASEIMG_VERSION)
-
     # DATA_PATH
     DATA_PATH: str = Field(default_factory=lambda: os.getenv("DATA_PATH", default.DATA_PATH))
 
@@ -72,6 +68,7 @@ class Settings(BaseModel):
     EXTERNAL_NAME: str = Field(default_factory=lambda: os.getenv("EXTERNAL_NAME", default.DOMAIN))
 
     # Web
+    HTTP_HOST: str = Field(default_factory=lambda: os.getenv("HTTP_HOST", default.HTTP_HOST))
     HTTP_PORT: int = Field(default_factory=lambda: int(os.getenv("HTTP_PORT", default.HTTP_PORT)))
     SECRET_KEY: str = Field(default_factory=lambda: (
         (os.getenv("SESSION_SECRET") or _read_text_if_exists(os.getenv("SECRET_KEY_FILE")) or secrets.token_urlsafe(64)).strip()

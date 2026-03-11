@@ -136,6 +136,7 @@ secrets:
 | `LOG_ACCESS_FILE` | access.log | HTTP access log |
 | `DOMAIN` | example.com | Public domain |
 | `EXTERNAL_NAME` | dyndns.example.com | External Name |
+| `HTTP_HOST` | 0.0.0.0 | IP address the server binds to |
 | `HTTP_PORT` | 8000 | Internal HTTP port |
 | `LOGIN_MAX_ATTEMPTS` | 5 | Login attempts |
 | `LOGIN_WINDOW_SECONDS` | 600 | Attempt window |
