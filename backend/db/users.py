@@ -32,6 +32,28 @@ def get_user_by_username(username):
     return cur.fetchone()
 
 # -----------------------------
+# Create User
+# -----------------------------
+def create_user(username, password_hash, email=None, is_admin=0, modules=None):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO users (
+            username, password_hash, email, is_admin, modules, status,
+            created_at, updated_at, password_changed_at
+        ) VALUES (?, ?, ?, ?, ?, 'active', strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
+    """, (
+        username,
+        password_hash,
+        email,
+        is_admin,
+        json.dumps(modules or [])
+    ))
+
+    conn.commit()
+
+# -----------------------------
 # Create Users Table
 # -----------------------------
 @register_init
@@ -76,24 +98,4 @@ def init_db_users_table(cur):
         "active"
     ))
 
-# -----------------------------
-# Create User
-# -----------------------------
-def create_user(username, password_hash, email=None, is_admin=0, modules=None):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        INSERT INTO users (
-            username, password_hash, email, is_admin, modules, status,
-            created_at, updated_at, password_changed_at
-        ) VALUES (?, ?, ?, ?, ?, 'active', strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
-    """, (
-        username,
-        password_hash,
-        email,
-        is_admin,
-        json.dumps(modules or [])
-    ))
-
-    conn.commit()
+    logger.info("USERS DB: Tables initialized successfully")

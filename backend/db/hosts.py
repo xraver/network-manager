@@ -229,5 +229,4 @@ def init_db_hosts_table(cur):
     """)
     cur.execute("CREATE INDEX idx_txt_host ON txt_records(host_id);")
 
-    logger.info("HOSTS DB: Database initialized successfully for %s", settings.DOMAIN)
-    logger.info("HOSTS DB: Public IP: %s", settings.EXTERNAL_NAME)
+    logger.info("HOSTS DB: Tables initialized successfully")

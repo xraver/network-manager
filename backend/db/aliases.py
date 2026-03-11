@@ -168,5 +168,4 @@ def init_db_alias_table(cur):
     """)
     cur.execute("CREATE INDEX idx_aliases_name ON aliases(name);")
 
-    logger.info("ALIASES DB: Database initialized successfully for %s", settings.DOMAIN)
-    logger.info("ALIASES DB: Public IP: %s", settings.EXTERNAL_NAME)
+    logger.info("ALIASES DB: Database initialized successfully")

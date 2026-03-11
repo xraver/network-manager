@@ -46,6 +46,5 @@ def init_db():
         func(cur)
 
     conn.commit()
-    conn.close()
 
     logger.info("DB Initialization Completed")
