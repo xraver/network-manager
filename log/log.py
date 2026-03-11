@@ -151,11 +151,6 @@ def setup_logging(level: str = "INFO", to_file: bool = False, log_file: Optional
     config = build_log_config(level=level, to_file=to_file, log_file=log_file, log_access_file=log_access_file)
     logging.config.dictConfig(config)
 
-    logging.getLogger("main").info(
-        "Logging configured (level=%s, to_file=%s, log_file=%s, log_access_file=%s)",
-        level.upper(), to_file, log_file, log_access_file
-    )
-
     _INITIALIZED = True
 
 # ---------------------------------------------------------

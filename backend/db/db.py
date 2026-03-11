@@ -3,14 +3,19 @@
 # Import standard modules
 import os
 import sqlite3
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Log
 from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 _connection = None
 _init_functions = []
 
+# -----------------------------
+# Register DB Init Function
+# -----------------------------
 def register_init(func):
     _init_functions.append(func)
     return func
@@ -31,7 +36,7 @@ def get_db():
 # Init Database
 # -----------------------------
 def init_db():
-    logger = get_logger(__name__)
+
     logger.info("Starting DB Initialization")
 
     conn = get_db()

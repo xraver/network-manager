@@ -11,10 +11,12 @@ import time
 # Import local modules
 from backend.db.hosts import get_hosts
 from backend.db.aliases import get_aliases
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Logging
-from log.log import setup_logging, get_logger
+from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Create Router
 router = APIRouter()
@@ -74,7 +76,6 @@ async def api_dns_reload(request: Request):
         )
 
     except Exception as err:
-        logger = get_logger("dns")
         logger.exception("Error reloading DNS: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 

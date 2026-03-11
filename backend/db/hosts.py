@@ -8,10 +8,12 @@ import re
 import sqlite3
 # Import local modules
 from backend.db.db import get_db, register_init
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Log
 from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Regex for MAC check
 MAC_RE = re.compile(r"^([0-9A-Fa-f]{2}([:\-])){5}([0-9A-Fa-f]{2})$")
@@ -187,7 +189,6 @@ def delete_host(host_id: int) -> bool:
 # -----------------------------
 @register_init
 def init_db_hosts_table(cur):
-    logger = get_logger(__name__)
 
     # SETTINGS TABLE
     cur.execute("""

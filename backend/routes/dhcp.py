@@ -12,10 +12,12 @@ from pathlib import Path
 import time
 # Import local modules
 from backend.db.hosts import get_hosts
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Logging
-from log.log import setup_logging, get_logger
+from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Create Router
 router = APIRouter()
@@ -80,7 +82,6 @@ async def api_dhcp_reload(request: Request):
         )
 
     except Exception as err:
-        logger = get_logger("dhcp")
         logger.exception("Error reloading DHCP: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -183,7 +184,6 @@ def api_dhcp_leases(request: Request):
         )
 
     except Exception as err:
-        logger = get_logger("dhcp")
         logger.exception("Error reading DHCP leases: %s", str(err).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

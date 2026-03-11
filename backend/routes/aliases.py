@@ -14,10 +14,12 @@ from backend.db.aliases import (
     update_alias,
     delete_alias
 )
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Logging
-from log.log import setup_logging, get_logger
+from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Create Router
 router = APIRouter()
@@ -48,7 +50,6 @@ def api_get_aliases(request: Request):
         return aliases or []
 
     except Exception as e:
-        logger = get_logger("aliases")
         logger.exception("Error getting list alias %s", str(e).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -84,7 +85,6 @@ def api_get_alias(request: Request, alias_id: int):
         return alias
 
     except Exception as e:
-        logger = get_logger("aliases")
         logger.exception("Error adding alias %s: %s", alias_id, str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -141,7 +141,6 @@ def api_add_alias(request: Request, data: dict):
         raise httpe
 
     except Exception as e:
-        logger = get_logger("aliases")
         logger.exception("Error adding alias: %s", str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -196,7 +195,6 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
         )
 
     except Exception as e:
-        logger = get_logger("aliases")
         logger.exception("Error updating alias %s: %s", alias_id, str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -251,7 +249,6 @@ def api_delete_alias(request: Request, alias_id: int):
         )
 
     except Exception as e:
-        logger = get_logger("aliases")
         logger.exception("Error deleting alias %s: %s", alias_id, str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(

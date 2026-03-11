@@ -10,8 +10,12 @@ import ipaddress
 import time
 # Import local modules
 from backend.db.hosts import get_hosts
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
+from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Create Router
 router = APIRouter()
@@ -54,7 +58,6 @@ async def api_dns_reload(request: Request):
 
     except Exception as err:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        logger = get_logger("hosts")
         logger.exception("Error executing backup: %s", str(e).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

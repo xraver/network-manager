@@ -7,10 +7,12 @@ from fastapi import Request, HTTPException
 from itsdangerous import TimestampSigner
 # Import local modules
 from backend.db.users import get_user_by_username
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Log
 from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 signer = TimestampSigner(settings.SECRET_KEY)
 
@@ -18,7 +20,7 @@ signer = TimestampSigner(settings.SECRET_KEY)
 # Verify Login
 # -----------------------------
 def verify_login(username, password):
-    logger = get_logger(__name__)
+
     user = get_user_by_username(username)
     if not user:
         logger.error("Login failed - user %s not found", username)
@@ -39,7 +41,6 @@ def verify_login(username, password):
 # creates or renew the cookie
 # ----------------------------
 def apply_session(response, username: str | None = None, token: str | None = None):
-    logger = get_logger(__name__)
 
     # First Login
     if username is not None and token is None:
@@ -68,6 +69,7 @@ def apply_session(response, username: str | None = None, token: str | None = Non
 # check session cookie
 # -----------------------------
 def is_logged_in(request: Request) -> bool:
+
     token = request.cookies.get("session")
     if not token:
         return False
@@ -81,7 +83,6 @@ def is_logged_in(request: Request) -> bool:
 # Close Session
 # -----------------------------
 def close_session(response):
-    logger = get_logger(__name__)
 
     response.delete_cookie(
         key="session",

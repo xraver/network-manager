@@ -5,10 +5,12 @@ from fastapi import APIRouter
 import sqlite3
 import time
 import os
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Logging
-from log.log import setup_logging, get_logger
+from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Create Router
 router = APIRouter()
@@ -40,7 +42,7 @@ def health():
         db_size = round(os.path.getsize(settings.DB_FILE) / (1024 * 1024), 2)
 
     except Exception as err:
-        get_logger("health").exception("Database health check failed: " + str(err).strip())
+        logger.exception("Database health check failed: " + str(err).strip())
         db_status = "error"
         db_version = None
 

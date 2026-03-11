@@ -7,10 +7,12 @@ import logging
 import os
 # Import local modules
 from backend.db.db import get_db, register_init
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Log
 from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # ================================
 # Create hash password
@@ -34,7 +36,6 @@ def get_user_by_username(username):
 # -----------------------------
 @register_init
 def init_db_users_table(cur):
-    logger = get_logger(__name__)
 
     # USERS TABLE
     cur.execute("""

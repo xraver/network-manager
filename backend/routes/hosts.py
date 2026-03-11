@@ -14,10 +14,12 @@ from backend.db.hosts import (
     update_host,
     delete_host
 )
-# Import Settings
+# Import Settings & Logging
 from settings.settings import settings
-# Import Logging
-from log.log import setup_logging, get_logger
+from log.log import get_logger
+
+# Logger initialization
+logger = get_logger(__name__)
 
 # Create Router
 router = APIRouter()
@@ -48,7 +50,6 @@ def api_get_hosts(request: Request):
         return hosts or []
 
     except Exception as e:
-        logger = get_logger("hosts")
         logger.exception("Error getting list host %s", str(e).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -84,7 +85,6 @@ def api_get_host(request: Request, host_id: int):
         return host
 
     except Exception as e:
-        logger = get_logger("hosts")
         logger.exception("Error adding host %s: %s", host_id, str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -141,7 +141,6 @@ def api_add_host(request: Request, data: dict):
         raise httpe
 
     except Exception as e:
-        logger = get_logger("hosts")
         logger.exception("Error adding host: %s", str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -196,7 +195,6 @@ def api_update_host(request: Request, data: dict, host_id: int):
         )
 
     except Exception as e:
-        logger = get_logger("hosts")
         logger.exception("Error updating host %s: %s", host_id, str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
@@ -251,7 +249,6 @@ def api_delete_host(request: Request, host_id: int):
         )
 
     except Exception as e:
-        logger = get_logger("hosts")
         logger.exception("Error deleting host %s: %s", host_id, str(e).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
