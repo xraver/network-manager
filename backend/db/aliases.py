@@ -39,11 +39,16 @@ def validate_data(data: dict) -> dict:
     # Boolean normalization for DB (0/1)
     ssl_enabled = int(bool(data.get("ssl_enabled", 0)))
 
+    # Normalization (0/1/2)
+    v = int(data.get("visibility", 0))
+    visibility = v if v in (0, 1, 2) else 0
+
     return {
         "name": name,
         "target": target,
         "note": note,
         "ssl_enabled": ssl_enabled,
+        "visibility": visibility,
     }
 
 # -----------------------------
@@ -75,12 +80,13 @@ def add_alias(data: dict):
     conn = get_db()
     try:
         cur = conn.execute(
-            "INSERT INTO aliases (name, target, note, ssl_enabled) VALUES (?, ?, ?, ?)",
+            "INSERT INTO aliases (name, target, note, ssl_enabled, visibility) VALUES (?, ?, ?, ?, ?)",
             (
                 cleaned["name"],
                 cleaned["target"],
                 cleaned["note"],
                 cleaned["ssl_enabled"],
+                cleaned["visibility"],
             )
         )
         conn.commit()
@@ -107,7 +113,7 @@ def update_alias(alias_id: int, data: dict) -> bool:
         cur = conn.execute(
             """
             UPDATE aliases
-            SET name=?, target=?, note=?, ssl_enabled=?
+            SET name=?, target=?, note=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
             WHERE id=?
             """,
             (
@@ -115,6 +121,7 @@ def update_alias(alias_id: int, data: dict) -> bool:
                 cleaned["target"],
                 cleaned["note"],
                 cleaned["ssl_enabled"],
+                cleaned["visibility"],
                 alias_id,
             )
         )
@@ -162,7 +169,7 @@ def init_db_alias_table(cur):
             target TEXT NOT NULL,
             note TEXT,
             ssl_enabled INTEGER NOT NULL DEFAULT 0,
-            external_mode INTEGER NOT NULL DEFAULT 0,
+            visibility INTEGER NOT NULL DEFAULT 0,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)

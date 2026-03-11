@@ -150,9 +150,9 @@ async function loadHosts() {
             td.appendChild(icon);
 
             //
-            // external_mode icon
+            // visibility icon
             //
-            const ext = (h.external_mode ?? "").toString();
+            const ext = (h.visibility ?? "").toString();
             let aria = "";
             let iconClass = "";
             switch (ext) {
@@ -294,6 +294,13 @@ async function editHost(id) {
     document.getElementById("hostMAC").value = data.mac ?? "";
     document.getElementById("hostNote").value = data.note ?? "";
     document.getElementById("hostSSL").checked = !!data.ssl_enabled;
+    if (data.visibility == 0) {
+        document.getElementById("hostVisibilityLocal").checked = true;
+    } else if (data.visibility == 1){
+        document.getElementById("hostVisibilityGlobal").checked = true;
+    } else {
+        document.getElementById("hostVisibilityAlias").checked = true;
+    }
 }
 
 // -----------------------------
@@ -444,7 +451,10 @@ async function handleAddHostSubmit(e) {
             ipv6:  document.getElementById('hostIPv6').value.trim(),
             mac:   document.getElementById('hostMAC').value.trim(),
             note:  document.getElementById('hostNote').value.trim(),
-            ssl_enabled: document.getElementById('hostSSL').checked ? 1 : 0
+            ssl_enabled: document.getElementById('hostSSL').checked ? 1 : 0,
+            visibility: Number(
+                document.querySelector('input[name="hostVisibility"]:checked')?.value ?? 0
+            )
         };
 
         const ok = await saveHost(data);

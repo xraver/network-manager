@@ -131,9 +131,9 @@ async function loadAliases() {
             td.appendChild(icon);
 
             //
-            // external_mode icon
+            // visibility icon
             //
-            const ext = (h.external_mode ?? "").toString();
+            const ext = (h.visibility ?? "").toString();
             let aria = "";
             let iconClass = "";
             switch (ext) {
@@ -273,6 +273,13 @@ async function editAlias(id) {
     document.getElementById("aliasTarget").value = data.target ?? "";
     document.getElementById("aliasNote").value = data.note ?? "";
     document.getElementById("aliasSSL").checked = !!data.ssl_enabled;
+    if (data.visibility == 0) {
+        document.getElementById("aliasVisibilityLocal").checked = true;
+    } else if (data.visibility == 1){
+        document.getElementById("aliasVisibilityGlobal").checked = true;
+    } else {
+        document.getElementById("aliasVisibilityAlias").checked = true;
+    }
 }
 
 // -----------------------------
@@ -411,7 +418,10 @@ async function handleAddAliasSubmit(e) {
             name:  document.getElementById('aliasName').value.trim(),
             target: document.getElementById('aliasTarget').value.trim(),
             note:   document.getElementById('aliasNote').value.trim(),
-            ssl_enabled: document.getElementById('aliasSSL').checked ? 1 : 0
+            ssl_enabled: document.getElementById('aliasSSL').checked ? 1 : 0,
+            visibility: Number(
+                document.querySelector('input[name="aliasVisibility"]:checked')?.value ?? 0
+            )
         };
 
         const ok = await saveAlias(data);

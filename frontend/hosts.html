@@ -167,6 +167,21 @@
                             <input class="form-check-input" type="checkbox" id="hostSSL">
                             <label class="form-check-label" for="hostSSL">SSL?</label>
                         </div>
+
+                        <div class="mb-2">
+                            <label class="form-label d-block">Visibility</label>
+                            <div class="btn-group" role="group">
+                                <!-- Local -->
+                                <input type="radio" class="btn-check" id="hostVisibilityLocal" name="hostVisibility" value="0" checked>
+                                <label class="btn btn-outline-primary" for="hostVisibilityLocal">Local</label>
+                                <!-- Global -->
+                                <input type="radio" class="btn-check" id="hostVisibilityGlobal" name="hostVisibility" value="1">
+                                <label class="btn btn-outline-primary" for="hostVisibilityGlobal">Global</label>
+                                <!-- Alias -->
+                                <input type="radio" class="btn-check" id="hostVisibilityAlias" name="hostVisibility" value="2">
+                                <label class="btn btn-outline-primary" for="hostVisibilityAlias">Alias</label>
+                            </div>
+                        </div>
                     </form>
                 </div>
 

@@ -214,7 +214,9 @@ body {
     line-height: 1.1;
 }
 
-.form-label {
+.form-label,
+.form-check-label,
+.form-check-input {
     font-size: 0.80rem;          /* più piccina */
     margin-bottom: 2px;          /* Bootstrap usa 8px; lo riduciamo */
 }
@@ -243,12 +245,6 @@ select.form-select:focus,
 .form-select.is-valid:focus {
     box-shadow: none;
     border-color: #198754; /* verde Bootstrap */
-}
-
-.form-check-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
-    outline: none;
 }
 
 /* ================================

@@ -55,6 +55,10 @@ def validate_data(data: dict) -> dict:
     # Normalizzazione boolean per DB (0/1)
     ssl_enabled = int(bool(data.get("ssl_enabled", 0)))
 
+    # Normalizzazione (0/1/2)
+    v = int(data.get("visibility", 0))
+    visibility = v if v in (0, 1, 2) else 0
+
     return {
         "name": name,
         "ipv4": ipv4,
@@ -62,6 +66,7 @@ def validate_data(data: dict) -> dict:
         "mac": mac,
         "note": note,
         "ssl_enabled": ssl_enabled,
+        "visibility": visibility,
     }
 
 # -----------------------------
@@ -107,7 +112,7 @@ def add_host(data: dict):
     conn = get_db()
     try:
         cur = conn.execute(
-            "INSERT INTO hosts (name, ipv4, ipv6, mac, note, ssl_enabled) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO hosts (name, ipv4, ipv6, mac, note, ssl_enabled, visibility) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
                 cleaned["name"],
                 cleaned["ipv4"],
@@ -115,6 +120,7 @@ def add_host(data: dict):
                 cleaned["mac"],
                 cleaned["note"],
                 cleaned["ssl_enabled"],
+                cleaned["visibility"],
             )
         )
         conn.commit()
@@ -141,7 +147,7 @@ def update_host(host_id: int, data: dict) -> bool:
         cur = conn.execute(
             """
             UPDATE hosts
-            SET name=?, ipv4=?, ipv6=?, mac=?, note=?, ssl_enabled=?
+            SET name=?, ipv4=?, ipv6=?, mac=?, note=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
             WHERE id=?
             """,
             (
@@ -151,6 +157,7 @@ def update_host(host_id: int, data: dict) -> bool:
                 cleaned["mac"],
                 cleaned["note"],
                 cleaned["ssl_enabled"],
+                cleaned["visibility"],
                 host_id,
             )
         )
@@ -210,7 +217,7 @@ def init_db_hosts_table(cur):
             mac TEXT,
             note TEXT,
             ssl_enabled INTEGER NOT NULL DEFAULT 0,
-            external_mode INTEGER NOT NULL DEFAULT 0,
+            visibility INTEGER NOT NULL DEFAULT 0,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
