@@ -10,11 +10,13 @@ import os
 import ipaddress
 from pathlib import Path
 import time
+
 # Import local modules
 from backend.db.hosts import get_hosts
+
 # Import Settings & Logging
-from settings.settings import settings
-from log.log import get_logger
+from backend.settings.settings import settings
+from backend.log.log import setup_logging, get_logger
 
 # Logger initialization
 logger = get_logger(__name__)

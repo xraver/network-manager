@@ -5,11 +5,13 @@ import bcrypt
 import os
 from fastapi import Request, HTTPException
 from itsdangerous import TimestampSigner
+
 # Import local modules
 from backend.db.users import get_user_by_username
+
 # Import Settings & Logging
-from settings.settings import settings
-from log.log import get_logger
+from backend.settings.settings import settings
+from backend.log.log import setup_logging, get_logger
 
 # Logger initialization
 logger = get_logger(__name__)

@@ -2,6 +2,7 @@
 
 # Import standard modules
 import os
+
 # Import backend modules
 from backend.bootstrap import bootstrap
 from backend.app import create_app

@@ -1,4 +1,4 @@
-# log/log.py
+# backend/log/log.py
 
 from __future__ import annotations
 

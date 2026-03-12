@@ -1,4 +1,4 @@
-# backend/settings.py
+# backend/settings/settings.py
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import datetime
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
+
 # Import Parameters
 from . import config, default
 

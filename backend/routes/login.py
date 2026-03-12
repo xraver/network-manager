@@ -5,10 +5,12 @@ from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse, RedirectResponse
 import os
 import time
+
 # Import local modules
 from backend.security import verify_login, apply_session, close_session
-# Import Settings
-from settings.settings import settings
+
+# Import Settings & Logging
+from backend.settings.settings import settings
 
 # Create Router
 router = APIRouter()

@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 import ipaddress
 import time
 import os
+
 # Import local modules
 from backend.db.aliases import (
     get_aliases,
@@ -14,9 +15,10 @@ from backend.db.aliases import (
     update_alias,
     delete_alias
 )
+
 # Import Settings & Logging
-from settings.settings import settings
-from log.log import get_logger
+from backend.settings.settings import settings
+from backend.log.log import setup_logging, get_logger
 
 # Logger initialization
 logger = get_logger(__name__)

@@ -2,8 +2,12 @@
 
 # Import standard modules
 from fastapi import APIRouter
+
+# Import local modules
+from backend.db.config import get_config
+
 # Import Settings
-from settings.settings import settings
+from backend.settings.settings import settings
 
 # Create Router
 router = APIRouter()
@@ -13,10 +17,10 @@ router = APIRouter()
 # ---------------------------------------------------------
 @router.get("/about")
 def about():
+    domain = get_config("domain")
     return {
         "app": {
             "version": settings.APP_VERSION,
         },
-        "domain": settings.DOMAIN,
-        "admin_hash_loaded": settings.ADMIN_PASSWORD_HASH is not None,
+        "domain": domain,
     }

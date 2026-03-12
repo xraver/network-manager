@@ -8,12 +8,15 @@ import json
 import os
 import ipaddress
 import time
+
 # Import local modules
+from backend.db.config import get_config
 from backend.db.hosts import get_hosts
 from backend.db.aliases import get_aliases
+
 # Import Settings & Logging
-from settings.settings import settings
-from log.log import get_logger
+from backend.settings.settings import settings
+from backend.log.log import setup_logging, get_logger
 
 # Logger initialization
 logger = get_logger(__name__)
@@ -41,6 +44,9 @@ async def api_dns_reload(request: Request):
                 line = f"{h.get('name')}\t\t IN\tA\t{h.get('ipv4')}\n"
                 f.write(line)
 
+        # Get Domain
+        domain = get_config("domain")
+
         # Save DNS Reverse Configuration
         path = settings.DNS_REVERSE_FILE
         with open(path, "w", encoding="utf-8") as f:
@@ -49,11 +55,11 @@ async def api_dns_reload(request: Request):
                 if ip:
                     parts = ip.split(".")
                     rev = f"{parts[-1]}.{parts[-2]}"
-                    line = f"{rev}\t\t IN PTR\t{h.get('name')}.{settings.DOMAIN}\n"
+                    line = f"{rev}\t\t IN PTR\t{h.get('name')}.{domain}\n"
                     f.write(line)
 
         # Get Aliases List
-        hosts = get_aliases()
+        aliases = get_aliases()
 
         # Save DNS Aliases Configuration
         path = settings.DNS_ALIAS_FILE

@@ -3,14 +3,17 @@
 # Import standard modules
 import logging
 import os
+
 # Import backend modules
 from backend.db.db import init_db
+import backend.db.config
 import backend.db.users
 import backend.db.hosts
 import backend.db.aliases
+
 # Import Settings & Logging
-from settings.settings import settings
-from log.log import setup_logging, get_logger
+from backend.settings.settings import settings
+from backend.log.log import setup_logging, get_logger
 
 # ------------------------------------------------------------------------------
 # Welcome log

@@ -15,8 +15,6 @@ RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 # Copy full application
 COPY backend backend
 COPY frontend frontend
-COPY log log
-COPY settings settings
 
 # ---------- STAGE 2: Alpine Runtime ----------
 FROM python:3.12-alpine

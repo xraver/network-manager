@@ -6,11 +6,12 @@ import logging
 import os
 import re
 import sqlite3
+
 # Import local modules
 from backend.db.db import get_db, register_init
-# Import Settings & Logging
-from settings.settings import settings
-from log.log import get_logger
+
+# Import Logging
+from backend.log.log import setup_logging, get_logger
 
 # Logger initialization
 logger = get_logger(__name__)
@@ -196,16 +197,6 @@ def delete_host(host_id: int) -> bool:
 # -----------------------------
 @register_init
 def init_db_hosts_table(cur):
-
-    # SETTINGS TABLE
-    cur.execute("""
-        CREATE TABLE settings (
-            key TEXT PRIMARY KEY,
-            value TEXT
-        );
-    """)
-    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("domain", settings.DOMAIN))
-    cur.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ("external_name", settings.EXTERNAL_NAME))
 
     # HOSTS TABLE
     cur.execute("""

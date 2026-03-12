@@ -1,4 +1,4 @@
-# backend/config.py
+# backend/settings/config.py
 
 # ---------------------------------------------------------
 # APP

@@ -1,4 +1,4 @@
-# backend/default.py
+# backend/settings/default.py
 
 # ---------------------------------------------------------
 # Frontend

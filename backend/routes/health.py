@@ -5,9 +5,10 @@ from fastapi import APIRouter
 import sqlite3
 import time
 import os
+
 # Import Settings & Logging
-from settings.settings import settings
-from log.log import get_logger
+from backend.settings.settings import settings
+from backend.log.log import setup_logging, get_logger
 
 # Logger initialization
 logger = get_logger(__name__)
