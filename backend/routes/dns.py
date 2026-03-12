@@ -44,9 +44,6 @@ async def api_dns_reload(request: Request):
                 line = f"{h.get('name')}\t\t IN\tA\t{h.get('ipv4')}\n"
                 f.write(line)
 
-        # Get Domain
-        domain = get_config("domain")
-
         # Save DNS Reverse Configuration
         path = settings.DNS_REVERSE_FILE
         with open(path, "w", encoding="utf-8") as f:
@@ -55,7 +52,7 @@ async def api_dns_reload(request: Request):
                 if ip:
                     parts = ip.split(".")
                     rev = f"{parts[-1]}.{parts[-2]}"
-                    line = f"{rev}\t\t IN PTR\t{h.get('name')}.{domain}\n"
+                    line = f"{rev}\t\t IN PTR\t{h.get('name')}.{settings.DOMAIN}\n"
                     f.write(line)
 
         # Get Aliases List

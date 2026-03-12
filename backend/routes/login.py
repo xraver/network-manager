@@ -7,6 +7,7 @@ import os
 import time
 
 # Import local modules
+from backend.db.config import get_config
 from backend.security import verify_login, apply_session, close_session
 
 # Import Settings & Logging
@@ -22,9 +23,9 @@ def check_rate_limit(ip: str):
     now = time.time()
     attempts = login_attempts.get(ip, [])
     # tieni solo tentativi negli ultimi LOGIN_WINDOW_SECONDS secondi
-    attempts = [t for t in attempts if now - t < settings.LOGIN_WINDOW_SECONDS]
+    attempts = [t for t in attempts if now - t < int(get_config("login_window_seconds"))]
 
-    if len(attempts) >= settings.LOGIN_MAX_ATTEMPTS:
+    if len(attempts) >= int(get_config("login_max_attempts")):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
