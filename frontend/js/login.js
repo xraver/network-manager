@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Disabilita UI + spinner
         const originalBtnHTML = btn.innerHTML;
-	if(btn) {
+        if(btn) {
             btn.disabled = true;
             btn.setAttribute('aria-busy', 'true');
             btn.innerHTML = `
@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 Accesso...
             `;
         }
-
 
         try {
             const fetchPromise = fetch('/api/login', {
@@ -93,60 +92,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 signal: inFlightController.signal
             });
 
-
             // error after 5s?
             // await Promise.race([ fetchPromise, timeout(5000, inFlightController.signal) ]);
             const res = await fetchPromise;
 
-            // Parse JSON resiliente
-            let data = {};
+            // Check content-type to avoid parsing errors
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+                const err = new Error(`${res.status}: ${res.statusText}`);
+                err.status = res.status;
+                throw err;
+            }
+
+            // Check JSON
+            let data;
             try {
                 data = await res.json();
             } catch {
-                // Se il server non risponde con JSON valido
-                data = { status: 'error', error: 'Risposta non valida dal server.' };
+                throw new Error('Invalid JSON payload');
             }
 
-            // Gestione HTTP non-OK come errore
+            // Check JSON errors
             if (!res.ok) {
-                // Usa messaggio server se presente, altrimenti status
-                const errMsg = (typeof data?.error === 'string' && data.error.trim())
-                    ? data.error.trim()
-                    : `Errore ${res.status} durante il login.`;
-                throw new Error(errMsg);
+                const serverMsg = data?.detail?.message?.trim();
+                const base = `Error during login`;
+                const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+                err.status = res.status;
+                throw err;
             }
 
-            // Gestione logica dell'API
-            if (data?.status === 'ok') {
-                // Redirect alla pagina host
-                location.assign('/hosts');
-                return;
-            } else {
-                const msg = (typeof data?.error === 'string' && data.error.trim())
-                    ? data.error.trim()
-                    : 'Credenziali non valide.';
-                // Credenziali errate -> metti focus su username, marca entrambi
-                showError(msg, { focus: 'username', markUser: true, markPass: true });
-                return;
-            }
+            // Login Success
+            // Redirect to main page (hosts)
+            location.assign('/hosts');
+            return;
+
         } catch (err) {
-          // Se è stato abortito, non mostrare errori
-          //if (inFlightController?.signal.aborted) return;
-          // Errori di rete o eccezioni
-          const msg = err?.message || 'Errore di connessione. Riprova.';
-          // Se è un timeout personalizzato, messaggio ad hoc
-          if (msg === 'Timeout di rete') {
-               showError('Il server non risponde. Riprova tra poco.', { focus: 'username' });
-          } else {
-              showError(msg, { focus: 'username' });
-          }
+            // Se è stato abortito, non mostrare errori
+            //if (inFlightController?.signal.aborted) return;
+            // Errori di rete o eccezioni
+            showError(err?.message || 'Connection error, please retry.', { focus: 'username', markUser: true, markPass: true });
         } finally {
             // Ripristina bottone
             if(btn) {
-                 btn.disabled = false;
-                 btn.removeAttribute('aria-busy');
-                 btn.innerHTML = originalBtnHTML ?? 'Entra';
-	    }
+                btn.disabled = false;
+                btn.removeAttribute('aria-busy');
+                btn.innerHTML = originalBtnHTML ?? 'Entra';
+            }
             // controller consumato
             inFlightController = null;
         }

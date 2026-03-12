@@ -27,9 +27,11 @@ def check_rate_limit(ip: str):
 
     if len(attempts) >= int(get_config("login_max_attempts")):
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={
-                "error": "Too many login attempts"
+                "code": "LOGIN_ERROR",
+                "status": "failure",
+                "message": "Too many login attempts"
             },
         )
 
@@ -56,9 +58,15 @@ def css_login():
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/session.js"))
 
 # ---------------------------------------------------------
-# API ENDPOINTS
+# Login API
 # ---------------------------------------------------------
-@router.post("/api/login")
+@router.post("/api/login", status_code=status.HTTP_200_OK, responses={
+    200: {"description": "Login successful"},
+    401: {"description": "Invalid credentials"},
+    403: {"description": "Account locked"}, # GRGR TBD
+    429: {"description": "Too many login attempts"},
+    500: {"description": "Internal server error"},
+})
 def api_login(request: Request, data: dict, response: Response):
     ip = request.client.host
     check_rate_limit(ip)
@@ -71,11 +79,33 @@ def api_login(request: Request, data: dict, response: Response):
         login_attempts.pop(ip, None)
 
         apply_session(response, username=user)
-        return {"status": "ok"}
+        response.status_code = status.HTTP_200_OK
+        return {
+            "code": "LOGIN_SUCCESS",
+            "status": "success",
+            "message": "Login successful",
+        }
 
-    return {"error": "Wrong credentials"}
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "code": "LOGIN_ERROR",
+            "status": "failure",
+            "message": "Invalid credentials",
+        },
+    )
 
-@router.post("/api/logout")
+# ---------------------------------------------------------
+# Logout API
+# ---------------------------------------------------------
+@router.post("/api/logout", status_code=status.HTTP_200_OK, responses={
+    200: {"description": "Logout successful"}
+})
 def api_logout(response: Response):
     close_session(response)
-    return {"status": "logged_out"}
+    response.status_code = status.HTTP_200_OK
+    return {
+        "code": "LOGOUT_SUCCESS",
+        "status": "success",
+        "message": "Logout successful",
+    }
