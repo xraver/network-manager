@@ -64,9 +64,33 @@ async def api_dns_reload(request: Request):
         # Save DNS Aliases Configuration
         path = settings.DNS_ALIAS_FILE
         with open(path, "w", encoding="utf-8") as f:
-            for h in hosts:
-                line = f"{h.get('name')}\t\t IN\tCNAME\t{h.get('target')}\n"
+            for a in aliases:
+                line = f"{a.get('name')}\t\t IN\tCNAME\t{a.get('target')}\n"
                 f.write(line)
+
+        # Get Ext_Cname
+        ext_cname = get_config("external_name")
+
+        # Save DNS Host and Aliases for the EXT DNS
+        path = settings.DNS_HOST_FILE + "_ext"
+        with open(path, "w", encoding="utf-8") as f:
+            for h in hosts:
+                vis = h.get('visibility')
+                if (vis == 1):
+                    line = f"{h.get('name')}\t\t IN\tA\t{h.get('ipv4')}\n"
+                    f.write(line)
+                if (vis == 2):
+                    line = f"{h.get('name')}\t\t IN\tCNAME\t{ext_cname}\n"
+                    f.write(line)
+
+            for a in aliases:
+                vis = a.get('visibility')
+                if (vis == 1):
+                    line = f"{a.get('name')}\t\t IN\tCNAME\t{a.get('target')}\n"
+                    f.write(line)
+                if (vis == 2):
+                    line = f"{a.get('name')}\t\t IN\tCNAME\t{ext_cname}\n"
+                    f.write(line)
 
         # RELOAD DNS
 

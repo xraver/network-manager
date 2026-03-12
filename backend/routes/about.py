@@ -17,10 +17,9 @@ router = APIRouter()
 # ---------------------------------------------------------
 @router.get("/about")
 def about():
-    domain = get_config("domain")
     return {
         "app": {
             "version": settings.APP_VERSION,
         },
-        "domain": domain,
+        "domain": settings.DOMAIN,
     }
