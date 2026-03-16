@@ -51,8 +51,8 @@ def api_get_aliases(request: Request):
         aliases = get_aliases()
         return aliases or []
 
-    except Exception as e:
-        logger.exception("Error getting list alias %s", str(e).strip())
+    except Exception as err:
+        logger.exception("Error getting list alias %s", str(err).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -86,8 +86,8 @@ def api_get_alias(request: Request, alias_id: int):
             )
         return alias
 
-    except Exception as e:
-        logger.exception("Error adding alias %s: %s", alias_id, str(e).strip())
+    except Exception as err:
+        logger.exception("Error adding alias %s: %s", alias_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -142,8 +142,8 @@ def api_add_alias(request: Request, data: dict):
     except HTTPException as httpe:
         raise httpe
 
-    except Exception as e:
-        logger.exception("Error adding alias: %s", str(e).strip())
+    except Exception as err:
+        logger.exception("Error adding alias: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -196,8 +196,8 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
             },
         )
 
-    except Exception as e:
-        logger.exception("Error updating alias %s: %s", alias_id, str(e).strip())
+    except Exception as err:
+        logger.exception("Error updating alias %s: %s", alias_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -250,8 +250,8 @@ def api_delete_alias(request: Request, alias_id: int):
             },
         )
 
-    except Exception as e:
-        logger.exception("Error deleting alias %s: %s", alias_id, str(e).strip())
+    except Exception as err:
+        logger.exception("Error deleting alias %s: %s", alias_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

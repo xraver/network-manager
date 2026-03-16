@@ -60,7 +60,7 @@ async def api_dns_reload(request: Request):
 
     except Exception as err:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        logger.exception("Error executing backup: %s", str(e).strip())
+        logger.exception("Error executing backup: %s", str(err).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={

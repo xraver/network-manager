@@ -51,8 +51,8 @@ def api_get_hosts(request: Request):
         hosts = get_hosts()
         return hosts or []
 
-    except Exception as e:
-        logger.exception("Error getting list host %s", str(e).strip())
+    except Exception as err:
+        logger.exception("Error getting list host %s", str(err).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -86,8 +86,8 @@ def api_get_host(request: Request, host_id: int):
             )
         return host
 
-    except Exception as e:
-        logger.exception("Error adding host %s: %s", host_id, str(e).strip())
+    except Exception as err:
+        logger.exception("Error adding host %s: %s", host_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -142,8 +142,8 @@ def api_add_host(request: Request, data: dict):
     except HTTPException as httpe:
         raise httpe
 
-    except Exception as e:
-        logger.exception("Error adding host: %s", str(e).strip())
+    except Exception as err:
+        logger.exception("Error adding host: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -196,8 +196,8 @@ def api_update_host(request: Request, data: dict, host_id: int):
             },
         )
 
-    except Exception as e:
-        logger.exception("Error updating host %s: %s", host_id, str(e).strip())
+    except Exception as err:
+        logger.exception("Error updating host %s: %s", host_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -250,8 +250,8 @@ def api_delete_host(request: Request, host_id: int):
             },
         )
 
-    except Exception as e:
-        logger.exception("Error deleting host %s: %s", host_id, str(e).strip())
+    except Exception as err:
+        logger.exception("Error deleting host %s: %s", host_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

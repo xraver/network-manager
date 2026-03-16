@@ -27,7 +27,10 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Reload
 # ---------------------------------------------------------
-@router.post("/api/dhcp/reload")
+@router.post("/api/dhcp/reload", status_code=status.HTTP_200_OK, responses={
+    200: {"description": "DHCP configuration reload successfully"},
+    500: {"description": "Internal server error"},
+})
 async def api_dhcp_reload(request: Request):
 
     # Inizializzazioni
@@ -99,7 +102,11 @@ async def api_dhcp_reload(request: Request):
 # ---------------------------------------------------------
 # Get Leases
 # ---------------------------------------------------------
-@router.get("/api/dhcp/leases")
+@router.get("/api/dhcp/leases", status_code=status.HTTP_200_OK, responses={
+    200: {"description": "Leases found"},
+    404: {"description": "Leases not found"},
+    500: {"description": "Internal server error"},
+})
 def api_dhcp_leases(request: Request):
 
     # Inizializzazioni

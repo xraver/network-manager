@@ -27,7 +27,10 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Reload
 # ---------------------------------------------------------
-@router.post("/api/dns/reload")
+@router.post("/api/dns/reload", status_code=status.HTTP_200_OK, responses={
+    200: {"description": "DNS configuration reload successfully"},
+    500: {"description": "Internal server error"},
+})
 async def api_dns_reload(request: Request):
 
     # Inizializzazioni
