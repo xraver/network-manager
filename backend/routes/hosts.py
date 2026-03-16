@@ -2,7 +2,7 @@
 
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse
 import ipaddress
 import time
 import os
@@ -122,16 +122,13 @@ def api_add_host(request: Request, data: dict):
         host_id = add_host(data)
         if(host_id > 0):
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
+            return {
                     "code": "HOST_ADDED",
                     "status": "success",
                     "message": "Host added successfully",
                     "host_id": host_id,
                     "took_ms": took_ms,
-                },
-            )
+                }
 
         # Already present
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
@@ -178,16 +175,13 @@ def api_update_host(request: Request, data: dict, host_id: int):
         updated = update_host(host_id, data)
         if updated:
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
+            return {
                     "code": "HOST_UPDATED",
                     "status": "success",
                     "message": "Host updated successfully",
                     "host_id": host_id,
                     "took_ms": took_ms,
-                },
-            )
+                }
 
         # Not Found
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
@@ -236,15 +230,12 @@ def api_delete_host(request: Request, host_id: int):
         deleted = delete_host(host_id)
         if deleted:
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
+            return {
                     "code": "HOST_DELETED",
                     "status": "success",
                     "message": "Host deleted successfully",
                     "details": {"took_ms": took_ms, "host_id": host_id,},
-                },
-            )
+                }
 
         # Not Found
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000

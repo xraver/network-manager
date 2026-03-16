@@ -2,7 +2,7 @@
 
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse
 import asyncio
 import json
 import os
@@ -69,15 +69,12 @@ async def api_backup(request: Request):
         save_aliases()
 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
+        return {
                 "code": "BACKUP_OK",
                 "status": "success",
                 "message": "BACKUP executed successfully",
                 "took_ms": took_ms,
-            },
-        )
+            }
 
     except HTTPException:
         raise

@@ -2,7 +2,7 @@
 
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse
 import ipaddress
 import time
 import os
@@ -122,16 +122,13 @@ def api_add_alias(request: Request, data: dict):
         alias_id = add_alias(data)
         if(alias_id > 0):
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
+            return {
                     "code": "ALIAS_ADDED",
                     "status": "success",
                     "message": "Alias added successfully",
                     "alias_id": alias_id,
                     "took_ms": took_ms,
-                },
-            )
+                }
 
         # Already present
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
@@ -178,16 +175,13 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
         updated = update_alias(alias_id, data)
         if updated:
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
+            return {
                     "code": "ALIAS_UPDATED",
                     "status": "success",
                     "message": "Alias updated successfully",
                     "alias_id": alias_id,
                     "took_ms": took_ms,
-                },
-            )
+                }
 
         # Not Found
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
@@ -236,15 +230,12 @@ def api_delete_alias(request: Request, alias_id: int):
         deleted = delete_alias(alias_id)
         if deleted:
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
+            return {
                     "code": "ALIAS_DELETED",
                     "status": "success",
                     "message": "Alias deleted successfully",
                     "details": {"took_ms": took_ms, "alias_id": alias_id,},
-                },
-            )
+                }
 
         # Not Found
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000

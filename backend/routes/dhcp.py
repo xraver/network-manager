@@ -2,7 +2,7 @@
 
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse
 import asyncio
 import csv
 import json
@@ -76,15 +76,12 @@ async def api_dhcp_reload(request: Request):
         # RELOAD DHCP
 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-                content={
+        return {
                 "code": "DHCP_RELOAD_OK",
                 "status": "success",
                 "message": "DHCP configuration reload successfully",
                 "took_ms": took_ms,
-            },
-        )
+            }
 
     except HTTPException:
         raise
@@ -161,12 +158,9 @@ def api_dhcp_leases(request: Request):
         with path.open("r", encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             if not reader.fieldnames:
-                return JSONResponse(
-                    status_code=status.HTTP_200_OK,
-                    content={
+                return {
                         "total": 0, "items": []
-                    },
-                )
+                    }
 
             for raw in reader:
                 rec = { _norm(k): (v if v is not None else "") for k, v in raw.items() }
@@ -187,13 +181,10 @@ def api_dhcp_leases(request: Request):
                 }
                 items.append(item)
 
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
+        return {
                 "total": len(items),
                 "items": items
-            },
-        )
+            }
 
     except Exception as err:
         logger.exception("Error reading DHCP leases: %s", str(err).strip())

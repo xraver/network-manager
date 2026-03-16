@@ -2,7 +2,7 @@
 
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 import os
 import time
 
