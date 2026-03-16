@@ -11,6 +11,7 @@ import time
 
 # Import local modules
 from backend.db.hosts import get_hosts
+from backend.db.aliases import get_aliases
 
 # Import Settings & Logging
 from backend.settings.settings import settings
@@ -23,29 +24,49 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 # ---------------------------------------------------------
+# Save Hosts DB
+# ---------------------------------------------------------
+def save_host():
+    # Get Hosts List
+    hosts = get_hosts()
+
+    # Backup Hosts DB
+    path = settings.DATA_PATH + "/hosts.json"
+    with open(path, "w", encoding="utf-8") as f:
+        for h in hosts:
+            f.write(json.dumps(h, ensure_ascii=False) + "\n")
+
+# ---------------------------------------------------------
+# Save Aliases DB
+# ---------------------------------------------------------
+def save_aliases():
+    # Get Aliases List
+    aliases = get_aliases()
+
+    # Backup Aliases DB
+    path = settings.DATA_PATH + "/aliases.json"
+    with open(path, "w", encoding="utf-8") as f:
+        for a in aliases:
+            f.write(json.dumps(a, ensure_ascii=False) + "\n")
+
+# ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------
-@router.get("/api/backup")
+@router.get("/api/backup", status_code=status.HTTP_200_OK, responses={
+    200: {"description": "Backup executed successfully"},
+    500: {"description": "Internal server error"},
+})
 async def api_dns_reload(request: Request):
-    start_ns = time.monotonic_ns()
 
     # Inizializzazioni
-    error = False
-    message = None
-    code = None
-    status = None
-    dns_hosts = []
-    dns_reverse = []
+    start_ns = time.monotonic_ns()
 
     try:
-        # Get Hosts List
-        hosts = get_hosts()
-
         # Backup Hosts DB
-        path = settings.DATA_PATH + "/hosts.json"
-        with open(path, "w", encoding="utf-8") as f:
-            for h in hosts:
-                f.write(json.dumps(h, ensure_ascii=False) + "\n")
+        save_host()
+
+        # Backup Aliases DB
+        save_aliases()
 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         return JSONResponse(
