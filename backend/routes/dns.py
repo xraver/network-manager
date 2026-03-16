@@ -124,6 +124,9 @@ async def api_dns_reload(request: Request):
             },
         )
 
+    except HTTPException:
+        raise
+
     except Exception as err:
         logger.exception("Error reloading DNS: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000

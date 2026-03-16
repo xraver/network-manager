@@ -51,6 +51,9 @@ def api_get_hosts(request: Request):
         hosts = get_hosts()
         return hosts or []
 
+    except HTTPException:
+        raise
+
     except Exception as err:
         logger.exception("Error getting list host %s", str(err).strip())
         raise HTTPException(
@@ -85,6 +88,9 @@ def api_get_host(request: Request, host_id: int):
                 },
             )
         return host
+
+    except HTTPException:
+        raise
 
     except Exception as err:
         logger.exception("Error adding host %s: %s", host_id, str(err).strip())
@@ -139,8 +145,8 @@ def api_add_host(request: Request, data: dict):
             },
         )
 
-    except HTTPException as httpe:
-        raise httpe
+    except HTTPException:
+        raise
 
     except Exception as err:
         logger.exception("Error adding host: %s", str(err).strip())
@@ -196,6 +202,9 @@ def api_update_host(request: Request, data: dict, host_id: int):
             },
         )
 
+    except HTTPException:
+        raise
+
     except Exception as err:
         logger.exception("Error updating host %s: %s", host_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
@@ -249,6 +258,9 @@ def api_delete_host(request: Request, host_id: int):
                 "took_ms": took_ms,
             },
         )
+
+    except HTTPException:
+        raise
 
     except Exception as err:
         logger.exception("Error deleting host %s: %s", host_id, str(err).strip())

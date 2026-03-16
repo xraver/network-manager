@@ -51,6 +51,9 @@ def api_get_aliases(request: Request):
         aliases = get_aliases()
         return aliases or []
 
+    except HTTPException:
+        raise
+
     except Exception as err:
         logger.exception("Error getting list alias %s", str(err).strip())
         raise HTTPException(
@@ -85,6 +88,9 @@ def api_get_alias(request: Request, alias_id: int):
                 },
             )
         return alias
+
+    except HTTPException:
+        raise
 
     except Exception as err:
         logger.exception("Error adding alias %s: %s", alias_id, str(err).strip())
@@ -139,8 +145,8 @@ def api_add_alias(request: Request, data: dict):
             },
         )
 
-    except HTTPException as httpe:
-        raise httpe
+    except HTTPException:
+        raise
 
     except Exception as err:
         logger.exception("Error adding alias: %s", str(err).strip())
@@ -196,6 +202,9 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
             },
         )
 
+    except HTTPException:
+        raise
+
     except Exception as err:
         logger.exception("Error updating alias %s: %s", alias_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
@@ -249,6 +258,9 @@ def api_delete_alias(request: Request, alias_id: int):
                 "took_ms": took_ms,
             },
         )
+
+    except HTTPException:
+        raise
 
     except Exception as err:
         logger.exception("Error deleting alias %s: %s", alias_id, str(err).strip())

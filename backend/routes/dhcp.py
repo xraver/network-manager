@@ -86,6 +86,9 @@ async def api_dhcp_reload(request: Request):
             },
         )
 
+    except HTTPException:
+        raise
+
     except Exception as err:
         logger.exception("Error reloading DHCP: %s", str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000

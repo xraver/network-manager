@@ -31,7 +31,7 @@ def save_host():
     hosts = get_hosts()
 
     # Backup Hosts DB
-    path = settings.DATA_PATH + "/hosts.json"
+    path = os.path.join(settings.DATA_PATH, "hosts.json")
     with open(path, "w", encoding="utf-8") as f:
         for h in hosts:
             f.write(json.dumps(h, ensure_ascii=False) + "\n")
@@ -44,7 +44,7 @@ def save_aliases():
     aliases = get_aliases()
 
     # Backup Aliases DB
-    path = settings.DATA_PATH + "/aliases.json"
+    path = os.path.join(settings.DATA_PATH, "aliases.json")
     with open(path, "w", encoding="utf-8") as f:
         for a in aliases:
             f.write(json.dumps(a, ensure_ascii=False) + "\n")
@@ -56,7 +56,7 @@ def save_aliases():
     200: {"description": "Backup executed successfully"},
     500: {"description": "Internal server error"},
 })
-async def api_dns_reload(request: Request):
+async def api_backup(request: Request):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
@@ -78,6 +78,9 @@ async def api_dns_reload(request: Request):
                 "took_ms": took_ms,
             },
         )
+
+    except HTTPException:
+        raise
 
     except Exception as err:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
