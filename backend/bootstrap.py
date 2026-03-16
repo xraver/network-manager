@@ -64,7 +64,7 @@ def print_goodbye(logger):
 # ================================
 # Create DB if needed
 # ================================
-def docker_create_db(logger):
+def create_db(logger):
     # Reset database if requested
     if settings.DB_RESET and os.path.exists(settings.DB_FILE):
         logger.info("Removing existing database: %s", settings.DB_FILE)
@@ -95,7 +95,7 @@ def bootstrap():
     print_welcome(logger)
 
     # Create or update database
-    docker_create_db(logger)
+    create_db(logger)
 
     #os.makedirs(DATA_DIR, exist_ok=True)
     #os.makedirs(BIND_DIR, exist_ok=True)

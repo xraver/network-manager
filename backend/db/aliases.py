@@ -81,7 +81,7 @@ def add_alias(data: Dict[str, Any]) -> int:
     try:
         cur = conn.execute(
             """
-			INSERT INTO aliases (name, target, note, ssl_enabled, visibility) 
+			INSERT INTO aliases (name, target, note, ssl_enabled, visibility)
 			VALUES (?, ?, ?, ?, ?)
 			""",
             (

@@ -6,19 +6,19 @@
 ### 🔄 DB management at startup
 
 - [X] **If the database is empty**
-  - [ ] Import initial YAML
+  - [ ] Import initial JSON
   - [X] Populate the database
 
 - [X] **If the database exists**
-  - [ ] Ignore YAML **unless the repository file has changed**
-  - [ ] If YAML has changed → update the DB
+  - [ ] Ignore JSON **unless the repository file has changed**
+  - [ ] If JSON has changed → update the DB
 
 ---
 
 ### 🛠️ Updates made by the Webapp
 
 - [X] Apply changes to the database
-- [ ] Regenerate YAML from the DB
+- [X] Regenerate JSON from the DB
 - [ ] Perform **commit + push** on Git
 - [ ] Regenerate **from scratch**:
   - [ ] **BIND (DNS)** configuration
@@ -35,18 +35,6 @@
 
 ---
 
-### 🔍 YAML ↔ DB Periodic Consistency
-
-- [ ] Calculate YAML **expected checksum**
-- [ ] Compare with **actual checksum**
-- [ ] Determine which element has changed
-
-#### Synchronization rules
-- [ ] YAML changed → update DB
-- [ ] DB changed → regenerate YAML
-
----
-
 ## 🧩 Configuration Generation
 
 ### 🧪 BIND (DNS)
@@ -56,7 +44,7 @@
 - [ ] Syntax validation (`named-checkconf`, `named-checkzone`)
 - [ ] Rollback management in case of errors
 - [ ] Update external DNS
-  - [ ] Dedicated file
+  - [X] Dedicated file
   - [ ] OVH
   - [ ] Cloudflare
 
@@ -115,6 +103,8 @@
 
 ### 🔧 Backup & Recovery
 - [X] Backup generation
+- [X] Backup restore
+- [ ] Backup/Restore from web
 - [ ] Periodic backup of SQLite DB
 - [ ] Remote Git repository backup
 - [ ] Backup of generated configurations
