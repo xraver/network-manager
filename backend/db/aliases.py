@@ -2,16 +2,15 @@
 
 # Import standard modules
 import ipaddress
-import logging
-import os
 import re
 import sqlite3
+from typing import Any, Dict, List, Optional
 
 # Import local modules
 from backend.db.db import get_db, register_init
 
 # Import Logging
-from backend.log.log import setup_logging, get_logger
+from backend.log.log import get_logger
 
 # Logger initialization
 logger = get_logger(__name__)
@@ -19,7 +18,7 @@ logger = get_logger(__name__)
 # -----------------------------
 # Check Data Input
 # -----------------------------
-def validate_data(data: dict) -> dict:
+def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
     # Check name
     if "name" not in data:
         raise ValueError("Missing required field: name")
@@ -55,7 +54,7 @@ def validate_data(data: dict) -> dict:
 # -----------------------------
 # SELECT ALL ALIASES
 # -----------------------------
-def get_aliases():
+def get_aliases() -> List[Dict[str, Any]]:
     conn = get_db()
     cur = conn.execute("SELECT * FROM aliases ORDER BY target")
     rows = [dict(r) for r in cur.fetchall()]
@@ -64,7 +63,7 @@ def get_aliases():
 # -----------------------------
 # SELECT SINGLE ALIAS
 # -----------------------------
-def get_alias(alias_id: int):
+def get_alias(alias_id: int) -> Optional[Dict[str, Any]]:
     conn = get_db()
     cur = conn.execute("SELECT * FROM aliases WHERE id = ?", (alias_id,))
     row = cur.fetchone()
@@ -73,7 +72,7 @@ def get_alias(alias_id: int):
 # -----------------------------
 # ADD ALIAS
 # -----------------------------
-def add_alias(data: dict):
+def add_alias(data: Dict[str, Any]) -> int:
 
     # Validate input
     cleaned = validate_data(data)
@@ -81,30 +80,34 @@ def add_alias(data: dict):
     conn = get_db()
     try:
         cur = conn.execute(
-            "INSERT INTO aliases (name, target, note, ssl_enabled, visibility) VALUES (?, ?, ?, ?, ?)",
+            """
+			INSERT INTO aliases (name, target, note, ssl_enabled, visibility) 
+			VALUES (?, ?, ?, ?, ?)
+			""",
             (
                 cleaned["name"],
                 cleaned["target"],
                 cleaned["note"],
                 cleaned["ssl_enabled"],
                 cleaned["visibility"],
-            )
+            ),
         )
         conn.commit()
         return cur.lastrowid
 
-    except sqlite3.IntegrityError as e:
+    except sqlite3.IntegrityError:
         conn.rollback()
         return -1
 
-    except Exception as e:
+    except Exception as err:
         conn.rollback()
+        logger.error(f"ALIASES DB: Error adding alias - {err}")
         raise
 
 # -----------------------------
 # UPDATE ALIAS
 # -----------------------------
-def update_alias(alias_id: int, data: dict) -> bool:
+def update_alias(alias_id: int, data: Dict[str, Any]) -> bool:
 
     # Validate input
     cleaned = validate_data(data)
@@ -124,13 +127,14 @@ def update_alias(alias_id: int, data: dict) -> bool:
                 cleaned["ssl_enabled"],
                 cleaned["visibility"],
                 alias_id,
-            )
+            ),
         )
         conn.commit()
         return cur.rowcount > 0
 
-    except Exception:
+    except Exception as err:
         conn.rollback()
+        logger.error(f"ALIASES DB: Error updating alias - {err}")
         raise
 
 # -----------------------------
@@ -144,26 +148,24 @@ def delete_alias(alias_id: int) -> bool:
 
     conn = get_db()
     try:
-        cur = conn.execute(
-            "DELETE FROM aliases WHERE id = ?",
-            (alias_id,)
-        )
+        cur = conn.execute("DELETE FROM aliases WHERE id = ?", (alias_id,))
         conn.commit()
-
         return cur.rowcount > 0
 
-    except Exception:
+    except Exception as err:
         conn.rollback()
+        logger.error(f"ALIASES DB: Error deleting alias - {err}")
         raise
 
 # -----------------------------
 # Initialize Aliases DB Table
 # -----------------------------
 @register_init
-def init_db_alias_table(cur):
+def init_db_alias_table(cur: sqlite3.Cursor) -> None:
 
     # ALIASES TABLE
-    cur.execute("""
+    cur.execute(
+        """
         CREATE TABLE aliases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
@@ -173,7 +175,23 @@ def init_db_alias_table(cur):
             visibility INTEGER NOT NULL DEFAULT 0,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+        """
+    )
     cur.execute("CREATE INDEX idx_aliases_name ON aliases(name);")
 
     logger.info("ALIASES DB: Database initialized successfully")
+
+# -----------------------------
+# Reset Aliases DB Table
+# -----------------------------
+def reset_aliases_db() -> None:
+    conn = get_db()
+    try:
+        conn.execute("DELETE FROM aliases;")
+        conn.execute("DELETE FROM sqlite_sequence WHERE name='aliases';")
+        conn.commit()
+
+    except Exception as err:
+        conn.rollback()
+        logger.error(f"ALIASES DB: Error resetting tables - {err}")
+        raise
