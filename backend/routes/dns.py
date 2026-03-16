@@ -41,7 +41,10 @@ async def api_dns_reload(request: Request):
         path = settings.DNS_HOST_FILE
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
-                line = f"{h.get('name')}\t\t IN\tA\t{h.get('ipv4')}\n"
+                name   = h.get("name").ljust(20)
+                rtype  = "A".ljust(8)
+                target = h.get("ipv4")
+                line = f"{name} IN {rtype} {target}\n"
                 f.write(line)
 
         # Save DNS Reverse Configuration
@@ -50,9 +53,12 @@ async def api_dns_reload(request: Request):
             for h in hosts:
                 ip = h.get("ipv4")
                 if ip:
-                    parts = ip.split(".")
-                    rev = f"{parts[-1]}.{parts[-2]}"
-                    line = f"{rev}\t\t IN PTR\t{h.get('name')}.{settings.DOMAIN}\n"
+                    parts  = ip.split(".")
+                    rev    = f"{parts[-1]}.{parts[-2]}"
+                    ip     = rev.ljust(20)
+                    rtype  = "PTR".ljust(8)
+                    target = h.get("name")+ "." + settings.DOMAIN
+                    line = f"{ip} IN {rtype} {target}\n"
                     f.write(line)
 
         # Get Aliases List
@@ -62,7 +68,10 @@ async def api_dns_reload(request: Request):
         path = settings.DNS_ALIAS_FILE
         with open(path, "w", encoding="utf-8") as f:
             for a in aliases:
-                line = f"{a.get('name')}\t\t IN\tCNAME\t{a.get('target')}\n"
+                name   = a.get("name").ljust(20)
+                rtype  = "CNAME".ljust(8)
+                target = a.get("target")
+                line = f"{name} IN {rtype} {target}\n"
                 f.write(line)
 
         # Get Ext_Cname
@@ -72,21 +81,31 @@ async def api_dns_reload(request: Request):
         path = settings.DNS_HOST_FILE + "_ext"
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
+                name   = h.get("name").ljust(20)
                 vis = h.get('visibility')
                 if (vis == 1):
-                    line = f"{h.get('name')}\t\t IN\tA\t{h.get('ipv4')}\n"
+                    rtype  = "A".ljust(8)
+                    target = h.get("ipv4")
+                    line = f"{name} IN {rtype} {target}\n"
                     f.write(line)
                 if (vis == 2):
-                    line = f"{h.get('name')}\t\t IN\tCNAME\t{ext_cname}\n"
+                    rtype  = "CNAME".ljust(8)
+                    target = ext_cname + "."
+                    line = f"{name} IN {rtype} {target}\n"
                     f.write(line)
 
             for a in aliases:
+                name   = a.get("name").ljust(20)
                 vis = a.get('visibility')
                 if (vis == 1):
-                    line = f"{a.get('name')}\t\t IN\tCNAME\t{a.get('target')}\n"
+                    rtype  = "CNAME".ljust(8)
+                    target = a.get("target") + "." + settings.DOMAIN + "."
+                    line = f"{name} IN {rtype} {target}\n"
                     f.write(line)
                 if (vis == 2):
-                    line = f"{a.get('name')}\t\t IN\tCNAME\t{ext_cname}\n"
+                    rtype  = "CNAME".ljust(8)
+                    target = ext_cname + "."
+                    line = f"{name} IN {rtype} {target}\n"
                     f.write(line)
 
         # RELOAD DNS

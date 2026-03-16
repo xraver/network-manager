@@ -49,7 +49,7 @@ ADMIN_PASSWORD_HASH_FILE = "/run/secrets/admin_password_hash"
 # DNS
 # ---------------------------------------------------------
 DNS_HOST_FILE=f"/dns/etc/{DOMAIN}/hosts.inc"
-DNS_ALIAS_FILE=f"/dns/etc/{DOMAIN}/alias.inc"
+DNS_ALIAS_FILE=f"/dns/etc/{DOMAIN}/aliases.inc"
 DNS_REVERSE_FILE="/dns/etc/reverse/hosts.inc"
 
 # ---------------------------------------------------------
