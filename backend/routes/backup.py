@@ -24,8 +24,8 @@ router = APIRouter()
 # API ENDPOINTS
 # ---------------------------------------------------------
 @router.get(
-    "/api/backup", 
-    status_code=status.HTTP_200_OK, 
+    "/api/backup",
+    status_code=status.HTTP_200_OK,
     responses={
         200: {"description": "Backup executed with success or failure result"},
         500: {"description": "Internal server error"},
@@ -40,9 +40,9 @@ async def api_backup(request: Request):
         # Backup DB
         result = backup()
         errors = result.get("errors") or []
-        
+ 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-        
+
         if errors:
             logger.warning("Backup executed with %d error(s)", len(errors))
             return {
@@ -81,8 +81,8 @@ async def api_backup(request: Request):
 # API: Restore from backup
 # ---------------------------------------------------------
 @router.get(
-    "/api/restore", 
-    status_code=status.HTTP_200_OK, 
+    "/api/restore",
+    status_code=status.HTTP_200_OK,
     responses={
         200: {"description": "Restore executed with success or failure result"},
         500: {"description": "Internal server error"},
@@ -95,8 +95,9 @@ async def api_restore(request: Request):
         # Restore hosts DB
         result = restore()
         errors = (result.get("errors") or [])
-        
+ 
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+
         if errors:
             return {
                 "code": "RESTORE_ERROR",
@@ -129,3 +130,4 @@ async def api_restore(request: Request):
                 "took_ms": took_ms,
             },
         )
+

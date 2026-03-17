@@ -192,7 +192,7 @@ def restore_aliases() -> Dict[str, Any]:
 # Backup DB
 # ---------------------------------------------------------
 def backup() -> Dict[str, Any]:
-    
+ 
     hosts_result = store_hosts()
     aliases_result = store_aliases()
     errors = (hosts_result.get("errors") or []) + (aliases_result.get("errors") or [])
@@ -220,7 +220,7 @@ def restore(cleanup: bool = True) -> Dict[str, Any]:
         except Exception as e:
             logger.exception("Cleanup failed %s", str(e).strip())
             raise
- 
+
     hosts_result = restore_hosts()
     aliases_result = restore_aliases()
     errors = (hosts_result.get("errors") or []) + (aliases_result.get("errors") or [])
