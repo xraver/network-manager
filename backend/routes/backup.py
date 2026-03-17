@@ -40,7 +40,7 @@ async def api_backup(request: Request):
         # Backup DB
         result = backup()
         errors = result.get("errors") or []
- 
+
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
         if errors:
@@ -95,7 +95,7 @@ async def api_restore(request: Request):
         # Restore hosts DB
         result = restore()
         errors = (result.get("errors") or [])
- 
+
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
         if errors:

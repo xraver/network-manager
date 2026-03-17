@@ -192,7 +192,7 @@ def restore_aliases() -> Dict[str, Any]:
 # Backup DB
 # ---------------------------------------------------------
 def backup() -> Dict[str, Any]:
- 
+
     hosts_result = store_hosts()
     aliases_result = store_aliases()
     errors = (hosts_result.get("errors") or []) + (aliases_result.get("errors") or [])
