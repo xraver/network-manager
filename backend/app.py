@@ -12,6 +12,7 @@ import os
 # Import Routers
 from backend.routes.about import router as about_router
 from backend.routes.backup import router as backup_router
+from backend.routes.certificates import router as certificates_router
 from backend.routes.health import router as health_router
 from backend.routes.login import router as login_router
 from backend.routes.hosts import router as hosts_router
@@ -200,6 +201,7 @@ def create_app() -> FastAPI:
     # Routers
     app.include_router(about_router)
     app.include_router(backup_router)
+    app.include_router(certificates_router)
     app.include_router(health_router)
     app.include_router(login_router)
     app.include_router(hosts_router)

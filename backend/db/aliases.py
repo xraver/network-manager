@@ -61,6 +61,15 @@ def get_aliases() -> List[Dict[str, Any]]:
     return rows
 
 # -----------------------------
+# SELECT ALL ALIASES with SSL Certificate
+# -----------------------------
+def get_aliases_certificates() -> List[Dict[str, Any]]:
+    conn = get_db()
+    cur = conn.execute("SELECT name FROM aliases WHERE ssl_enabled = 1")
+    rows = [dict(r) for r in cur.fetchall()]
+    return rows
+
+# -----------------------------
 # SELECT SINGLE ALIAS
 # -----------------------------
 def get_alias(alias_id: int) -> Optional[Dict[str, Any]]:

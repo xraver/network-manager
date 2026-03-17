@@ -94,6 +94,15 @@ def get_hosts() -> List[Dict[str, Any]]:
     return rows
 
 # -----------------------------
+# SELECT ALL HOSTS with SSL Certificate
+# -----------------------------
+def get_hosts_certificates() -> List[Dict[str, Any]]:
+    conn = get_db()
+    cur = conn.execute("SELECT name FROM hosts WHERE ssl_enabled = 1")
+    rows = [dict(r) for r in cur.fetchall()]
+    return rows
+
+# -----------------------------
 # SELECT SINGLE HOST
 # -----------------------------
 def get_host(host_id: int) -> Optional[Dict[str, Any]]:
