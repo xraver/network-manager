@@ -52,9 +52,8 @@ def api_get_certificates(request: Request):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
-                "code": "HOSTS_GET_ERROR",
+                "code": "SSL_CERTIFICATES_GET_ERROR",
                 "status": "failure",
-                "message": "Internal error getting host",
+                "message": "Internal error getting ssl certificates",
             },
         )
-
