@@ -10,6 +10,7 @@ import backend.db.config
 import backend.db.users
 import backend.db.hosts
 import backend.db.aliases
+from backend.backup import restore
 
 # Import Settings & Logging
 from backend.settings.settings import settings
@@ -82,6 +83,14 @@ def create_db(logger):
 
     # Initialize DB tables
     init_db()
+
+    # Restore from backup if requested
+    result = restore(cleanup=False)
+    errors = result.get("errors") or []
+    if errors:
+        logger.warning("Failed restoring database from backup")
+    else:
+        logger.info("Database succesfully restored from backup")
 
 # ------------------------------------------------------------------------------
 # Bootstrap: setup logging, print welcome, create DB, etc.

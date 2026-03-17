@@ -6,12 +6,11 @@
 ### 🔄 DB management at startup
 
 - [X] **If the database is empty**
-  - [ ] Import initial JSON
   - [X] Populate the database
+  - [X] Import initial JSON
 
 - [X] **If the database exists**
-  - [ ] Ignore JSON **unless the repository file has changed**
-  - [ ] If JSON has changed → update the DB
+  - [X] Ignore JSON
 
 ---
 
@@ -136,7 +135,7 @@
 
 # ⭐ Final checklist
 
-- [ ] Complete DB ↔ YAML management
+- [ ] Complete DB ↔ JSON management
 - [ ] BIND/Kea generation with validation & rollback
 - [ ] Git versioning
 - [ ] BIND/Kea health check
