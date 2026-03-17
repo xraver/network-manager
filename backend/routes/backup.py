@@ -23,7 +23,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # API ENDPOINTS
 # ---------------------------------------------------------
-@router.get(
+@router.post(
     "/api/backup",
     status_code=status.HTTP_200_OK,
     responses={
@@ -40,26 +40,15 @@ async def api_backup(request: Request):
         # Backup DB
         result = backup()
         errors = result.get("errors") or []
-
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
-        if errors:
-            logger.warning("Backup executed with %d error(s)", len(errors))
-            return {
-                "code": "BACKUP_ERROR",
-                "status": "failure",
-                "message": "Some operations failed",
-                "took_ms": took_ms,
-                "results": result,
-            }
-
         return {
-                "code": "BACKUP_OK",
-                "status": "success",
-                "message": "BACKUP executed successfully",
-                "took_ms": took_ms,
-                "results": result,
-            }
+            "code": "BACKUP_OK" if not errors else "BACKUP_ERROR",
+            "status": "success" if not errors else "failure",
+            "message": "BACKUP executed successfully" if not errors else "Some operations failed",
+            "took_ms": took_ms,
+            "results": result,
+        }
 
     except HTTPException:
         raise
@@ -80,7 +69,7 @@ async def api_backup(request: Request):
 # ---------------------------------------------------------
 # API: Restore from backup
 # ---------------------------------------------------------
-@router.get(
+@router.post(
     "/api/restore",
     status_code=status.HTTP_200_OK,
     responses={
@@ -92,28 +81,18 @@ async def api_restore(request: Request):
     start_ns = time.monotonic_ns()
 
     try:
-        # Restore hosts DB
+        # Restore DB
         result = restore()
         errors = (result.get("errors") or [])
-
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
-        if errors:
-            return {
-                "code": "RESTORE_ERROR",
-                "status": "failure",
-                "message": "Some operation failed",
-                "took_ms": took_ms,
-                "results": result,
-            }
-
         return {
-                "code": "RESTORE_OK",
-                "status": "success",
-                "message": "RESTORE executed successfully",
-                "took_ms": took_ms,
-                "results": result,
-            }
+            "code": "RESTORE_OK" if not errors else "RESTORE_ERROR",
+            "status": "success" if not errors else "failure",
+            "message": "RESTORE executed successfully" if not errors else "Some operations failed",
+            "took_ms": took_ms,
+            "results": result,
+        }
 
     except HTTPException:
         raise
@@ -130,4 +109,3 @@ async def api_restore(request: Request):
                 "took_ms": took_ms,
             },
         )
-

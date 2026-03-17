@@ -36,7 +36,7 @@ def verify_login(username, password):
         logger.error("Login Failed - password wrong for user %s", username)
         return False
 
-    logger.info("Login successful - user %s", username)
+    logger.debug("Login successful - user %s", username)
     return True
 
 # ----------------------------
@@ -47,11 +47,11 @@ def apply_session(response, username: str | None = None, token: str | None = Non
     # First Login
     if username is not None and token is None:
         token = signer.sign(username).decode()
-        logger.info("Session created - %s", username)
+        logger.debug("Session created - %s", username)
 
     if username is None:
         username = signer.unsign(token, max_age=86400).decode()
-        logger.info("Session updated - %s", username)
+        logger.debug("Session updated - %s", username)
 
     if username is None or token is None:
         logger.error("Session Error - missing username or token")
@@ -91,4 +91,4 @@ def close_session(response):
         path="/"
     )
 
-    logger.info("Session closed")
+    logger.debug("Session closed")

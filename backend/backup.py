@@ -236,4 +236,3 @@ def restore(cleanup: bool = True) -> Dict[str, Any]:
         # GRGR -> reset db in caso di errori
 
     return result
-
