@@ -563,18 +563,38 @@ async function clearSearch() {
 // Action Handlers
 // -----------------------------
 const actionHandlers = {
-  async delete(e, el) { handleDeleteHost(e, el); },
-
-  // edit is handled by bootstrap modal show event
-  edit(e, el) {
-    // no-op o log
-  },
-
-  // Reload DNS
-  async reloadDns(e, el) { reloadDNS(); },
-
-  // Reload DHCP
-  async reloadDhcp(e, el) { reloadDHCP(); },
+    // Delete host
+    delete: (e, el) => {
+        handleDeleteHost(e, el);
+    },
+    // Edit host
+    edit: () => {
+        // handled by bootstrap modal show event
+    },
+    // Reload DNS
+    reloadDns: async () => {
+        try {
+            const result = await reloadDNS();
+            const msg = (typeof result === 'object' && result?.message)
+                        ? result.message
+                        : 'DNS reload successfully';
+            showToast(msg, true);
+        } catch (err) {
+            showToast(err?.message || "Error reloading DNS", false);
+        }
+    },
+    // Reload DHCP
+    reloadDhcp: async () => {
+        try {
+            const result = await reloadDHCP();
+            const msg = (typeof result === 'object' && result?.message)
+                        ? result.message
+                        : 'DHCP reload successfully';
+            showToast(msg, true);
+        } catch (err) {
+            showToast(err?.message || "Error reloading DHCP", false);
+        }
+    },
 };
 
 // -----------------------------

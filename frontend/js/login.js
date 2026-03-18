@@ -122,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Login Success
-            // Redirect to main page (hosts)
-            location.assign('/hosts');
+            // Redirect to main page
+            location.assign('/home');
             return;
 
         } catch (err) {

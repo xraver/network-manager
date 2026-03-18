@@ -165,7 +165,11 @@ async def session_middleware(request: Request, call_next):
 # ------------------------------------------------------------------------------
 # Homepage
 def home(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "hosts.html"))
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "index.html"))
+
+# Homepage JS
+def js_home(request: Request):
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/index.js"))
 
 # CSS variables
 def css_variables(request: Request):
@@ -232,6 +236,9 @@ def create_app() -> FastAPI:
 
     # Route per file del frontend
     app.add_api_route("/", home, methods=["GET"])
+    app.add_api_route("/home", home, methods=["GET"])
+    app.add_api_route("/index.html", home, methods=["GET"])
+    app.add_api_route("/js/index.js", js_home, methods=["GET"])
     app.add_api_route("/css/variables.css", css_variables, methods=["GET"])
     app.add_api_route("/css/layout.css", css_layout, methods=["GET"])
     app.add_api_route("/js/common.js", js_common, methods=["GET"])

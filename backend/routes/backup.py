@@ -45,7 +45,7 @@ async def api_backup(request: Request):
         return {
             "code": "BACKUP_OK" if not errors else "BACKUP_ERROR",
             "status": "success" if not errors else "failure",
-            "message": "BACKUP executed successfully" if not errors else "Some operations failed",
+            "message": "Backup executed successfully" if not errors else "Some operations failed",
             "took_ms": took_ms,
             "results": result,
         }
@@ -89,7 +89,7 @@ async def api_restore(request: Request):
         return {
             "code": "RESTORE_OK" if not errors else "RESTORE_ERROR",
             "status": "success" if not errors else "failure",
-            "message": "RESTORE executed successfully" if not errors else "Some operations failed",
+            "message": "Restore executed successfully" if not errors else "Some operations failed",
             "took_ms": took_ms,
             "results": result,
         }

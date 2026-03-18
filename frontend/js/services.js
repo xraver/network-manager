@@ -1,109 +1,264 @@
-import { showToast } from './common.js';
+// -------------------------------------------------------
+// API Health Check
+// -------------------------------------------------------
+export async function apiCheck() {
+    const pill = document.getElementById('api-pill');
+    if (!pill) return;
+
+    try {
+        const r = await fetch('/api/health');
+        if (r.ok) {
+            pill.textContent = 'API OK';
+            pill.classList.remove('btn-outline-primary');
+            pill.classList.add('btn-primary');
+            return true;
+        } else {
+            pill.textContent = `API ${r.status}`;
+            return false;
+        }
+    } catch {
+        pill.textContent = 'API OFFLINE';
+        return false;
+    }
+}
 
 // -----------------------------
 // Reload DNS
 // -----------------------------
 export async function reloadDNS() {
+    let res;
     try {
         // Fetch data
-        const res = await fetch(`/api/dns/reload`, {
+        res = await fetch('/api/dns/reload', {
             method: 'POST',
             headers: { 'Accept': 'application/json' },
         });
-
-        // Success without JSON
-        if (res.status === 204) {
-            showToast('DNS reload successfully', true);
-            return true;
-        }
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error reloading DNS`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'DNS reload successfully', true);
-        return true;
-
     } catch (err) {
-        console.error(err?.message || "Error reloading DNS");
-        showToast(err?.message || "Error reloading DNS", false);
+        const msg = 'Network error while reloading DNS' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
     }
 
-    return false;
+    // Success without JSON
+    if (res.status === 204) {
+        return true;
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error reloading DNS: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error reloading DNS: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error reloading DNS' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    if (res.ok && (data.status === 'success' || data.code === 'DNS_RELOAD_OK')) {
+        // Success
+        return data?.message ? { message: data.message } : true;
+    } else {
+        // Failed with JSON error message
+        return data?.message ? { message: data.message } : false;
+    }
 }
 
 // -----------------------------
 // Reload DHCP action
 // -----------------------------
 export async function reloadDHCP() {
+    let res;
     try {
         // Fetch data
-        const res = await fetch(`/api/dhcp/reload`, {
+        res = await fetch(`/api/dhcp/reload`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+        });
+    } catch (err) {
+        const msg = 'Network error while reloading DHCP' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
+    }
+
+    // Success without JSON
+    if (res.status === 204) {
+        return true;
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error reloading DHCP: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error reloading DHCP: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error reloading DHCP' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    if (res.ok && (data.status === 'success' || data.code === 'DHCP_RELOAD_OK')) {
+        // Success
+        return data?.message ? { message: data.message } : true;
+    } else {
+        // Failed with JSON error message
+        return data?.message ? { message: data.message } : false;
+    }
+}
+
+// -------------------------------------------------------
+// Execute Backup
+// -------------------------------------------------------
+export async function doBackup() {
+    let res;
+
+    try {
+        // Fetch data
+        res = await fetch(`/api/backup`, {
             method: 'POST',
             headers: { 'Accept': 'application/json' },
         });
 
-        // Success without JSON
-        if (res.status === 204) {
-            showToast('DHCP reload successfully', true);
-            return true;
-        }
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Error reloading DHCP: Invalid JSON payload');
-        }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error reloadin DHCP`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'DHCP reload successfully', true);
-        return true;
-
-    } catch (err) {
-        console.error(err?.message || "Error reloading DHCP");
-        showToast(err?.message || "Error reloading DHCP", false);
+    } catch {
+        const msg = 'Network error while performing backup' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
     }
 
-    return false;
+    // Success without JSON
+    if (res.status === 204) {
+        return true;
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error performing backup: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error performing backup: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error performing backup' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_OK')) {
+        // Success
+        return data?.message ? { message: data.message } : true;
+    } else {
+        // Failed with JSON error message
+        return data?.message ? { message: data.message } : false;
+    }
+}
+
+// -------------------------------------------------------
+// Execute Restore
+// -------------------------------------------------------
+export async function doRestore(id) {
+    let res;
+
+    try {
+        // Fetch data
+        res = await fetch(`/api/restore`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: JSON.stringify({ backup_id: id })
+        });
+
+    } catch {
+        const msg = 'Network error while performing restore' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
+    }
+
+    // Success without JSON
+    if (res.status === 204) {
+        return true;
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error performing restore: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error performing restore: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error performing restore' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    if (res.ok && (data.status === 'success' || data.code === 'RESTORE_OK')) {
+        // Success
+        return data?.message ? { message: data.message } : true;
+    } else {
+        // Failed with JSON error message
+        return data?.message ? { message: data.message } : false;
+    }
 }
