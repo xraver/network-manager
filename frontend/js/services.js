@@ -6,7 +6,7 @@ export async function apiCheck() {
     if (!pill) return;
 
     try {
-        const r = await fetch('/api/health');
+        const r = await fetch('/about');
         if (r.ok) {
             pill.textContent = 'API OK';
             pill.classList.remove('btn-outline-primary');

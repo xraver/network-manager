@@ -289,6 +289,11 @@ if (restoreModal) {
 }
 
 // -------------------------------------------------------
-// KICKOFF
+// Periodic API Check
 // -------------------------------------------------------
-apiCheck();
+async function periodicTest() {
+    await apiCheck();
+    setTimeout(periodicTest, 10000);
+}
+
+periodicTest();
