@@ -136,6 +136,49 @@ body {
     font-style: italic;
 }
 
+/* Griglia tile */
+.tiles {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* Tile stile pfSense-like come login-box */
+.tile {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px;
+    box-shadow: 0 3px 6px var(--shadow-soft);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    color: var(--text-dark);
+}
+
+.tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--shadow-strong);
+    border-color: var(--accent-hover);
+}
+
+.tile h3 {
+    margin: 8px 0 4px 0;
+    font-size: 1.05rem;
+}
+
+.tile p {
+    margin: 0;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+/* Icone tile */
+.tile-icon {
+    font-size: 28px;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
 /* ================================
     Buttons
    ================================ */

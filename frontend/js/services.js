@@ -262,3 +262,58 @@ export async function doRestore(id) {
         return data?.message ? { message: data.message } : false;
     }
 }
+
+// -------------------------------------------------------
+// Check Health
+// -------------------------------------------------------
+export async function checkHealth() {
+    let res;
+
+    try {
+        // Fetch data
+        res = await fetch(`/api/health`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+    } catch (err) {
+        const msg = 'Network error while performing health check' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
+    }
+
+    // Success without JSON
+    if (res.status === 204) {
+        return true;
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error performing health check: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error performing health check: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error performing health check' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    return (data ?? []);
+}
