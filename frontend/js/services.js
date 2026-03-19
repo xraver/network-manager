@@ -153,7 +153,7 @@ export async function doBackup() {
             headers: { 'Accept': 'application/json' },
         });
 
-    } catch {
+    } catch (err) {
         const msg = 'Network error while performing backup' + (err?.message ? `: ${err.message}` : '');
         throw new Error(msg, { cause: err });
     }
@@ -215,7 +215,7 @@ export async function doRestore(id) {
             body: JSON.stringify({ backup_id: id })
         });
 
-    } catch {
+    } catch (err) {
         const msg = 'Network error while performing restore' + (err?.message ? `: ${err.message}` : '');
         throw new Error(msg, { cause: err });
     }

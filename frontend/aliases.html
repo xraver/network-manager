@@ -24,7 +24,7 @@
     <!-- Topbar -->
     <header class="topbar">
         <div class="topbar-inner">
-            <div class="logo">
+            <a href="/home" class="logo text-decoration-none">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true">
                     <circle cx="12" cy="4" r="2"></circle>
                     <circle cx="4" cy="12" r="2"></circle>
@@ -34,7 +34,7 @@
                     <line x1="6" y1="12" x2="18" y2="12" stroke="var(--accent)" stroke-width="2"></line>
                 </svg>
                 <span>Network Manager</span>
-            </div>
+            </a>
 
             <!-- Spacer -->
             <div class="col d-none d-md-block"></div>
@@ -47,7 +47,6 @@
                 <!-- Menu -->
                 <div class="collapse navbar-collapse" id="menuNav">
                     <div class="navbar-nav ms-auto gap-2">
-                        <a href="/home"    id="homeBtn"    class="btn btn-primary"        aria-current="page">Dashboard</a>
                         <a href="/hosts"   id="hostsBtn"   class="btn btn-primary"        aria-current="page">Hostname</a>
                         <a href="/aliases" id="aliasesBtn" class="btn btn-primary active" aria-current="page">Alias</a>
                         <button id="logoutBtn" class="btn btn-primary">Logout</button>
