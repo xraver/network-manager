@@ -78,13 +78,17 @@ def api_get_host(request: Request, host_id: int):
     try:
         host = get_host(host_id)
         if not host:  # None or empty dict
+            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={
                     "code": "HOST_NOT_FOUND",
                     "status": "failure",
                     "message": "Host not found",
-                    "host_id": host_id,
+                    "details": {
+                        "host_id": host_id,
+                        "took_ms": took_ms,
+                    },
                 },
             )
         return host
@@ -101,7 +105,10 @@ def api_get_host(request: Request, host_id: int):
                 "code": "HOST_GET_ERROR",
                 "status": "failure",
                 "message": "Internal error getting host",
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -126,8 +133,10 @@ def api_add_host(request: Request, data: dict):
                     "code": "HOST_ADDED",
                     "status": "success",
                     "message": "Host added successfully",
-                    "host_id": host_id,
-                    "took_ms": took_ms,
+                    "details": {
+                        "host_id": host_id,
+                        "took_ms": took_ms,
+                    },
                 }
 
         # Already present
@@ -138,7 +147,10 @@ def api_add_host(request: Request, data: dict):
                 "code": "HOST_ALREADY_PRESENT",
                 "status": "failure",
                 "message": "Host already present",
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -154,7 +166,10 @@ def api_add_host(request: Request, data: dict):
                 "code": "HOST_ADD_ERROR",
                 "status": "failure",
                 "message": "Internal error adding host",
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -179,8 +194,10 @@ def api_update_host(request: Request, data: dict, host_id: int):
                     "code": "HOST_UPDATED",
                     "status": "success",
                     "message": "Host updated successfully",
-                    "host_id": host_id,
-                    "took_ms": took_ms,
+                    "details": {
+                        "host_id": host_id,
+                        "took_ms": took_ms,
+                    },
                 }
 
         # Not Found
@@ -191,8 +208,10 @@ def api_update_host(request: Request, data: dict, host_id: int):
                 "code": "HOST_NOT_FOUND",
                 "status": "failure",
                 "message": "Host not found",
-                "host_id": host_id,
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -208,8 +227,10 @@ def api_update_host(request: Request, data: dict, host_id: int):
                 "code": "HOST_UPDATE_ERROR",
                 "status": "failure",
                 "message": "Internal error updating host",
-                "host_id": host_id,
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -234,7 +255,10 @@ def api_delete_host(request: Request, host_id: int):
                     "code": "HOST_DELETED",
                     "status": "success",
                     "message": "Host deleted successfully",
-                    "details": {"took_ms": took_ms, "host_id": host_id,},
+                    "details": {
+                        "host_id": host_id,
+                        "took_ms": took_ms,
+                    },
                 }
 
         # Not Found
@@ -245,8 +269,10 @@ def api_delete_host(request: Request, host_id: int):
                 "code": "HOST_NOT_FOUND",
                 "status": "failure",
                 "message": "Host not found",
-                "host_id": host_id,
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -262,7 +288,9 @@ def api_delete_host(request: Request, host_id: int):
                 "code": "HOST_DELETE_ERROR",
                 "status": "failure",
                 "message": "Internal error deleting host",
-                "host_id": host_id,
-                "took_ms": took_ms,
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
             },
         )

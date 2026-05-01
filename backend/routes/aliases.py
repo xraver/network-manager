@@ -78,13 +78,17 @@ def api_get_alias(request: Request, alias_id: int):
     try:
         alias = get_alias(alias_id)
         if not alias:  # None or empty dict
+            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={
                     "code": "ALIAS_NOT_FOUND",
                     "status": "failure",
                     "message": "Alias not found",
-                    "alias_id": alias_id,
+                    "details": {
+                        "alias_id": alias_id,
+                        "took_ms": took_ms,
+                    },
                 },
             )
         return alias
@@ -101,7 +105,10 @@ def api_get_alias(request: Request, alias_id: int):
                 "code": "ALIAS_GET_ERROR",
                 "status": "failure",
                 "message": "Internal error getting alias",
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -126,8 +133,10 @@ def api_add_alias(request: Request, data: dict):
                     "code": "ALIAS_ADDED",
                     "status": "success",
                     "message": "Alias added successfully",
-                    "alias_id": alias_id,
-                    "took_ms": took_ms,
+                    "details": {
+                        "alias_id": alias_id,
+                        "took_ms": took_ms,
+                    },
                 }
 
         # Already present
@@ -138,7 +147,10 @@ def api_add_alias(request: Request, data: dict):
                 "code": "ALIAS_ALREADY_PRESENT",
                 "status": "failure",
                 "message": "Alias already present",
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -154,7 +166,10 @@ def api_add_alias(request: Request, data: dict):
                 "code": "ALIAS_ADD_ERROR",
                 "status": "failure",
                 "message": "Internal error adding alias",
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -179,8 +194,10 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
                     "code": "ALIAS_UPDATED",
                     "status": "success",
                     "message": "Alias updated successfully",
-                    "alias_id": alias_id,
-                    "took_ms": took_ms,
+                    "details": {
+                        "alias_id": alias_id,
+                        "took_ms": took_ms,
+                    },
                 }
 
         # Not Found
@@ -191,8 +208,10 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
                 "code": "ALIAS_NOT_FOUND",
                 "status": "failure",
                 "message": "Alias not found",
-                "alias_id": alias_id,
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -208,8 +227,10 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
                 "code": "ALIAS_UPDATE_ERROR",
                 "status": "failure",
                 "message": "Internal error updating alias",
-                "alias_id": alias_id,
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -234,7 +255,10 @@ def api_delete_alias(request: Request, alias_id: int):
                     "code": "ALIAS_DELETED",
                     "status": "success",
                     "message": "Alias deleted successfully",
-                    "details": {"took_ms": took_ms, "alias_id": alias_id,},
+                    "details": {
+                        "alias_id": alias_id,
+                        "took_ms": took_ms,
+                    },
                 }
 
         # Not Found
@@ -245,8 +269,10 @@ def api_delete_alias(request: Request, alias_id: int):
                 "code": "ALIAS_NOT_FOUND",
                 "status": "failure",
                 "message": "Alias not found",
-                "alias_id": alias_id,
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
 
@@ -262,7 +288,9 @@ def api_delete_alias(request: Request, alias_id: int):
                 "code": "ALIAS_DELETE_ERROR",
                 "status": "failure",
                 "message": "Internal error deleting alias",
-                "alias_id": alias_id,
-                "took_ms": took_ms,
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
             },
         )
