@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional
 
 # Import local modules
 from backend.db.db import get_db, register_init
+from backend.utils import normalize
 
 # Import Logging
 from backend.log.log import get_logger
@@ -33,8 +34,8 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
     if not target:
         raise ValueError("Field 'target' cannot be empty")
 
-    # Check note
-    note = data.get("note")
+    # Check Description
+    description = data.get("description")
 
     # Boolean normalization for DB (0/1)
     ssl_enabled = int(bool(data.get("ssl_enabled", 0)))
@@ -44,9 +45,9 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
     visibility = v if v in (0, 1, 2) else 0
 
     return {
-        "name": name,
-        "target": target,
-        "note": note,
+        "name": normalize(name),
+        "target": normalize(target),
+        "description": normalize(description),
         "ssl_enabled": ssl_enabled,
         "visibility": visibility,
     }
@@ -90,13 +91,13 @@ def add_alias(data: Dict[str, Any]) -> int:
     try:
         cur = conn.execute(
             """
-			INSERT INTO aliases (name, target, note, ssl_enabled, visibility)
-			VALUES (?, ?, ?, ?, ?)
-			""",
+            INSERT INTO aliases (name, target, description, ssl_enabled, visibility)
+            VALUES (?, ?, ?, ?, ?)
+            """,
             (
                 cleaned["name"],
                 cleaned["target"],
-                cleaned["note"],
+                cleaned["description"],
                 cleaned["ssl_enabled"],
                 cleaned["visibility"],
             ),
@@ -126,13 +127,13 @@ def update_alias(alias_id: int, data: Dict[str, Any]) -> bool:
         cur = conn.execute(
             """
             UPDATE aliases
-            SET name=?, target=?, note=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
+            SET name=?, target=?, description=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
             WHERE id=?
             """,
             (
                 cleaned["name"],
                 cleaned["target"],
-                cleaned["note"],
+                cleaned["description"],
                 cleaned["ssl_enabled"],
                 cleaned["visibility"],
                 alias_id,
@@ -179,7 +180,7 @@ def init_db_alias_table(cur: sqlite3.Cursor) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             target TEXT NOT NULL,
-            note TEXT,
+            description TEXT,
             ssl_enabled INTEGER NOT NULL DEFAULT 0,
             visibility INTEGER NOT NULL DEFAULT 0,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP

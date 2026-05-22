@@ -11,7 +11,7 @@ from backend.db.db import get_db, register_init
 
 # Import Settings & Logging
 from backend.settings.settings import settings
-from backend.log.log import setup_logging, get_logger
+from backend.log.log import get_logger
 
 # Logger initialization
 logger = get_logger(__name__)
@@ -75,7 +75,7 @@ def init_db_users_table(cur):
             last_failed_at INTEGER,
             last_login_at INTEGER,
             password_changed_at INTEGER,
-            notes TEXT,
+            description TEXT,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL
         );

@@ -110,13 +110,12 @@
     <table id="dataTable" class="table table-bordered table-hover align-middle">
         <thead class="table-light">
             <tr>
-                <th data-type="string" data-sortable="true">Hostname <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv4"   data-sortable="true">IPv4     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv6"   data-sortable="true">IPv6     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="mac"    data-sortable="true">MAC      <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true">Note     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true">Options  <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="false">Actions <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Hostname   <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="ipv4"   data-sortable="true">IP Address <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="mac"    data-sortable="true">MAC Address<span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Description<span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Options    <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Actions   <span class="sort-arrow" aria-hidden="true"></span></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -158,8 +157,8 @@
                         </div>
 
                         <div class="mb-2">
-                            <label for="hostNote" class="form-label">Note</label>
-                            <input type="text" id="hostNote" class="form-control">
+                            <label for="hostDescription" class="form-label">Description</label>
+                            <input type="text" id="hostDescription" class="form-control">
                         </div>
 
                         <div class="form-check my-2">

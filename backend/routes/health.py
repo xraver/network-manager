@@ -8,7 +8,7 @@ import os
 
 # Import Settings & Logging
 from backend.settings.settings import settings
-from backend.log.log import setup_logging, get_logger
+from backend.log.log import get_logger
 
 # Logger initialization
 logger = get_logger(__name__)

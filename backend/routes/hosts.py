@@ -18,7 +18,7 @@ from backend.db.hosts import (
 
 # Import Settings & Logging
 from backend.settings.settings import settings
-from backend.log.log import setup_logging, get_logger
+from backend.log.log import get_logger
 
 # Logger initialization
 logger = get_logger(__name__)
@@ -47,6 +47,7 @@ def js_hosts():
     500: {"description": "Internal server error"},
 })
 def api_get_hosts(request: Request):
+
     try:
         hosts = get_hosts()
         return hosts or []
@@ -91,7 +92,7 @@ def api_get_host(request: Request, host_id: int):
                     },
                 },
             )
-        return host
+        return host or []
 
     except HTTPException:
         raise

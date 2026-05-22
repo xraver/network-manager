@@ -98,10 +98,10 @@ async function loadAliases() {
             tr.appendChild(td);
         }
 
-        // Note
+        // Description
         {
             const td = document.createElement("td");
-            const val = (h.note ?? "").toString();
+            const val = (h.description ?? "").toString();
             td.textContent = val;
             if (val) td.setAttribute("data-value", val.toLowerCase());
             tr.appendChild(td);
@@ -271,7 +271,7 @@ async function editAlias(id) {
     // Pre-fill the form fields
     document.getElementById("aliasName").value = data.name ?? "";
     document.getElementById("aliasTarget").value = data.target ?? "";
-    document.getElementById("aliasNote").value = data.note ?? "";
+    document.getElementById("aliasDescription").value = data.description ?? "";
     document.getElementById("aliasSSL").checked = !!data.ssl_enabled;
     if (data.visibility == 0) {
         document.getElementById("aliasVisibilityLocal").checked = true;
@@ -417,7 +417,7 @@ async function handleAddAliasSubmit(e) {
         const data = {
             name:  document.getElementById('aliasName').value.trim(),
             target: document.getElementById('aliasTarget').value.trim(),
-            note:   document.getElementById('aliasNote').value.trim(),
+            description:   document.getElementById('aliasDescription').value.trim(),
             ssl_enabled: document.getElementById('aliasSSL').checked ? 1 : 0,
             visibility: Number(
                 document.querySelector('input[name="aliasVisibility"]:checked')?.value ?? 0

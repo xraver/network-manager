@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional
 
 # Import local modules
 from backend.db.db import get_db, register_init
+from backend.utils import normalize
 
 # Import Logging
 from backend.log.log import get_logger
@@ -50,8 +51,8 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
     if mac and not MAC_RE.match(mac):
         raise ValueError(f"Invalid MAC address: {mac}")
 
-    # Check note
-    note = data.get("note")
+    # Check description
+    description = data.get("description")
 
     # Normalizzazione boolean per DB (0/1)
     ssl_enabled = int(bool(data.get("ssl_enabled", 0)))
@@ -61,11 +62,11 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
     visibility = v if v in (0, 1, 2) else 0
 
     return {
-        "name": name,
-        "ipv4": ipv4,
-        "ipv6": ipv6,
-        "mac": mac,
-        "note": note,
+        "name": normalize(name),
+        "ipv4": normalize(ipv4),
+        "ipv6": normalize(ipv6),
+        "mac": normalize(mac),
+        "description": normalize(description),
         "ssl_enabled": ssl_enabled,
         "visibility": visibility,
     }
@@ -123,7 +124,7 @@ def add_host(data: Dict[str, Any]) -> int:
     try:
         cur = conn.execute(
            """
-           INSERT INTO hosts (name, ipv4, ipv6, mac, note, ssl_enabled, visibility)
+           INSERT INTO hosts (name, ipv4, ipv6, mac, description, ssl_enabled, visibility)
            VALUES (?, ?, ?, ?, ?, ?, ?)
            """,
             (
@@ -131,7 +132,7 @@ def add_host(data: Dict[str, Any]) -> int:
                 cleaned["ipv4"],
                 cleaned["ipv6"],
                 cleaned["mac"],
-                cleaned["note"],
+                cleaned["description"],
                 cleaned["ssl_enabled"],
                 cleaned["visibility"],
             ),
@@ -161,7 +162,7 @@ def update_host(host_id: int, data: Dict[str, Any]) -> bool:
         cur = conn.execute(
             """
             UPDATE hosts
-            SET name=?, ipv4=?, ipv6=?, mac=?, note=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
+            SET name=?, ipv4=?, ipv6=?, mac=?, description=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
             WHERE id=?
             """,
             (
@@ -169,7 +170,7 @@ def update_host(host_id: int, data: Dict[str, Any]) -> bool:
                 cleaned["ipv4"],
                 cleaned["ipv6"],
                 cleaned["mac"],
-                cleaned["note"],
+                cleaned["description"],
                 cleaned["ssl_enabled"],
                 cleaned["visibility"],
                 host_id,
@@ -218,7 +219,7 @@ def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
             ipv4 TEXT,
             ipv6 TEXT,
             mac TEXT,
-            note TEXT,
+            description TEXT,
             ssl_enabled INTEGER NOT NULL DEFAULT 0,
             visibility INTEGER NOT NULL DEFAULT 0,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -234,7 +235,7 @@ def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             value TEXT NOT NULL,
-            note TEXT,
+            description TEXT,
             host_id INTEGER,
             FOREIGN KEY (host_id) REFERENCES hosts(id)
         );

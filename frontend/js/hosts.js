@@ -98,15 +98,6 @@ async function loadHosts() {
             tr.appendChild(td);
         }
 
-        // IPv6
-        {
-            const td = document.createElement("td");
-            const raw = (h.ipv6 ?? "").toString().trim();
-            td.textContent = raw;
-            if (raw) td.setAttribute("data-value", raw.toLowerCase());
-            tr.appendChild(td);
-        }
-
         // MAC
         {
             const td = document.createElement("td");
@@ -117,10 +108,10 @@ async function loadHosts() {
             tr.appendChild(td);
         }
 
-        // Note
+        // Description
         {
             const td = document.createElement("td");
-            const val = (h.note ?? "").toString();
+            const val = (h.description ?? "").toString();
             td.textContent = val;
             if (val) td.setAttribute("data-value", val.toLowerCase());
             tr.appendChild(td);
@@ -292,7 +283,7 @@ async function editHost(id) {
     document.getElementById("hostIPv4").value = data.ipv4 ?? "";
     document.getElementById("hostIPv6").value = data.ipv6 ?? "";
     document.getElementById("hostMAC").value = data.mac ?? "";
-    document.getElementById("hostNote").value = data.note ?? "";
+    document.getElementById("hostDescription").value = data.description ?? "";
     document.getElementById("hostSSL").checked = !!data.ssl_enabled;
     if (data.visibility == 0) {
         document.getElementById("hostVisibilityLocal").checked = true;
@@ -450,7 +441,7 @@ async function handleAddHostSubmit(e) {
             ipv4:  document.getElementById('hostIPv4').value.trim(),
             ipv6:  document.getElementById('hostIPv6').value.trim(),
             mac:   document.getElementById('hostMAC').value.trim(),
-            note:  document.getElementById('hostNote').value.trim(),
+            description:  document.getElementById('hostDescription').value.trim(),
             ssl_enabled: document.getElementById('hostSSL').checked ? 1 : 0,
             visibility: Number(
                 document.querySelector('input[name="hostVisibility"]:checked')?.value ?? 0
