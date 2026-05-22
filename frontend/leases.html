@@ -47,9 +47,10 @@
                 <!-- Menu -->
                 <div class="collapse navbar-collapse" id="menuNav">
                     <div class="navbar-nav ms-auto gap-2">
-                        <a href="/hosts"   id="hostsBtn"   class="btn btn-primary active" aria-current="page">Hostname</a>
+                        <a href="/hosts"   id="hostsBtn"   class="btn btn-primary"        aria-current="page">Hostname</a>
                         <a href="/aliases" id="aliasesBtn" class="btn btn-primary"        aria-current="page">Alias</a>
-                        <a href="/leases"  id="leasesBtn"  class="btn btn-primary"        aria-current="page">DHCP Leases</a>
+                        <a href="/leases"  id="leasesBtn"  class="btn btn-primary active" aria-current="page">DHCP Leases</a>
+                        <a href="/devices" id="devicesBtn" class="btn btn-primary"        aria-current="page">Devices</a>
                         <button id="logoutBtn" class="btn btn-primary">Logout</button>
                     </div>
                 </div>
@@ -68,7 +69,7 @@
                 <div class="col-12 col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon">🖧</span>
-                        <span class="section-title">Host List</span>
+                        <span class="section-title">DHCP Leases</span>
                     </h2>
                 </div>
 
@@ -90,10 +91,6 @@
 
                 <!-- Bottoni -->
                 <div class="col-12 col-md-auto d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary" title="Add Host" aria-label="Add Host"
-                            data-bs-toggle="modal" data-bs-target="#addHostModal">
-                        <i class="bi bi-plus-lg"></i><span class="label"> Add Host</span>
-                    </button>
                     <button class="btn btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS"
                             data-action="reloadDns">
                         <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DNS</span>
@@ -111,12 +108,13 @@
     <table id="dataTable" class="table table-bordered table-hover align-middle d-none">
         <thead class="table-light">
             <tr>
-                <th data-type="string" data-sortable="true">Hostname   <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="ipv4"   data-sortable="true">IP Address <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="mac"    data-sortable="true">MAC Address<span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true">Description<span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true">Options    <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="false">Actions   <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="ipv4"   data-sortable="true">IP Address<span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="mac"    data-sortable="true">MAC       <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Hostname  <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">Start     <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">End       <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="true">State     <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Actions  <span class="sort-arrow" aria-hidden="true"></span></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -206,7 +204,7 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="js/hosts.js"></script>
+    <script type="module" src="js/leases.js"></script>
     <script type="module" src="js/session.js"></script>
 
     <!-- Bootstrap JS -->
