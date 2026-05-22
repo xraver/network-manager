@@ -24,7 +24,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     LANG=C.UTF-8
 
 # librerie runtime
-RUN apk add --no-cache libffi openssl sqlite-libs
+RUN apk add --no-cache libffi openssl sqlite-libs iputils
 
 WORKDIR /app
 

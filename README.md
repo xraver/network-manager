@@ -151,6 +151,7 @@ secrets:
 | `DHCP4_LEASES_FILE` | /dhcp/lib/dhcp4.leases | KEA-DHCP4 leases file |
 | `DHCP6_HOST_FILE` | /dhcp/etc/hosts-ipv6.json | KEA-DHCP6 Hosts file |
 | `DHCP6_LEASES_FILE` | /dhcp/lib/dhcp6.leases | KEA-DHCP6 leases file |
+| `PING_WORKERS` | 25 | Number of threads used for pinging |
 
 ---
 

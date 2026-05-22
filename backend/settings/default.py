@@ -59,3 +59,8 @@ DHCP4_HOST_FILE="/dhcp/etc/hosts-ipv4.json"
 DHCP4_LEASES_FILE="/dhcp/lib/dhcp4.leases"
 DHCP6_HOST_FILE="/dhcp/etc/hosts-ipv6.json"
 DHCP6_LEASES_FILE="/dhcp/lib/dhcp6.leases"
+
+# ---------------------------------------------------------
+# APP Features
+# ---------------------------------------------------------
+PING_WORKERS = 25

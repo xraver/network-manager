@@ -52,6 +52,10 @@ def print_welcome(logger):
         "DHCP: ipv4 host file=%s | ipv4 leases file=%s | ipv6 host file=%s | ipv6 leases file=%s",
         settings.DHCP4_HOST_FILE, settings.DHCP4_LEASES_FILE, settings.DHCP6_HOST_FILE, settings.DHCP6_LEASES_FILE
     )
+    logger.info(
+        "App features: ping_workers=%d",
+        settings.PING_WORKERS
+    )
 
 # ------------------------------------------------------------------------------
 # Shutdown log

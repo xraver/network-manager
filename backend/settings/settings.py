@@ -95,6 +95,9 @@ class Settings(BaseModel):
     DHCP6_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_HOST_FILE", default.DHCP6_HOST_FILE))
     DHCP6_LEASES_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_LEASES_FILE", default.DHCP6_LEASES_FILE))
 
+    # APP Features
+    PING_WORKERS: int = Field(default_factory=lambda: int(os.getenv("PING_WORKERS", default.PING_WORKERS)))
+
     def model_post_init(self, __context) -> None:
         if self.DEVEL:
             ts = datetime.datetime.now().strftime("%Y%m%d-%H%M")

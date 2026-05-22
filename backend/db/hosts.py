@@ -87,10 +87,19 @@ def ipv4_sort_key(h: Dict[str, Any]):
 # -----------------------------
 # SELECT ALL HOSTS
 # -----------------------------
-def get_hosts() -> List[Dict[str, Any]]:
+def get_hosts(filter_devices: bool = False) -> List[Dict[str, Any]]:
     conn = get_db()
-    cur = conn.execute("SELECT * FROM hosts")
-    rows = [dict(r) for r in cur.fetchall()]
+    if (filter_devices != True):
+        cur = conn.execute("SELECT * FROM hosts")
+    else:
+        cur = conn.execute("SELECT id, ipv4, mac, name, description FROM hosts WHERE ipv4 IS NOT NULL AND mac IS NOT NULL")
+
+    rows = []
+    for r in cur.fetchall():
+        item = dict(r)
+        if (filter_devices == True):
+            item["id"] = f"s-{item['id']}"
+        rows.append(item)
     rows.sort(key=ipv4_sort_key)
     return rows
 
