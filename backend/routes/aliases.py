@@ -75,6 +75,9 @@ def api_get_aliases(request: Request):
 })
 def api_get_alias(request: Request, alias_id: int):
 
+    # Inizializzazioni
+    start_ns = time.monotonic_ns()
+
     try:
         alias = get_alias(alias_id)
         if not alias:  # None or empty dict

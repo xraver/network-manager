@@ -302,12 +302,12 @@ async function editHost(id) {
     document.getElementById("hostMAC").value = data.mac ?? "";
     document.getElementById("hostDescription").value = data.description ?? "";
     document.getElementById("hostSSL").checked = !!data.ssl_enabled;
-    if (data.visibility == 0) {
-        document.getElementById("hostVisibilityLocal").checked = true;
+    if (data.visibility == 2) {
+        document.getElementById("hostVisibilityAlias").checked = true;
     } else if (data.visibility == 1){
         document.getElementById("hostVisibilityGlobal").checked = true;
     } else {
-        document.getElementById("hostVisibilityAlias").checked = true;
+        document.getElementById("hostVisibilityLocal").checked = true;
     }
 }
 

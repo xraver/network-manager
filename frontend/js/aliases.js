@@ -290,12 +290,12 @@ async function editAlias(id) {
     document.getElementById("aliasTarget").value = data.target ?? "";
     document.getElementById("aliasDescription").value = data.description ?? "";
     document.getElementById("aliasSSL").checked = !!data.ssl_enabled;
-    if (data.visibility == 0) {
-        document.getElementById("aliasVisibilityLocal").checked = true;
+    if (data.visibility == 2) {
+        document.getElementById("aliasVisibilityAlias").checked = true;
     } else if (data.visibility == 1){
         document.getElementById("aliasVisibilityGlobal").checked = true;
     } else {
-        document.getElementById("aliasVisibilityAlias").checked = true;
+        document.getElementById("aliasVisibilityLocal").checked = true;
     }
 }
 
@@ -611,7 +611,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 e.stopPropagation();    // evita che arrivi al listener globale
                 resetSorting(sortState);
                 clearSearch();          // svuota input e ricarica tabella (come definito nella tua funzione)
-                filterHosts('');        // ripristina tabella
+                filterAliases('');        // ripristina tabella
             }
         });
     }
@@ -628,7 +628,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             e.preventDefault();
             resetSorting(sortState);
             clearSearch();
-            filterHosts('');
+            filterAliases('');
         }
     });
 

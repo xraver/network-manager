@@ -76,6 +76,9 @@ def api_get_hosts(request: Request):
 })
 def api_get_host(request: Request, host_id: int):
 
+    # Inizializzazioni
+    start_ns = time.monotonic_ns()
+
     try:
         host = get_host(host_id)
         if not host:  # None or empty dict
