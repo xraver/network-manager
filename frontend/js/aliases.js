@@ -13,7 +13,17 @@ const sortState = { sortDirection: {}, lastSort: null };
 // -----------------------------
 async function loadAliases() {
     let aliases = [];
+    const loader = document.getElementById("loader");
+    const container = document.getElementById("devices-container");
+    const dataTable = document.getElementById("dataTable");
+
+    // hide table during loading to avoid flickering and show loader
+    dataTable.classList.add("d-none");
+
     try {
+        // Show loader
+        loader.style.display = "block";
+
         // Fetch data
         const res = await fetch(`/api/aliases`, {
             headers: { Accept: 'application/json' },
@@ -50,6 +60,9 @@ async function loadAliases() {
         console.error(err?.message || "Error loading aliases");
         showToast(err?.message || "Error loading aliase", false);
         aliases = [];
+        // hide loader and show table
+        loader.style.display = "none";
+        dataTable.classList.remove("d-none");
     }
 
     // DOM Reference
@@ -226,6 +239,10 @@ async function loadAliases() {
             sortTable(lastSort.colIndex, sortState);
         }
     }
+
+    // hide loader and show table
+    loader.style.display = "none";
+    dataTable.classList.remove("d-none");
 }
 
 // -----------------------------

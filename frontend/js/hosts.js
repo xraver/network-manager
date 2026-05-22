@@ -13,7 +13,17 @@ const sortState = { sortDirection: {}, lastSort: null };
 // -----------------------------
 async function loadHosts() {
     let hosts = [];
+    const loader = document.getElementById("loader");
+    const container = document.getElementById("devices-container");
+    const dataTable = document.getElementById("dataTable");
+
+    // hide table during loading to avoid flickering and show loader
+    dataTable.classList.add("d-none");
+
     try {
+        // Show loader
+        loader.style.display = "block";
+
         // Fetch data
         const res = await fetch(`/api/hosts`, {
             headers: { Accept: 'application/json' },
@@ -50,6 +60,9 @@ async function loadHosts() {
         console.error(err?.message || "Error loading hosts");
         showToast(err?.message || "Error loading hosts", false);
         hosts = [];
+        // hide loader and show table
+        loader.style.display = "none";
+        dataTable.classList.remove("d-none");
     }
 
     // DOM Reference
@@ -233,9 +246,13 @@ async function loadHosts() {
     if (typeof lastSort === "object" && lastSort && Array.isArray(sortDirection)) {
         if (Number.isInteger(lastSort.colIndex)) {
             sortDirection[lastSort.colIndex] = !lastSort.ascending;
-            sortTable(lastSort.colIndex);
+            sortTable(lastSort.colIndex, sortState);
         }
     }
+
+    // hide loader and show table
+    loader.style.display = "none";
+    dataTable.classList.remove("d-none");
 }
 
 // -----------------------------

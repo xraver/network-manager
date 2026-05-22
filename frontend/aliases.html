@@ -107,7 +107,7 @@
     </section>
 
     <!-- Tabella -->
-    <table id="dataTable" class="table table-bordered table-hover align-middle">
+    <table id="dataTable" class="table table-bordered table-hover align-middle d-none">
         <thead class="table-light">
             <tr>
                 <th data-type="string" data-sortable="true">Alias      <span class="sort-arrow" aria-hidden="true"></span></th>
@@ -120,6 +120,15 @@
         <tbody></tbody>
     </table>
 
+    <!-- Loader -->
+    <div id="loader" class="text-center my-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div id="devices-container"></div>
+
+	<!-- AddAlias -->
     <div class="modal fade" id="addAliasModal" tabindex="-1" aria-labelledby="addAliasTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
             <div class="modal-content addhost-modal">
