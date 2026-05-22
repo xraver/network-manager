@@ -91,6 +91,8 @@ async function loadHosts() {
     const frag = document.createDocumentFragment();
 
     hosts.forEach(h => {
+
+        const id = Number(h.id);
         const tr = document.createElement("tr");
 
         // Name
@@ -196,9 +198,7 @@ async function loadHosts() {
             td.style.textAlign = "center";
             td.style.verticalAlign = "middle";
 
-            const id = Number(h.id);
-
-            // Usa elementi reali invece di innerHTML con entity
+            // Edit Button
             const editSpan = document.createElement("span");
             editSpan.className = "action-icon";
             editSpan.setAttribute("role", "button");
@@ -216,6 +216,7 @@ async function loadHosts() {
                 editSpan.appendChild(i);
             }
 
+            // Delete Button
             const delSpan = document.createElement("span");
             delSpan.className = "action-icon";
             delSpan.setAttribute("role", "button");

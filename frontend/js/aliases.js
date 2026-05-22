@@ -91,6 +91,8 @@ async function loadAliases() {
     const frag = document.createDocumentFragment();
 
     aliases.forEach(h => {
+
+        const id = Number(h.id);
         const tr = document.createElement("tr");
 
         // Name
@@ -186,9 +188,7 @@ async function loadAliases() {
             td.style.textAlign = "center";
             td.style.verticalAlign = "middle";
 
-            const id = Number(h.id);
-
-            // Usa elementi reali invece di innerHTML con entity
+            // Edit Button
             const editSpan = document.createElement("span");
             editSpan.className = "action-icon";
             editSpan.setAttribute("role", "button");
@@ -206,6 +206,7 @@ async function loadAliases() {
                 editSpan.appendChild(i);
             }
 
+            // Delete Button
             const delSpan = document.createElement("span");
             delSpan.className = "action-icon";
             delSpan.setAttribute("role", "button");

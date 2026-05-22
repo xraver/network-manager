@@ -90,6 +90,8 @@ async function loadLeases() {
     const frag = document.createDocumentFragment();
 
     leases.forEach(l => {
+
+        const id = Number(l.id);
         const tr = document.createElement("tr");
 
         // IP Address
@@ -211,26 +213,25 @@ async function loadLeases() {
             td.style.textAlign = "center";
             td.style.verticalAlign = "middle";
 
-            const id = Number(l.id);
-
-            // Usa elementi reali invece di innerHTML con entity
-            const editSpan = document.createElement("span");
-            editSpan.className = "action-icon";
-            editSpan.setAttribute("role", "button");
-            editSpan.tabIndex = 0;
-            editSpan.title = "Add static lease";
-            editSpan.setAttribute("aria-label", "Add static lease");
-            editSpan.setAttribute("data-bs-toggle", "modal");
-            editSpan.setAttribute("data-bs-target", "#addHostModal");
-            editSpan.setAttribute("data-action", "add");
-            editSpan.setAttribute("data-lease-id", String(id));
+            // Add Button
+            const addSpan = document.createElement("span");
+            addSpan.className = "action-icon";
+            addSpan.setAttribute("role", "button");
+            addSpan.tabIndex = 0;
+            addSpan.title = "Add static lease";
+            addSpan.setAttribute("aria-label", "Add static lease");
+            addSpan.setAttribute("data-bs-toggle", "modal");
+            addSpan.setAttribute("data-bs-target", "#addHostModal");
+            addSpan.setAttribute("data-action", "add");
+            addSpan.setAttribute("data-lease-id", String(id));
             {
                 const i = document.createElement("i");
                 i.className = "bi bi-plus-circle icon icon-action";
                 i.setAttribute("aria-hidden", "true");
-                editSpan.appendChild(i);
+                addSpan.appendChild(i);
             }
 
+            // Delete Button
             const delSpan = document.createElement("span");
             delSpan.className = "action-icon";
             delSpan.setAttribute("role", "button");
@@ -246,7 +247,7 @@ async function loadLeases() {
                 delSpan.appendChild(i);
             }
 
-            td.appendChild(editSpan);
+            td.appendChild(addSpan);
             td.appendChild(delSpan);
             tr.appendChild(td);
         }
