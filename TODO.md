@@ -27,6 +27,7 @@
     - [ ] IPv6 configuration
   - [X] **Kea (DHCP)** configuration
     - [X] IPv4 configuration
+    - [X] Convert dynamic lease into a static host
     - [X] IPv6 configuration
 - [ ] Reload services:
   - [ ] BIND
