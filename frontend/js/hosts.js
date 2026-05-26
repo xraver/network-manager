@@ -6,15 +6,14 @@ import { apiMap, fetchData } from './api.js';
 // -----------------------------
 // State variables
 // -----------------------------
-let allHosts = [];
-let viewHosts = [];
+let hostsList = [];
 let editingHostId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
-// Load all hosts into the table
+// Fetch hosts from API
 // -----------------------------
-async function loadHosts(refresh = true) {
+async function fetchHosts () {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -22,24 +21,27 @@ async function loadHosts(refresh = true) {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    if(refresh) {
-        try {
-            // Show loader
-            loader.style.display = "block";
+    try {
+        // Show loader
+        loader.style.display = "block";
 
-            // Fetch hosts
-            allHosts = await fetchData(apiMap.hosts);
-            viewHosts = [...allHosts];
+        // Fetch hosts
+        hostsList = await fetchData(apiMap.hosts);
 
-        } catch (err) {
-            console.error(err?.message || "Error loading hosts");
-            showToast(err?.message || "Error loading hosts", false);
-            allHosts = [];
-            // hide loader and show table
-            loader.style.display = "none";
-            dataTable.classList.remove("d-none");
-        }
+    } catch (err) {
+        console.error(err?.message || "Error loading hosts");
+        showToast(err?.message || "Error loading hosts", false);
+        hostsList = [];
+        // hide loader and show table
+        loader.style.display = "none";
+        dataTable.classList.remove("d-none");
     }
+}
+
+// -----------------------------
+// Update table with current hosts
+// -----------------------------
+function updateTable () {
 
     // DOM Reference
     const tbody = document.querySelector("#dataTable tbody");
@@ -52,7 +54,7 @@ async function loadHosts(refresh = true) {
     tbody.innerHTML = "";
 
     // if no hosts, show an empty row
-    if (!allHosts.length) {
+    if (!hostsList.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -69,7 +71,7 @@ async function loadHosts(refresh = true) {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    allHosts.forEach(h => {
+    hostsList.forEach(h => {
 
         const id = Number(h.id);
         const tr = document.createElement("tr");
@@ -449,7 +451,8 @@ async function handleAddHostSubmit(e) {
         if (ok !== false) {
             // close modal and reload hosts
             closeAddHostModal();
-            await loadHosts();
+            await fetchHosts();
+            updateTable();
             return true
         }
 
@@ -513,7 +516,8 @@ async function handleDeleteHost(e, el) {
         showToast(data?.message || 'Host deleted successfully', true);
 
         // Reload hosts
-        await loadHosts();
+        await fetchHosts();
+        updateTable();
         return true;
 
     } catch (err) {
@@ -584,7 +588,8 @@ async function initApp() {
 
     // Load data (hosts)
     try {
-        await loadHosts();
+        await fetchHosts();
+        updateTable();
     } catch (err) {
         console.error(err?.message || "Error loading hosts");
         showToast(err?.message || "Error loading hosts", false);
@@ -623,8 +628,7 @@ function initSearch() {
             e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
             clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-            viewHosts = [...allHosts];
-            loadHosts(false);
+            updateTable();            // aggiorna tabella
             filterData('');           // ripristina tabella
         }
     });
@@ -732,8 +736,7 @@ function handleKeyboard(e) {
         e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
         resetSorting(sortState);
         clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-        viewHosts = [...allHosts];
-        loadHosts(false);
+        updateTable();            // aggiorna tabella
         filterData('');           // ripristina tabella
     }
 

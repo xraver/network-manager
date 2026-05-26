@@ -24,6 +24,7 @@ export const apiMap = {
 // Fetch Data functions
 // -----------------------------
 export async function fetchData(api) {
+
     let items = [];
 
     // Fetch data

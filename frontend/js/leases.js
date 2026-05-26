@@ -6,14 +6,13 @@ import { apiMap, fetchData } from './api.js';
 // -----------------------------
 // State variables
 // -----------------------------
-let allLeases = [];
-let viewLeases = [];
+let leasesList = [];
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
 // Load all leases into the table
 // -----------------------------
-async function loadLeases(refresh = true) {
+async function fetchLeases () {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -21,24 +20,27 @@ async function loadLeases(refresh = true) {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    if(refresh) {
-        try {
-            // Show loader
-            loader.style.display = "block";
+    try {
+        // Show loader
+        loader.style.display = "block";
 
-            // Fetch leases
-            allLeases = await fetchData(apiMap.leases);
-            viewLeases = [...allLeases];
+        // Fetch leases
+        leasesList = await fetchData(apiMap.leases);
 
-        } catch (err) {
-            console.error(err?.message || "Error loading leases");
-            showToast(err?.message || "Error loading leases", false);
-            allLeases = [];
-            // hide loader and show table
-            loader.style.display = "none";
-            dataTable.classList.remove("d-none");
-        }
+    } catch (err) {
+        console.error(err?.message || "Error loading leases");
+        showToast(err?.message || "Error loading leases", false);
+        leasesList = [];
+        // hide loader and show table
+        loader.style.display = "none";
+        dataTable.classList.remove("d-none");
     }
+}
+
+// -----------------------------
+// Update table with current hosts
+// -----------------------------
+function updateTable () {
 
     // DOM Reference
     const tbody = document.querySelector("#dataTable tbody");
@@ -51,7 +53,7 @@ async function loadLeases(refresh = true) {
     tbody.innerHTML = "";
 
     // if no leases, show an empty row
-    if (!allLeases.length) {
+    if (!leasesList.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -68,7 +70,7 @@ async function loadLeases(refresh = true) {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    allLeases.forEach(l => {
+    leasesList.forEach(l => {
 
         const id = Number(l.id);
         const tr = document.createElement("tr");
@@ -413,7 +415,8 @@ async function handleAddHostSubmit(e) {
         if (ok !== false) {
             // close modal and reload hosts
             closeAddHostModal();
-            await loadLeases();
+            await fetchLeases();
+            updateTable();
             return true
         }
 
@@ -477,7 +480,8 @@ async function handleDeleteLease(e, el) {
         showToast(data?.message || 'Lease deleted successfully', true);
 
         // Reload leases
-        await loadLeases();
+        await fetchLeases();
+        updateTable();
         return true;
 
     } catch (err) {
@@ -548,7 +552,8 @@ async function initApp() {
 
     // Load data (leases)
     try {
-        await loadLeases();
+        await fetchLeases();
+        updateTable();
     } catch (err) {
         console.error(err?.message || "Error loading dhcp leases");
         showToast(err?.message || "Error loading dhcp leases", false);
@@ -587,9 +592,8 @@ function initSearch() {
             e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
             clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-            viewLeases = [...allLeases];
-            loadLeases(false);
-            filterData('');           // ripristina tabella'');
+            updateTable();            // aggiorna tabella
+            filterData('');           // ripristina tabella
         }
     });
 }
@@ -688,9 +692,8 @@ function handleKeyboard(e) {
         e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
         resetSorting(sortState);
         clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-        viewLeases = [...allLeases];
-        loadLeases(false);
-        filterData('');           // ripristina tabella'');
+        updateTable();            // aggiorna tabella
+        filterData('');           // ripristina tabella
     }
 
     // Button event delegation (Enter, Space)

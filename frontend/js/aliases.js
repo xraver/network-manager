@@ -6,15 +6,14 @@ import { apiMap, fetchData } from './api.js';
 // -----------------------------
 // State variables
 // -----------------------------
-let allAliases = [];
-let viewAliases = [];
+let aliasesList = [];
 let editingAliasId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
-// Load all aliases into the table
+// Fetch hosts from API
 // -----------------------------
-async function loadAliases(refresh = true) {
+async function fetchAliases () {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -22,24 +21,27 @@ async function loadAliases(refresh = true) {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    if(refresh) {
-        try {
-            // Show loader
-            loader.style.display = "block";
+    try {
+        // Show loader
+        loader.style.display = "block";
 
-            // Fetch devices
-            allAliases = await fetchData(apiMap.aliases);
-            viewAliases = [...allAliases];
+        // Fetch aliases
+        aliasesList = await fetchData(apiMap.aliases);
 
-        } catch (err) {
-          console.error(err?.message || "Error loading aliases");
-          showToast(err?.message || "Error loading aliase", false);
-          allAliases = [];
-          // hide loader and show table
-          loader.style.display = "none";
-          dataTable.classList.remove("d-none");
-        }
+    } catch (err) {
+      console.error(err?.message || "Error loading aliases");
+      showToast(err?.message || "Error loading aliase", false);
+      aliasesList = [];
+      // hide loader and show table
+      loader.style.display = "none";
+      dataTable.classList.remove("d-none");
     }
+}
+
+// -----------------------------
+// Update table with current hosts
+// -----------------------------
+function updateTable () {
 
     // DOM Reference
     const tbody = document.querySelector("#dataTable tbody");
@@ -52,7 +54,7 @@ async function loadAliases(refresh = true) {
     tbody.innerHTML = "";
 
     // if no aliases, show an empty row
-    if (!allAliases.length) {
+    if (!aliasesList.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -69,7 +71,7 @@ async function loadAliases(refresh = true) {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    allAliases.forEach(h => {
+    aliasesList.forEach(h => {
 
         const id = Number(h.id);
         const tr = document.createElement("tr");
@@ -489,7 +491,8 @@ async function handleDeleteAlias(e, el) {
         showToast(data?.message || 'Alias deleted successfully', true);
 
         // Reload aliases
-        await loadAliases();
+        await fetchAliases();
+        updateTable();
         return true;
 
     } catch (err) {
@@ -560,7 +563,8 @@ async function initApp() {
 
     // Load data (aliases)
     try {
-        await loadAliases();
+        await fetchAliases();
+        updateTable();
     } catch (err) {
         console.error(err?.message || "Error loading aliases");
         showToast(err?.message || "Error loading aliases:", false);
@@ -599,9 +603,8 @@ function initSearch() {
             e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
             clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-            viewAliases = [...allAliases];
-            loadAliases(false);
-            filterData('');           // ripristina tabella'');
+            updateTable();            // aggiorna tabella
+            filterData('');           // ripristina tabella
         }
     });
 }
@@ -708,9 +711,8 @@ function handleKeyboard(e) {
         e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
         resetSorting(sortState);
         clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-        viewAliases = [...allAliases];
-        loadAliases(false);
-        filterData('');           // ripristina tabella'');
+        updateTable();            // aggiorna tabella
+        filterData('');           // ripristina tabella
     }
 
     // Button event delegation (Enter, Space)

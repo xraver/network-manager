@@ -6,15 +6,14 @@ import { apiMap, fetchData } from './api.js';
 // -----------------------------
 // State variables
 // -----------------------------
-let allDevices = [];
-let viewDevices = [];
+let devicesList = [];
 let editingHostId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
-// Load all devices into the table
+// Fetch hosts from API
 // -----------------------------
-async function loadDevices(refresh = true) {
+async function fetchDevices () {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -22,24 +21,27 @@ async function loadDevices(refresh = true) {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    if(refresh) {
-        try {
-            // Show loader
-            loader.style.display = "block";
+    try {
+        // Show loader
+        loader.style.display = "block";
 
-            // Fetch devices
-            allDevices = await fetchData(apiMap.devices);
-            viewDevices = [...allDevices];
+        // Fetch devices
+        devicesList = await fetchData(apiMap.devices);
 
-        } catch (err) {
-            console.error(err?.message || "Error loading devices");
-            showToast(err?.message || "Error loading devices", false);
-            allDevices = [];
-            // hide loader and show table
-            loader.style.display = "none";
-            dataTable.classList.remove("d-none");
-        }
+    } catch (err) {
+        console.error(err?.message || "Error loading devices");
+        showToast(err?.message || "Error loading devices", false);
+        devicesList = [];
+        // hide loader and show table
+        loader.style.display = "none";
+        dataTable.classList.remove("d-none");
     }
+}
+
+// -----------------------------
+// Update table with current devices
+// -----------------------------
+function updateTable () {
 
     // DOM Reference
     const tbody = document.querySelector("#dataTable tbody");
@@ -52,7 +54,7 @@ async function loadDevices(refresh = true) {
     tbody.innerHTML = "";
 
     // if no devices, show an empty row
-    if (!allDevices.length) {
+    if (!devicesList.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -69,10 +71,8 @@ async function loadDevices(refresh = true) {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    allDevices.forEach(d => {
+    devicesList.forEach(d => {
 
-        //const mixedId = d.id;
-        //const id = mixedId.slice(2);
         const id = d.id;
         let type = 0;
 
@@ -606,7 +606,8 @@ async function handleDeleteDevice(e, el) {
         showToast(data?.message || 'Device deleted successfully', true);
 
         // Reload devices
-        await loadDevices();
+        await fetchDevices();
+        updateTable();
         return true;
 
     } catch (err) {
@@ -677,7 +678,8 @@ async function initApp() {
 
     // Load data (devices)
     try {
-        await loadDevices();
+        await fetchDevices();
+        updateTable();
     } catch (err) {
         console.error(err?.message || "Error loading devices");
         showToast(err?.message || "Error loading devices", false);
@@ -716,9 +718,8 @@ function initSearch() {
             e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
             clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-            viewDevices = [...allDevices];
-            loadDevices(false);
-            filterData('');           // ripristina tabella'');
+            updateTable();            // aggiorna tabella
+            filterData('');           // ripristina tabella
         }
     });
 }
@@ -825,9 +826,8 @@ function handleKeyboard(e) {
         e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
         resetSorting(sortState);
         clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-        viewDevices = [...allDevices];
-        loadDevices(false);
-        filterData('');           // ripristina tabella'');
+        updateTable();            // aggiorna tabella
+        filterData('');           // ripristina tabella
     }
 
     // Button event delegation (Enter, Space)
