@@ -1,7 +1,7 @@
 // -------------------------------------------------------
 // IMPORT
 // -------------------------------------------------------
-import { showToast } from './common.js';
+import { loadModals, showToast } from './common.js';
 import { apiCheck, reloadDNS, reloadDHCP, doBackup, doRestore, checkHealth } from './services.js';
 
 // -------------------------------------------------------
@@ -252,6 +252,23 @@ const actionHandlers = {
     }
 };
 
+// -----------------------------
+// DOMContentLoaded: initialize everything
+// -----------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
+    try {
+        await loadModals();
+    } catch (err) {
+        console.error(err?.message || "Error loading modals");
+        showToast(err?.message || "Error loading modals", false);
+    }
+
+    // Init Restore Backup Modal (backdrop click to close)
+    initRestoreBackupModal();
+});
+
 // -------------------------------------------------------
 // Global Click Delegation
 // -------------------------------------------------------
@@ -281,8 +298,13 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-const restoreModal = document.getElementById('restoreModal');
-if (restoreModal) {
+// -------------------------------------------------------
+// Init Restore Backup Modal (backdrop click to close)
+// -------------------------------------------------------
+function initRestoreBackupModal() {
+    const restoreModal = document.getElementById('restoreModal');
+    if (!restoreModal) return;
+
     restoreModal.addEventListener('click', (e) => {
         if (e.target === restoreModal) closeRestoreModal();
     });

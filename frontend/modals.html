@@ -1,0 +1,214 @@
+<!-- AddHost -->
+<div class="modal fade" id="addHostModal" tabindex="-1" aria-labelledby="addHostTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
+        <div class="modal-content addhost-modal">
+            <!-- Header scuro con logo/brand -->
+            <div class="modal-header addhost-header">
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Emoji o icona -->
+                    <span class="title-icon" aria-hidden="true">🖧</span>
+                    <h5 class="modal-title mb-0" id="addHostTitle">Aggiungi Host</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="addHostForm">
+                    <div class="mb-2">
+                        <label for="hostName" class="form-label">Hostname</label>
+                        <input type="text" id="hostName" class="form-control" required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="hostIPv4" class="form-label">IPv4</label>
+                        <input type="text" id="hostIPv4" class="form-control" inputmode="decimal" placeholder="es. 192.168.1.10">
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="hostIPv6" class="form-label">IPv6</label>
+                        <input type="text" id="hostIPv6" class="form-control" placeholder="es. fe80::1">
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="hostMAC" class="form-label">MAC Address</label>
+                        <input type="text" id="hostMAC" class="form-control" placeholder="es. AA:BB:CC:DD:EE:FF">
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="hostDescription" class="form-label">Description</label>
+                        <input type="text" id="hostDescription" class="form-control">
+                    </div>
+
+                    <div class="form-check my-2">
+                        <input class="form-check-input" type="checkbox" id="hostSSL">
+                        <label class="form-check-label" for="hostSSL">SSL?</label>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label d-block">Visibility</label>
+                        <div class="btn-group" role="group">
+                            <!-- Local -->
+                            <input type="radio" class="btn-check" id="hostVisibilityLocal" name="hostVisibility" value="0" checked>
+                            <label class="btn btn-outline-primary" for="hostVisibilityLocal">Local</label>
+                            <!-- Global -->
+                            <input type="radio" class="btn-check" id="hostVisibilityGlobal" name="hostVisibility" value="1">
+                            <label class="btn btn-outline-primary" for="hostVisibilityGlobal">Global</label>
+                            <!-- Alias -->
+                            <input type="radio" class="btn-check" id="hostVisibilityAlias" name="hostVisibility" value="2">
+                            <label class="btn btn-outline-primary" for="hostVisibilityAlias">Alias</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" form="addHostForm" class="btn btn-primary">
+                    <i class="bi bi-check2"></i>
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AddAlias -->
+<div class="modal fade" id="addAliasModal" tabindex="-1" aria-labelledby="addAliasTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
+        <div class="modal-content addhost-modal">
+            <!-- Header scuro con logo/brand -->
+            <div class="modal-header addhost-header">
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Emoji o icona -->
+                    <span class="title-icon" aria-hidden="true">🖧</span>
+                    <h5 class="modal-title mb-0" id="addAliasTitle">Aggiungi Alias</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="addAliasForm">
+                    <div class="mb-2">
+                        <label for="aliasName" class="form-label">Alias</label>
+                        <input type="text" id="aliasName" class="form-control" required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="aliasTarget" class="form-label">Target</label>
+                        <input type="text" id="aliasTarget" class="form-control" required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="aliasDescription" class="form-label">Description</label>
+                        <input type="text" id="aliasDescription" class="form-control">
+                    </div>
+
+                    <div class="form-check my-2">
+                        <input class="form-check-input" type="checkbox" id="aliasSSL">
+                        <label class="form-check-label" for="aliasSSL">SSL?</label>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label d-block">Visibility</label>
+                        <div class="btn-group" role="group">
+                            <!-- Local -->
+                            <input type="radio" class="btn-check" id="aliasVisibilityLocal" name="aliasVisibility" value="0" checked>
+                            <label class="btn btn-outline-primary" for="aliasVisibilityLocal">Local</label>
+                            <!-- Global -->
+                            <input type="radio" class="btn-check" id="aliasVisibilityGlobal" name="aliasVisibility" value="1">
+                            <label class="btn btn-outline-primary" for="aliasVisibilityGlobal">Global</label>
+                            <!-- Alias -->
+                            <input type="radio" class="btn-check" id="aliasVisibilityAlias" name="aliasVisibility" value="2">
+                            <label class="btn btn-outline-primary" for="aliasVisibilityAlias">Alias</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" form="addAliasForm" class="btn btn-primary">
+                    <i class="bi bi-check2"></i>
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Restorebackup -->
+<div id="restoreModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="restoreTitle">
+    <div class="modal-content addhost-modal">
+        <div class="addhost-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="title-icon">💾</span>
+                <span id="restoreTitle" class="modal-title">Execute Restore</span>
+            </div>
+            <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeRestoreModal"></button>
+        </div>
+
+        <div class="modal-body">
+            <label for="restoreBackupId" class="form-label">Backup ID</label>
+            <input type="text" id="restoreBackupId" class="form-control" placeholder="e.g., bk_20260317_200100" />
+            <small class="text-muted">Select the backup ID to restore.</small>
+        </div>
+
+        <div class="modal-footer modal-buttons">
+            <button type="button" class="btn btn-primary" data-action="startRestore"><span class="label">Start Restore</span></button>
+            <button type="button" class="btn btn-outline-primary" data-action="closeRestoreModal"><span class="label">Cancel</span></button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Health -->
+<div id="healthModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content addhost-modal">
+            <div class="addhost-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="title-icon">❤️‍🩹</span>
+                    <span id="healthTitle" class="modal-title">Health Status</span>
+                </div>
+                <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeHealthModal"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Loading -->
+                <div id="healthLoading" class="d-flex align-items-center gap-2">
+                    <div class="spinner-border text-primary spinner-border-sm" role="status" aria-label="Loading"></div>
+                        <span class="text-muted">Loading status…</span>
+                    </div>
+
+                    <!-- Content -->
+                    <div id="healthContent" class="d-none">
+                        <ul class="list-group mb-3" id="healthSummary">
+                            <!-- Popolato via JS -->
+                        </ul>
+
+                        <div class="mb-3">
+                            <span class="badge rounded-pill" id="healthStatusBadge">—</span>
+                            <small class="text-muted ms-2" id="healthUpdatedAt"></small>
+                        </div>
+
+                        <!--<details>
+                            <summary class="mb-2">JSON completo</summary>
+                            <pre class="bg-light p-2 rounded small mb-0" id="healthRawJson" aria-label="Raw JSON"></pre>
+                        </details>-->
+                    </div>
+
+                <!-- Error -->
+                <div id="healthError" class="alert alert-danger d-none" role="alert" aria-live="assertive">
+                    Error fetching health status. Please try again later.
+                </div>
+            </div>
+
+            <div class="modal-footer modal-buttons">
+                <button type="button" class="btn btn-outline-primary" data-action="closeHealthModal">
+                    <span class="label">Close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

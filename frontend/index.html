@@ -178,80 +178,8 @@
         </div>
     </main>
 
-    <!-- Modal Restore -->
-    <div id="restoreModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="restoreTitle">
-        <div class="modal-content addhost-modal">
-            <div class="addhost-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="title-icon">💾</span>
-                    <span id="restoreTitle" class="modal-title">Execute Restore</span>
-                </div>
-                <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeRestoreModal"></button>
-            </div>
-
-            <div class="modal-body">
-                <label for="restoreBackupId" class="form-label">Backup ID</label>
-                <input type="text" id="restoreBackupId" class="form-control" placeholder="e.g., bk_20260317_200100" />
-                <small class="text-muted">Select the backup ID to restore.</small>
-            </div>
-
-            <div class="modal-footer modal-buttons">
-                <button type="button" class="btn btn-primary" data-action="startRestore"><span class="label">Start Restore</span></button>
-                <button type="button" class="btn btn-outline-primary" data-action="closeRestoreModal"><span class="label">Cancel</span></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Health -->
-    <div id="healthModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content addhost-modal">
-                <div class="addhost-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="title-icon">❤️‍🩹</span>
-                        <span id="healthTitle" class="modal-title">Health Status</span>
-                    </div>
-                    <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeHealthModal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <!-- Loading -->
-                    <div id="healthLoading" class="d-flex align-items-center gap-2">
-                        <div class="spinner-border text-primary spinner-border-sm" role="status" aria-label="Loading"></div>
-                            <span class="text-muted">Loading status…</span>
-                        </div>
-
-                        <!-- Content -->
-                        <div id="healthContent" class="d-none">
-                            <ul class="list-group mb-3" id="healthSummary">
-                                <!-- Popolato via JS -->
-                            </ul>
-
-                            <div class="mb-3">
-                                <span class="badge rounded-pill" id="healthStatusBadge">—</span>
-                                <small class="text-muted ms-2" id="healthUpdatedAt"></small>
-                            </div>
-
-                            <!--<details>
-                                <summary class="mb-2">JSON completo</summary>
-                                <pre class="bg-light p-2 rounded small mb-0" id="healthRawJson" aria-label="Raw JSON"></pre>
-                            </details>-->
-                        </div>
-
-                    <!-- Error -->
-                    <div id="healthError" class="alert alert-danger d-none" role="alert" aria-live="assertive">
-                        Error fetching health status. Please try again later.
-                    </div>
-                </div>
-
-                <div class="modal-footer modal-buttons">
-                    <button type="button" class="btn btn-outline-primary" data-action="closeHealthModal">
-                        <span class="label">Close</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="modals-container"></div>
 
     <!-- Scripts -->
     <script type=module src="js/index.js"></script>

@@ -172,6 +172,10 @@ def home(request: Request):
 def js_home(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/index.js"))
 
+# Modals
+def modals(request: Request):
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "modals.html"))
+
 # CSS variables
 def css_variables(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/variables.css"))
@@ -240,6 +244,7 @@ def create_app() -> FastAPI:
     app.add_api_route("/", home, methods=["GET"])
     app.add_api_route("/home", home, methods=["GET"])
     app.add_api_route("/index.html", home, methods=["GET"])
+    app.add_api_route("/modals.html", modals, methods=["GET"])
     app.add_api_route("/js/index.js", js_home, methods=["GET"])
     app.add_api_route("/css/variables.css", css_variables, methods=["GET"])
     app.add_api_route("/css/layout.css", css_layout, methods=["GET"])

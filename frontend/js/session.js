@@ -11,7 +11,7 @@ async function handleLogout() {
 }
 
 // -----------------------------
-// DOM Ready
+// DOMContentLoaded: initialize everything
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById("logoutBtn");

@@ -5,6 +5,29 @@ let timeoutToast = 3000; // milliseconds
 const stringCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
 // -----------------------------
+// Load modals HTML and initialize them
+// -----------------------------
+export async function loadModals() {
+    try {
+        const r = await fetch("/modals.html");
+        if (!r.ok) throw new Error("Error loading modals");
+
+        const html = await r.text();
+
+        const container = document.getElementById("modals-container");
+        if (!container) {
+            console.warn("modals-container not found");
+            return;
+        }
+
+        container.innerHTML = html;
+
+    } catch (err) {
+        console.error("Modals load error:", err);
+    }
+}
+
+// -----------------------------
 // Validate the IPv4 address format
 // -----------------------------
 export function isValidIPv4(ip) {

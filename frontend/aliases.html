@@ -130,70 +130,8 @@
     </div>
     <div id="devices-container"></div>
 
-	<!-- AddAlias -->
-    <div class="modal fade" id="addAliasModal" tabindex="-1" aria-labelledby="addAliasTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
-            <div class="modal-content addhost-modal">
-                <!-- Header scuro con logo/brand -->
-                <div class="modal-header addhost-header">
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Emoji o icona -->
-                        <span class="title-icon" aria-hidden="true">🖧</span>
-                        <h5 class="modal-title mb-0" id="addAliasTitle">Aggiungi Alias</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-                </div>
-
-                <div class="modal-body">
-                    <form id="addAliasForm">
-                        <div class="mb-2">
-                            <label for="aliasName" class="form-label">Alias</label>
-                            <input type="text" id="aliasName" class="form-control" required>
-                        </div>
-
-                        <div class="mb-2">
-                            <label for="aliasTarget" class="form-label">Target</label>
-                            <input type="text" id="aliasTarget" class="form-control" required>
-                        </div>
-
-                        <div class="mb-2">
-                            <label for="aliasDescription" class="form-label">Description</label>
-                            <input type="text" id="aliasDescription" class="form-control">
-                        </div>
-
-                        <div class="form-check my-2">
-                            <input class="form-check-input" type="checkbox" id="aliasSSL">
-                            <label class="form-check-label" for="aliasSSL">SSL?</label>
-                        </div>
-
-                        <div class="mb-2">
-                            <label class="form-label d-block">Visibility</label>
-                            <div class="btn-group" role="group">
-                                <!-- Local -->
-                                <input type="radio" class="btn-check" id="aliasVisibilityLocal" name="aliasVisibility" value="0" checked>
-                                <label class="btn btn-outline-primary" for="aliasVisibilityLocal">Local</label>
-                                <!-- Global -->
-                                <input type="radio" class="btn-check" id="aliasVisibilityGlobal" name="aliasVisibility" value="1">
-                                <label class="btn btn-outline-primary" for="aliasVisibilityGlobal">Global</label>
-                                <!-- Alias -->
-                                <input type="radio" class="btn-check" id="aliasVisibilityAlias" name="aliasVisibility" value="2">
-                                <label class="btn btn-outline-primary" for="aliasVisibilityAlias">Alias</label>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" form="addAliasForm" class="btn btn-primary">
-                        <i class="bi bi-check2"></i>
-                    </button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="modals-container"></div>
 
     <!-- Scripts -->
     <script type="module" src="js/aliases.js"></script>

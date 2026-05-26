@@ -1,5 +1,5 @@
 // Import common js
-import { isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting } from './common.js';
+import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting } from './common.js';
 import { reloadDNS, reloadDHCP } from './services.js';
 
 // -----------------------------
@@ -610,6 +610,14 @@ const actionHandlers = {
 // DOMContentLoaded: initialize everything
 // -----------------------------
 document.addEventListener("DOMContentLoaded", async () => {
+
+    // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
+    try {
+        await loadModals();
+    } catch (err) {
+        console.error(err?.message || "Error loading modals");
+        showToast(err?.message || "Error loading modals", false);
+    }
 
     // Init UI sort (aria-sort, arrows)
     initSortableTable();
