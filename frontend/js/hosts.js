@@ -1,18 +1,20 @@
 // Import common js
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting } from './common.js';
 import { reloadDNS, reloadDHCP } from './services.js';
+import { apiMap, fetchData } from './api.js';
 
 // -----------------------------
 // State variables
 // -----------------------------
+let allHosts = [];
+let viewHosts = [];
 let editingHostId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
 // Load all hosts into the table
 // -----------------------------
-async function loadHosts() {
-    let hosts = [];
+async function loadHosts(refresh = true) {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -20,49 +22,23 @@ async function loadHosts() {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    try {
-        // Show loader
-        loader.style.display = "block";
-
-        // Fetch data
-        const res = await fetch(`/api/hosts`, {
-            headers: { Accept: 'application/json' },
-        });
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
+    if(refresh) {
         try {
-            data = await res.json();
-            hosts = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+            // Show loader
+            loader.style.display = "block";
 
-        } catch {
-            throw new Error('Invalid JSON payload');
+            // Fetch hosts
+            allHosts = await fetchData(apiMap.hosts);
+            viewHosts = [...allHosts];
+
+        } catch (err) {
+            console.error(err?.message || "Error loading hosts");
+            showToast(err?.message || "Error loading hosts", false);
+            allHosts = [];
+            // hide loader and show table
+            loader.style.display = "none";
+            dataTable.classList.remove("d-none");
         }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error loading hosts`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-    } catch (err) {
-        console.error(err?.message || "Error loading hosts");
-        showToast(err?.message || "Error loading hosts", false);
-        hosts = [];
-        // hide loader and show table
-        loader.style.display = "none";
-        dataTable.classList.remove("d-none");
     }
 
     // DOM Reference
@@ -76,7 +52,7 @@ async function loadHosts() {
     tbody.innerHTML = "";
 
     // if no hosts, show an empty row
-    if (!hosts.length) {
+    if (!allHosts.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -93,7 +69,7 @@ async function loadHosts() {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    hosts.forEach(h => {
+    allHosts.forEach(h => {
 
         const id = Number(h.id);
         const tr = document.createElement("tr");
@@ -566,9 +542,12 @@ function filterHosts() {
 // -----------------------------
 async function clearSearch() {
     const input = document.getElementById("searchInput");
-    input.value = "";
-    input.blur();
-    await loadHosts();
+    if (input) {
+        input.value = "";
+        input.blur();
+    }
+    viewHosts = [...allHosts];
+    await loadHosts(false);
 }
 
 // -----------------------------
@@ -666,11 +645,11 @@ function initSearch() {
     // Escape management when focus is in the input
     input.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            e.preventDefault();     // evita side-effect (es. chiusure di modali del browser)
-            e.stopPropagation();    // evita che arrivi al listener globale
+            e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
+            e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
-            clearSearch();          // svuota input e ricarica tabella (come definito nella tua funzione)
-            filterHosts('');        // ripristina tabella
+            clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
+            filterHosts('');          // ripristina tabella
         }
     });
 }

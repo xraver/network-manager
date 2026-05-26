@@ -1,18 +1,20 @@
 // Import common js
 import { loadModals, showToast, sortTable, initSortableTable, resetSorting } from './common.js';
 import { reloadDNS, reloadDHCP } from './services.js';
+import { apiMap, fetchData } from './api.js';
 
 // -----------------------------
 // State variables
 // -----------------------------
+let allAliases = [];
+let viewAliases = [];
 let editingAliasId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
 // Load all aliases into the table
 // -----------------------------
-async function loadAliases() {
-    let aliases = [];
+async function loadAliases(refresh = true) {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -20,49 +22,23 @@ async function loadAliases() {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    try {
-        // Show loader
-        loader.style.display = "block";
-
-        // Fetch data
-        const res = await fetch(`/api/aliases`, {
-            headers: { Accept: 'application/json' },
-        });
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
+    if(refresh) {
         try {
-            data = await res.json();
-            aliases = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+            // Show loader
+            loader.style.display = "block";
 
-        } catch {
-            throw new Error('Invalid JSON payload');
+            // Fetch devices
+            allAliases = await fetchData(apiMap.aliases);
+            viewAliases = [...allAliases];
+
+        } catch (err) {
+          console.error(err?.message || "Error loading aliases");
+          showToast(err?.message || "Error loading aliase", false);
+          allAliases = [];
+          // hide loader and show table
+          loader.style.display = "none";
+          dataTable.classList.remove("d-none");
         }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error loading aliases`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-    } catch (err) {
-        console.error(err?.message || "Error loading aliases");
-        showToast(err?.message || "Error loading aliase", false);
-        aliases = [];
-        // hide loader and show table
-        loader.style.display = "none";
-        dataTable.classList.remove("d-none");
     }
 
     // DOM Reference
@@ -76,7 +52,7 @@ async function loadAliases() {
     tbody.innerHTML = "";
 
     // if no aliases, show an empty row
-    if (!aliases.length) {
+    if (!allAliases.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -93,7 +69,7 @@ async function loadAliases() {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    aliases.forEach(h => {
+    allAliases.forEach(h => {
 
         const id = Number(h.id);
         const tr = document.createElement("tr");
@@ -542,9 +518,12 @@ function filterAliases() {
 // -----------------------------
 async function clearSearch() {
     const input = document.getElementById("searchInput");
-    input.value = "";
-    input.blur();
-    await loadAliases();
+    if (input) {
+        input.value = "";
+        input.blur();
+    }
+    viewAliases = [...allAliases];
+    await loadAliases(false);
 }
 
 // -----------------------------
@@ -642,10 +621,10 @@ function initSearch() {
     // Escape management when focus is in the input
     input.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            e.preventDefault();     // evita side-effect (es. chiusure di modali del browser)
-            e.stopPropagation();    // evita che arrivi al listener globale
+            e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
+            e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
-            clearSearch();          // svuota input e ricarica tabella (come definito nella tua funzione)
+            clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
             filterAliases('');        // ripristina tabella
         }
     });

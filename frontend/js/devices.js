@@ -1,18 +1,20 @@
 // Import common js
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting } from './common.js';
 import { reloadDNS, reloadDHCP } from './services.js';
+import { apiMap, fetchData } from './api.js';
 
 // -----------------------------
 // State variables
 // -----------------------------
+let allDevices = [];
+let viewDevices = [];
 let editingHostId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
 // Load all devices into the table
 // -----------------------------
-async function loadDevices() {
-    let devices = [];
+async function loadDevices(refresh = true) {
     const loader = document.getElementById("loader");
     const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
@@ -20,49 +22,23 @@ async function loadDevices() {
     // hide table during loading to avoid flickering and show loader
     dataTable.classList.add("d-none");
 
-    try {
-        // Show loader
-        loader.style.display = "block";
-
-        // Fetch data
-        const res = await fetch(`/api/devices`, {
-            headers: { Accept: 'application/json' },
-        });
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
+    if(refresh) {
         try {
-            data = await res.json();
-            devices = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+            // Show loader
+            loader.style.display = "block";
 
-        } catch {
-            throw new Error('Invalid JSON payload');
+            // Fetch devices
+            allDevices = await fetchData(apiMap.devices);
+            viewDevices = [...allDevices];
+
+        } catch (err) {
+            console.error(err?.message || "Error loading devices");
+            showToast(err?.message || "Error loading devices", false);
+            allDevices = [];
+            // hide loader and show table
+            loader.style.display = "none";
+            dataTable.classList.remove("d-none");
         }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error loading devices`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-    } catch (err) {
-        console.error(err?.message || "Error loading devices");
-        showToast(err?.message || "Error loading devices", false);
-        devices = [];
-        // hide loader and show table
-        loader.style.display = "none";
-        dataTable.classList.remove("d-none");
     }
 
     // DOM Reference
@@ -76,7 +52,7 @@ async function loadDevices() {
     tbody.innerHTML = "";
 
     // if no devices, show an empty row
-    if (!devices.length) {
+    if (!allDevices.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -93,7 +69,7 @@ async function loadDevices() {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    devices.forEach(d => {
+    allDevices.forEach(d => {
 
         //const mixedId = d.id;
         //const id = mixedId.slice(2);
@@ -659,9 +635,12 @@ function filterDevices() {
 // -----------------------------
 async function clearSearch() {
     const input = document.getElementById("searchInput");
-    input.value = "";
-    input.blur();
-    await loadDevices();
+    if (input) {
+        input.value = "";
+        input.blur();
+    }
+    viewDevices = [...allDevices];
+    await loadDevices(false);
 }
 
 // -----------------------------

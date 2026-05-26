@@ -188,6 +188,10 @@ def css_layout(request: Request):
 def js_common(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/common.js"))
 
+# JS API
+def js_api(request: Request):
+    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/api.js"))
+
 # JS Services
 def js_services(request: Request):
     return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/services.js"))
@@ -249,6 +253,7 @@ def create_app() -> FastAPI:
     app.add_api_route("/css/variables.css", css_variables, methods=["GET"])
     app.add_api_route("/css/layout.css", css_layout, methods=["GET"])
     app.add_api_route("/js/common.js", js_common, methods=["GET"])
+    app.add_api_route("/js/api.js", js_api, methods=["GET"])
     app.add_api_route("/js/services.js", js_services, methods=["GET"])
     app.add_api_route("/favicon.ico", favicon, methods=["GET"])
 
