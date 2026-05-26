@@ -320,11 +320,35 @@ export function resetSorting(state, tableId = 'dataTable') {
 }
 
 /**
- * Opzionale: inizializza aria-sort='none'
+  * Optional: set aria-sort='none' on all headers on page load for better accessibility.
  */
 export function initSortableTable() {
     const table = document.getElementById("dataTable");
     if (!table) return;
     const ths = table.querySelectorAll("thead th");
     ths.forEach(th => th.setAttribute("aria-sort", "none"));
+}
+
+/**
+  * Live filter: mostra solo le righe che contengono il testo di ricerca (case-insensitive)
+ */
+export function filterData() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? "" : "none";
+    });
+}
+
+/**
+ * Clear search input and reset table filter
+ */
+export function clearSearch() {
+    const input = document.getElementById("searchInput");
+    if (input) {
+        input.value = "";
+        input.blur();
+    }
 }

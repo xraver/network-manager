@@ -1,5 +1,5 @@
 // Import common js
-import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting } from './common.js';
+import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterData, clearSearch } from './common.js';
 import { reloadDNS, reloadDHCP } from './services.js';
 import { apiMap, fetchData } from './api.js';
 
@@ -618,32 +618,6 @@ async function handleDeleteDevice(e, el) {
 }
 
 // -----------------------------
-// filter devices in the table
-// -----------------------------
-function filterDevices() {
-    const query = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? "" : "none";
-    });
-}
-
-// -----------------------------
-// Clear search on ESC key
-// -----------------------------
-async function clearSearch() {
-    const input = document.getElementById("searchInput");
-    if (input) {
-        input.value = "";
-        input.blur();
-    }
-    viewDevices = [...allDevices];
-    await loadDevices(false);
-}
-
-// -----------------------------
 // Action Handlers
 // -----------------------------
 const actionHandlers = {
@@ -734,7 +708,7 @@ function initSearch() {
     // clean input on load
     input.value = "";
     // live filter for each keystroke
-    input.addEventListener("input", filterDevices);
+    input.addEventListener("input", filterData);
     // Escape management when focus is in the input
     input.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
@@ -742,7 +716,9 @@ function initSearch() {
             e.stopPropagation();      // evita che arrivi al listener globale
             resetSorting(sortState);
             clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-            filterDevices('');        // ripristina tabella
+            viewDevices = [...allDevices];
+            loadDevices(false);
+            filterData('');           // ripristina tabella'');
         }
     });
 }
@@ -849,7 +825,9 @@ function handleKeyboard(e) {
         e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
         resetSorting(sortState);
         clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-        filterDevices('');        // ripristina tabella
+        viewDevices = [...allDevices];
+        loadDevices(false);
+        filterData('');           // ripristina tabella'');
     }
 
     // Button event delegation (Enter, Space)
