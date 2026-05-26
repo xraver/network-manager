@@ -637,6 +637,18 @@ function initSearch() {
 
     // clean input on load
     input.value = "";
+    // live filter for each keystroke
+    input.addEventListener("input", filterAliases);
+    // Escape management when focus is in the input
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            e.preventDefault();     // evita side-effect (es. chiusure di modali del browser)
+            e.stopPropagation();    // evita che arrivi al listener globale
+            resetSorting(sortState);
+            clearSearch();          // svuota input e ricarica tabella (come definito nella tua funzione)
+            filterAliases('');        // ripristina tabella
+        }
+    });
 }
 
 // -----------------------------
