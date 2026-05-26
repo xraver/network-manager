@@ -84,6 +84,9 @@ async function loadAliases() {
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
+        // hide loader and show table
+        loader.style.display = "none";
+        dataTable.classList.remove("d-none");
         return;
     }
 
