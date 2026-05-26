@@ -586,9 +586,16 @@ const actionHandlers = {
 };
 
 // -----------------------------
-// DOMContentLoaded: initialize everything
+// DOMContentLoaded: bootstrap app
 // -----------------------------
 document.addEventListener("DOMContentLoaded", async () => {
+    await initApp();
+});
+
+// -----------------------------
+// APP INIT
+// -----------------------------
+async function initApp() {
 
     // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
     try {
@@ -598,9 +605,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         showToast(err?.message || "Error loading modals", false);
     }
 
-    // Init UI sort (aria-sort, arrows)
-    initSortableTable();
-
     // Load data (aliases)
     try {
         await loadAliases();
@@ -609,149 +613,171 @@ document.addEventListener("DOMContentLoaded", async () => {
         showToast(err?.message || "Error loading aliases:", false);
     }
 
+    initUI();
+    initEvents();
+}
+
+// -----------------------------
+// UI INIT
+// -----------------------------
+function initUI() {
+    // Init UI sort (aria-sort, arrows)
+    initSortableTable();
+    initSearch();
+    initModalLifecycle();
+}
+
+// -----------------------------
+// SEARCH
+// -----------------------------
+function initSearch() {
     // search bar
     const input = document.getElementById("searchInput");
-    if (input) {
-        // clean input on load
-        input.value = "";
-        // live filter for each keystroke
-        input.addEventListener("input", filterAliases);
-        // Escape management when focus is in the input
-        input.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-                e.preventDefault();     // evita side-effect (es. chiusure di modali del browser)
-                e.stopPropagation();    // evita che arrivi al listener globale
-                resetSorting(sortState);
-                clearSearch();          // svuota input e ricarica tabella (come definito nella tua funzione)
-                filterAliases('');        // ripristina tabella
-            }
-        });
-    }
+    if (!input) return;
 
-    // global ESC key listener to clear search and reset sorting
-    document.addEventListener("keydown", (e) => {
-        // Ignore if focus is in a typing field
-        const tag = (e.target.tagName || "").toLowerCase();
-        const isTypingField =
-            tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
+    // clean input on load
+    input.value = "";
+}
 
-        if (e.key === "Escape" && !isTypingField) {
-            // Prevent default form submission
-            e.preventDefault();
-            resetSorting(sortState);
-            clearSearch();
-            filterAliases('');
-        }
-    });
+// -----------------------------
+// MODAL LIFECYCLE (ADD / EDIT)
+// -----------------------------
+function initModalLifecycle() {
 
     // Modal show/hidden events to prepare/reset the form
     const modalEl = document.getElementById('addAliasModal');
-    if (modalEl) {
+    if (!modalEl) return;
 
-        // store who opened the modal
-        let lastTriggerEl = null;
+    // store who opened the modal
+    let lastTriggerEl = null;
 
-        // When shown, determine Add or Edit mode
-        modalEl.addEventListener('show.bs.modal', async (ev) => {
-            lastTriggerEl = ev.relatedTarget; // trigger (Add o Edit)
-            const formEl = document.getElementById('addAliasForm');
+    // When shown, determine Add or Edit mode
+    modalEl.addEventListener('show.bs.modal', async (ev) => {
+        lastTriggerEl = ev.relatedTarget; // trigger (Add o Edit)
 
-            // Security check
-            if (!formEl) return;
+        // check Add or Edit mode based on presence of data-host-id in the trigger element
+        const id = Number(lastTriggerEl?.dataset?.aliasId);
 
-            // check Add or Edit mode
-            const idAttr = lastTriggerEl?.getAttribute?.('data-alias-id');
-            const id = idAttr ? Number(idAttr) : null;
-
-            if (Number.isFinite(id)) {
-                // Edit Mode
-                try {
-                    await editAlias(id);
-                } catch (err) {
-                    showToast(err?.message || "Error loading alias for edit", false);
-                    // Close modal
-                    const closeOnShown = () => {
-                        closeAddAliasModal(lastTriggerEl);
-                        modalEl.removeEventListener('shown.bs.modal', closeOnShown);
-                    };
-                    modalEl.addEventListener('shown.bs.modal', closeOnShown);
-                }
-            } else {
-                // Add Mode
-                clearAddAliasForm();
-                // Set focus to the first input field when modal is shown
-                const focusOnShown = () => {
-                    document.getElementById('aliasName')?.focus({ preventScroll: true });
-                    modalEl.removeEventListener('shown.bs.modal', focusOnShown);
-                };
-                modalEl.addEventListener('shown.bs.modal', focusOnShown);
+        if (Number.isFinite(id)) {
+            // EDIT MODE
+            try {
+                await editAlias(id);
+            } catch (err) {
+                showToast(err?.message || "Error loading alias", false);
+                // Close modal
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    closeAddAliasModal(lastTriggerEl);
+                }, { once: true });
             }
-        });
-
-        // When hiding, restore focus to the trigger element
-        modalEl.addEventListener('hide.bs.modal', () => {
-            const active = document.activeElement;
-            if (active && modalEl.contains(active)) {
-                if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
-                    lastTriggerEl.focus({ preventScroll: true });
-                } else {
-                    active.blur();
-                }
-            }
-        });
-
-        // When hidden, reset the form
-        modalEl.addEventListener('hidden.bs.modal', () => {
-            // reset form fields
+        } else {
+            // ADD MODE
             clearAddAliasForm();
-            // pulizia ref del trigger
-            lastTriggerEl = null;
-        });
-    }
-
-    // Button event delegation (click)
-    document.addEventListener('click', async (e) => {
-        const el = e.target.closest('[data-action]');
-        if (!el) return;
-
-        const action = el.dataset.action;
-        const handler = actionHandlers[action];
-        if (!handler) return;
-
-        // Execute handler
-        try {
-            await handler(e, el);
-        } catch (err) {
-            console.error(err?.message || 'Action error');
-            showToast(err?.message || 'Action error', false);
+            // Set focus to the first input field when modal is shown
+            modalEl.addEventListener('shown.bs.modal', () => {
+                document.getElementById('aliasName')?.focus({ preventScroll: true });
+            }, { once: true });
         }
     });
 
-    // Button event delegation (Enter, Space)
-    document.addEventListener('keydown', async (e) => {
-        const isEnter = e.key === 'Enter';
-        const isSpace = e.key === ' ' || e.key === 'Spacebar';
-        if (!isEnter && !isSpace) return;
-
-        const el = e.target.closest('[data-action]');
-        if (!el) return;
-
-        // Space/Enter
-        if (el.tagName === 'BUTTON') return;
-        // Trigger click event
-        el.click();
+    // When hiding, restore focus to the trigger element
+    modalEl.addEventListener('hide.bs.modal', () => {
+        const active = document.activeElement;
+        if (active && modalEl.contains(active)) {
+            lastTriggerEl?.focus?.({ preventScroll: true }) || active.blur();
+        }
     });
 
-    // Submit Form
-    const form = document.getElementById('addAliasForm');
-    if (form) {
-        form.addEventListener('submit', handleAddAliasSubmit);
+    // When hidden, reset the form
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        // reset form fields
+        clearAddAliasForm();
+        // pulizia ref del trigger
+        lastTriggerEl = null;
+    });
+}
+
+// -----------------------------
+// GLOBAL EVENTS INIT
+// -----------------------------
+function initEvents() {
+    document.addEventListener('click', handleActionClick);
+    document.addEventListener('click', handleSortClick);
+    document.addEventListener('keydown', handleKeyboard);
+    document.addEventListener('submit', handleForms);
+}
+
+// -----------------------------
+// CLICK (DATA-ACTION)
+// -----------------------------
+async function handleActionClick(e) {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+
+    const action = el.dataset.action;
+    const handler = actionHandlers[action];
+    if (!handler) return;
+
+    // Execute handler
+    try {
+        await handler(e, el);
+    } catch (err) {
+        console.error(err?.message || 'Action error');
+        showToast(err?.message || 'Action error', false);
+    }
+}
+
+// -----------------------------
+// KEYBOARD (ESC + accessibility)
+// -----------------------------
+function handleKeyboard(e) {
+    // Ignore if focus is in a typing field
+    const tag = (e.target.tagName || "").toLowerCase();
+    const isTypingField =
+        tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
+
+    // global ESC key listener to clear search and reset sorting
+    if (e.key === "Escape" && !isTypingField) {
+        // Prevent default form submission
+        e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
+        resetSorting(sortState);
+        clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
+        filterAliases('');        // ripristina tabella
     }
 
-    // Submit Sort
-    const headers = document.querySelectorAll('thead th');
-    headers.forEach((th) => {
-        if (th.dataset.sortable === 'false') return;
-        th.addEventListener('click', () => sortTable(th.cellIndex, sortState));
-    });
-});
+    // Button event delegation (Enter, Space)
+    const isEnter = e.key === 'Enter';
+    const isSpace = e.key === ' ';
+    if (!isEnter && !isSpace) return;
+
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+
+    // Space/Enter
+    if (el.tagName === 'BUTTON') return;
+    // Trigger click event
+    el.click();
+}
+
+// -----------------------------
+// FORM SUBMIT (delegation)
+// -----------------------------
+function handleForms(e) {
+    if (e.target.id === 'addAliasForm') {
+        handleAddAliasSubmit(e);
+    }
+}
+
+// -----------------------------
+// SORT CLICK
+// -----------------------------
+function handleSortClick(e) {
+    const th = e.target.closest('th[data-sortable="true"]');
+    if (!th) return;
+
+    if (th.dataset.sortable === 'false') return;
+
+    const colIndex = Number(th.dataset.sort);
+    if (!Number.isInteger(colIndex)) return;
+
+    sortTable(colIndex, sortState);
+}
