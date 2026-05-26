@@ -92,7 +92,7 @@ def get_hosts(filter_devices: bool = False) -> List[Dict[str, Any]]:
     if (filter_devices != True):
         cur = conn.execute("SELECT * FROM hosts")
     else:
-        cur = conn.execute("SELECT id, ipv4, mac, name, description FROM hosts WHERE ipv4 IS NOT NULL AND mac IS NOT NULL")
+        cur = conn.execute("SELECT id, ipv4, mac, name, description FROM hosts WHERE ipv4 IS NOT NULL")
 
     rows = []
     for r in cur.fetchall():
