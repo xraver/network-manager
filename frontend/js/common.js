@@ -332,13 +332,12 @@ export function initSortableTable() {
 /**
   * Live filter: mostra solo le righe che contengono il testo di ricerca (case-insensitive)
  */
-export function filterData() {
-    const query = document.getElementById("searchInput").value.toLowerCase();
+export function filterTable(term) {
     const rows = document.querySelectorAll("#dataTable tbody tr");
 
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? "" : "none";
+        row.style.display = text.includes(term) ? "" : "none";
     });
 }
 

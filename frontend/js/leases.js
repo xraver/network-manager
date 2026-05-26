@@ -1,12 +1,13 @@
 // Import common js
-import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterData, clearSearch } from './common.js';
+import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch } from './common.js';
 import { reloadDNS, reloadDHCP } from './services.js';
 import { apiMap, fetchData } from './api.js';
 
 // -----------------------------
 // State variables
 // -----------------------------
-let leasesList = [];
+let allLeases = [];
+let viewLeases = [];
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
@@ -14,7 +15,6 @@ const sortState = { sortDirection: {}, lastSort: null };
 // -----------------------------
 async function fetchLeases () {
     const loader = document.getElementById("loader");
-    const container = document.getElementById("devices-container");
     const dataTable = document.getElementById("dataTable");
 
     // hide table during loading to avoid flickering and show loader
@@ -25,12 +25,14 @@ async function fetchLeases () {
         loader.style.display = "block";
 
         // Fetch leases
-        leasesList = await fetchData(apiMap.leases);
+        allLeases = await fetchData(apiMap.leases);
+        viewLeases = [...allLeases];
 
     } catch (err) {
         console.error(err?.message || "Error loading leases");
         showToast(err?.message || "Error loading leases", false);
-        leasesList = [];
+        allLeases = [];
+        viewLeases = [];
         // hide loader and show table
         loader.style.display = "none";
         dataTable.classList.remove("d-none");
@@ -41,6 +43,8 @@ async function fetchLeases () {
 // Update table with current hosts
 // -----------------------------
 function updateTable () {
+    const loader = document.getElementById("loader");
+    const dataTable = document.getElementById("dataTable");
 
     // DOM Reference
     const tbody = document.querySelector("#dataTable tbody");
@@ -53,7 +57,7 @@ function updateTable () {
     tbody.innerHTML = "";
 
     // if no leases, show an empty row
-    if (!leasesList.length) {
+    if (!viewLeases.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
@@ -70,7 +74,7 @@ function updateTable () {
     // fragment per performance
     const frag = document.createDocumentFragment();
 
-    leasesList.forEach(l => {
+    viewLeases.forEach(l => {
 
         const id = Number(l.id);
         const tr = document.createElement("tr");
@@ -240,16 +244,25 @@ function updateTable () {
     tbody.appendChild(frag);
 
     // apply last sorting
-    if (typeof lastSort === "object" && lastSort && Array.isArray(sortDirection)) {
-        if (Number.isInteger(lastSort.colIndex)) {
-            sortDirection[lastSort.colIndex] = !lastSort.ascending;
-            sortTable(lastSort.colIndex, sortState);
-        }
+    const { lastSort, sortDirection } = sortState;
+
+    if (lastSort && Number.isInteger(lastSort.colIndex)) {
+        sortDirection[lastSort.colIndex] = !lastSort.ascending;
+        sortTable(lastSort.colIndex, sortState);
     }
 
     // hide loader and show table
     loader.style.display = "none";
     dataTable.classList.remove("d-none");
+
+    // apply current search filter
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        const term = searchInput.value.trim().toLowerCase();
+        if (term) {
+            filterTable(term);
+        }
+    }
 }
 
 // -----------------------------
@@ -584,17 +597,9 @@ function initSearch() {
     // clean input on load
     input.value = "";
     // live filter for each keystroke
-    input.addEventListener("input", filterData);
-    // Escape management when focus is in the input
-    input.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
-            e.stopPropagation();      // evita che arrivi al listener globale
-            resetSorting(sortState);
-            clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-            updateTable();            // aggiorna tabella
-            filterData('');           // ripristina tabella
-        }
+    input.addEventListener("input", (e) => {
+        const term = e.target.value.trim().toLowerCase();
+        filterTable(term);
     });
 }
 
@@ -681,26 +686,35 @@ async function handleActionClick(e) {
 // KEYBOARD (ESC + accessibility)
 // -----------------------------
 function handleKeyboard(e) {
-    // Ignore if focus is in a typing field
-    const tag = (e.target.tagName || "").toLowerCase();
-    const isTypingField =
-        tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
 
-    // global ESC key listener to clear search and reset sorting
-    if (e.key === "Escape" && !isTypingField) {
-        // Prevent default form submission
-        e.preventDefault();       // evita side-effect (es. chiusure di modali del browser)
-        resetSorting(sortState);
-        clearSearch();            // svuota input e ricarica tabella (come definito nella tua funzione)
-        updateTable();            // aggiorna tabella
-        filterData('');           // ripristina tabella
-    }
-
-    // Button event delegation (Enter, Space)
+    // Button event delegation (Escape, Enter, Space)
+    const isEscape = e.key === 'Escape';
     const isEnter = e.key === 'Enter';
     const isSpace = e.key === ' ';
-    if (!isEnter && !isSpace) return;
 
+    if (!isEscape && !isEnter && !isSpace) return;
+
+    // ESC delegation: clear search and reset sorting
+    if (isEscape) {
+        // Ignore if focus is in a typing field
+        const tag = (e.target.tagName || "").toLowerCase();
+        const isTypingField =
+            tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
+        const isSearchInput = e.target.id === "searchInput";
+
+        // ESC should clear search and reset sorting only if not focused on a typing field, or if focused on the search input (to allow quick clearing of search)
+        if (!isTypingField || isSearchInput) {
+            // Prevent default form submission
+            e.preventDefault();             // evita side-effect (es. chiusure di modali del browser)
+            resetSorting(sortState);
+            clearSearch();                  // svuota input e ricarica tabella (come definito nella tua funzione)
+            viewLeases = [...allLeases];
+            updateTable();                  // aggiorna tabella
+        }
+        return;
+    }
+
+    // Enter / Space delegation
     const el = e.target.closest('[data-action]');
     if (!el) return;
 
