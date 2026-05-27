@@ -231,7 +231,7 @@ def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
             description TEXT,
             ssl_enabled INTEGER NOT NULL DEFAULT 0,
             visibility INTEGER NOT NULL DEFAULT 0,
-            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            last_updated TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
         );
         """
     )
