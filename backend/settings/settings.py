@@ -95,6 +95,9 @@ class Settings(BaseModel):
     DHCP6_HOST_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_HOST_FILE", default.DHCP6_HOST_FILE))
     DHCP6_LEASES_FILE: str = Field(default_factory=lambda: os.getenv("DHCP6_LEASES_FILE", default.DHCP6_LEASES_FILE))
 
+    # Backup
+    BACKUP_PATH: str= Field(default_factory=lambda: os.getenv("BACKUP_PATH", default.BACKUP_PATH))
+
     # APP Features
     PING_WORKERS: int = Field(default_factory=lambda: int(os.getenv("PING_WORKERS", default.PING_WORKERS)))
 
@@ -109,6 +112,9 @@ class Settings(BaseModel):
         self.DB_FILE         = self.DATA_PATH + "/" + self.DB_FILE
         self.LOG_FILE        = self.DATA_PATH + "/" + self.LOG_FILE
         self.LOG_ACCESS_FILE = self.DATA_PATH + "/" + self.LOG_ACCESS_FILE
+
+        # Backup
+        self.BACKUP_PATH = self.BACKUP_PATH if os.path.isabs(self.BACKUP_PATH) else os.path.join(self.DATA_PATH, self.BACKUP_PATH)
 
         # Update DNS Files
         if self.DOMAIN.lower() != default.DOMAIN.lower():

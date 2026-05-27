@@ -162,7 +162,13 @@ const actionHandlers = {
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'Backup compleated successfully';
-            showToast(msg, true);
+            if (result?.partial) {
+                // partial success
+                showToast(msg, false);
+            } else {
+                // success
+                showToast(msg, true);
+            }
         } catch (err) {
             showToast(err?.message || "Error performing backup", false);
         } finally {
@@ -196,7 +202,13 @@ const actionHandlers = {
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'Restore completed successfully';
-            showToast(msg, true);
+            if (result?.partial) {
+                // partial success
+                showToast(msg, false);
+            } else {
+                // success
+                showToast(msg, true);
+            }
             // Close modal and reset input
             if (modal) modal.style.display = 'none';
             input.value = '';

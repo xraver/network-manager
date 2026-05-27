@@ -151,7 +151,10 @@ secrets:
 | `DHCP4_LEASES_FILE` | /dhcp/lib/dhcp4.leases | KEA-DHCP4 leases file |
 | `DHCP6_HOST_FILE` | /dhcp/etc/hosts-ipv6.json | KEA-DHCP6 Hosts file |
 | `DHCP6_LEASES_FILE` | /dhcp/lib/dhcp6.leases | KEA-DHCP6 leases file |
+| `BACKUP_PATH` | backup | Backup folder (*) |
 | `PING_WORKERS` | 25 | Number of threads used for pinging |
+
+(*) Note: If the path starts with '/', it is treated as an absolute path. Otherwise, it is considered relative to DATA_PATH.
 
 ---
 

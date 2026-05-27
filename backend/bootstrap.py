@@ -53,6 +53,10 @@ def print_welcome(logger):
         settings.DHCP4_HOST_FILE, settings.DHCP4_LEASES_FILE, settings.DHCP6_HOST_FILE, settings.DHCP6_LEASES_FILE
     )
     logger.info(
+        "Backup: path=%s",
+        settings.BACKUP_PATH
+    )
+    logger.info(
         "App features: ping_workers=%d",
         settings.PING_WORKERS
     )

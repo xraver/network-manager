@@ -195,6 +195,11 @@ export async function doBackup() {
     if (res.ok && (data.status === 'success' || data.code === 'BACKUP_OK')) {
         // Success
         return data?.message ? { message: data.message } : true;
+    } else if (res.ok && (data.status === 'partial' || data.code === 'BACKUP_PARTIAL')) {
+        // Partial success
+        return data?.message
+            ? { message: data.message, partial: true }
+            : { partial: true };
     } else {
         // Failed with JSON error message
         return data?.message ? { message: data.message } : false;
@@ -257,6 +262,11 @@ export async function doRestore(id) {
     if (res.ok && (data.status === 'success' || data.code === 'RESTORE_OK')) {
         // Success
         return data?.message ? { message: data.message } : true;
+    } else if (res.ok && (data.status === 'partial' || data.code === 'RESTORE_PARTIAL')) {
+        // Partial success
+        return data?.message
+            ? { message: data.message, partial: true }
+            : { partial: true };
     } else {
         // Failed with JSON error message
         return data?.message ? { message: data.message } : false;
