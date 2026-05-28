@@ -2,7 +2,7 @@
 // IMPORT
 // -------------------------------------------------------
 import { loadModals, showToast } from './common.js';
-import { apiCheck, reloadDNS, reloadDHCP, CreateBackup, fetchBackups, RestoreBackup, deleteBackup, checkHealth } from './services.js';
+import { serviceCheckAbount, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, deleteBackup} from './services.js';
 
 // -------------------------------------------------------
 // BACKUP MODAL OPEN/CLOSE
@@ -25,7 +25,7 @@ async function openBackupModal() {
     }
 
     try {
-        const data = await fetchBackups();
+        const data = await serviceBackupList();
         renderBackupList(data);
     } catch (err) {
         console.error(err);
@@ -133,7 +133,7 @@ function getSelectedBackup() {
 }
 
 // -------------------------------------------------------
-// HEALTH MODAL OPEN/CLOSE + RENDER (usa checkHealth())
+// HEALTH MODAL OPEN/CLOSE + RENDER
 // -------------------------------------------------------
 function openHealthModal() {
     const modal = document.getElementById('healthModal');
@@ -160,11 +160,11 @@ function openHealthModal() {
     }
     if (updatedAtEl) updatedAtEl.textContent = '';
 
-    // Usa checkHealth() per ottenere il payload health
+    // Usa serviceCheckHealth() per ottenere il payload health
     Promise.resolve()
-      .then(() => checkHealth())
+      .then(() => serviceCheckHealth())
       .then((data) => {
-          // Se checkHealth ritorna true o {message}, non abbiamo i dettagli: mostra un messaggio
+          // Se serviceCheckHealth ritorna true o {message}, non abbiamo i dettagli: mostra un messaggio
           const isDetailed =
               data && typeof data === 'object' &&
               ('status' in data || 'latency_ms' in data || 'database' in data);
@@ -267,7 +267,7 @@ const actionHandlers = {
         label.textContent = ' Exporting…';
 
         try {
-            const result = await CreateBackup();
+            const result = await serviceBackupCreate();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'Backup completed successfully';
@@ -299,7 +299,7 @@ const actionHandlers = {
         label.textContent = ' Restoring…';
 
         try {
-            const result = await RestoreBackup(id);
+            const result = await serviceBackupRestore(id);
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'Restore completed successfully';
@@ -334,7 +334,7 @@ const actionHandlers = {
             showToast(msg, true);
 
             // reload list
-            const data = await fetchBackups();
+            const data = await serviceBackupList();
             renderBackupList(data);
 
         } catch (err) {
@@ -348,7 +348,7 @@ const actionHandlers = {
     // Reload DNS
     reloadDns: async () => {
         try {
-            const result = await reloadDNS();
+            const result = await serviceReloadDNS();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DNS reload successfully';
@@ -360,7 +360,7 @@ const actionHandlers = {
     // Reload DHCP
     reloadDhcp: async () => {
         try {
-            const result = await reloadDHCP();
+            const result = await serviceReloadDHCP();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DHCP reload successfully';
@@ -371,7 +371,7 @@ const actionHandlers = {
     },
     // Check API status
     apiCheck: async () => {
-        const result = await apiCheck();
+        const result = await serviceCheckAbount();
         if(result) {
             showToast('API status updated succesfully', true);
         } else {
@@ -450,7 +450,7 @@ function initBackupModal() {
 // Periodic API Check
 // -------------------------------------------------------
 async function periodicTest() {
-    await apiCheck();
+    await serviceCheckAbount();
     setTimeout(periodicTest, 10000);
 }
 

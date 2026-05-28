@@ -1,61 +1,87 @@
-// -----------------------------
-// API Endpoints
-// -----------------------------
-export const apiMap = {
-    hosts: {
-        url: "/api/hosts",
-        name: "Hosts"
-    },
-    aliases: {
-        url: "/api/aliases",
-        name: "Aliases"
-    },
-    leases: {
-        url: "/api/dhcp/leases",
-        name: "Leases"
-    },
-    devices: {
-        url: "/api/devices",
-        name: "Devices"
+// -------------------------------------------------------
+// API CORE - Generic request wrapper
+// -------------------------------------------------------
+export async function apiRequest(
+    url,
+    {
+        method = 'GET',
+        headers = {},
+        body = null,
+    } = {},
+    errorPrefix = 'Request error'
+) {
+    let res;
+
+    try {
+        res = await fetch(url, {
+            method,
+            headers: {
+                'Accept': 'application/json',
+                ...headers
+            },
+            body
+        });
+    } catch (err) {
+        throw new Error(
+            `${errorPrefix}: network error${err?.message ? `: ${err.message}` : ''}`,
+            { cause: err }
+        );
     }
-};
 
-// -----------------------------
-// Fetch Data functions
-// -----------------------------
-export async function fetchData(api) {
+    // 204 No Content
+    if (res.status === 204) {
+        return true;
+    }
 
-    let items = [];
-
-    // Fetch data
-    const res = await fetch(api.url, {
-        headers: { Accept: 'application/json' },
-    });
-
-    // Check content-type to avoid parsing errors
+    // Content-Type check
     const contentType = res.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-        const err = new Error(`${res.status}: ${res.statusText}`);
+        const err = new Error(
+            `${errorPrefix}: ${res.status} ${res.statusText || 'Unexpected response'}`
+        );
         err.status = res.status;
         throw err;
     }
 
-    // Check JSON
+    // Parse JSON
     let data;
     try {
         data = await res.json();
-        items = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
     } catch {
-        throw new Error('Invalid JSON payload');
+        throw new Error(`${errorPrefix}: Invalid JSON payload`);
     }
 
-    // Check JSON errors
+    // Handle HTTP error
     if (!res.ok) {
-        const serverMsg = data?.detail?.message?.trim();
-        const base = `Error loading ${api.name}`;
-        const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+
+        const err = new Error(
+            `${errorPrefix}${serverMsg ? `: ${serverMsg}` : ''}`
+        );
         err.status = res.status;
         throw err;
     }
-    return items;
+
+    return data;
+}
+
+export function apiGet(url, errorPrefix = 'Fetch error') {
+    return apiRequest(url, { method: 'GET' }, errorPrefix);
+}
+
+export function apiPost(url, payload, errorPrefix = 'Request error') {
+    return apiRequest(
+        url,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        },
+        errorPrefix
+    );
 }

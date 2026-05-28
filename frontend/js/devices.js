@@ -1,7 +1,7 @@
 // Import common js
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch } from './common.js';
-import { reloadDNS, reloadDHCP } from './services.js';
-import { apiMap, fetchData } from './api.js';
+// Import services
+import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLeases, serviceGetDHCPLease, serviceDeleteDHCPLease, serviceGetDevices, serviceGetHost, serviceCreateHost, serviceUpdateHost, serviceDeleteHost } from './services.js';
 
 // -----------------------------
 // State variables
@@ -26,7 +26,7 @@ async function fetchDevices () {
         loader.style.display = "block";
 
         // Fetch devices
-        allDevices  = await fetchData(apiMap.devices);
+        allDevices  = await serviceGetDevices();
         viewDevices = [...allDevices];
 
     } catch (err) {
@@ -87,8 +87,8 @@ function updateTable () {
         } else if (id.startsWith("d-")) {
             type = 2;
         } else {
-            console.error("loadDevices: unknown device type:", id);
-            showToast("loadDevices: unknown device type:", false);
+            console.error("updateTable: unknown device type:", id);
+            showToast("updateTable: unknown device type:", false);
         }
 
         const tr = document.createElement("tr");
@@ -306,21 +306,19 @@ function updateTable () {
 // -----------------------------
 async function editHost(id) {
 
-    let fetchUrl = "";
     let host = false;
 
     // Clear form first
     clearAddHostForm();
 
+    // host or lease
     if (id !== null) {
         // Static or Dynamic?
         if (id.startsWith("s-")) {
             // static
-            fetchUrl = `/api/hosts/${id.slice(2)}`;
             host = true;
         } else if (id.startsWith("d-")) {
             // dynamic
-            fetchUrl = `/api/dhcp/leases/${id.slice(2)}`;
             host = false;
         } else {
             throw new Error("Invalid Device ID format for edit");
@@ -330,54 +328,36 @@ async function editHost(id) {
         throw new Error("Invalid Device ID for edit");
     }
 
-    // Fetch host
-    const res = await fetch(fetchUrl, {
-        headers: { Accept: 'application/json' },
-    });
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Fetch failed for host ${id}: ${res.statusText}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data;
     try {
-        data = await res.json();
-    } catch {
-        throw new Error(`Fetch failed for host ${id}: Invalid JSON payload`);
-    }
+        let data;
 
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg = data?.detail?.message?.trim();
-        const base = `Fetch failed for host ${id}`;
-        const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-        err.status = res.status;
-        throw err;
-    }
+        if(host){
+            data = await serviceGetHost(id);
 
-    if(host) {
-        // Store the ID of the host being edited
-        editingHostId = id;
-    }
+            // Store the ID of the host being edited
+            editingHostId = id;
+        } else {
+            data = await serviceGetDHCPLease(id);
+        }
 
-    // Pre-fill the form fields
-    document.getElementById("hostName").value = data.name ?? "";
-    document.getElementById("hostIPv4").value = data.ipv4 ?? "";
-    document.getElementById("hostIPv6").value = data.ipv6 ?? "";
-    document.getElementById("hostMAC").value = data.mac ?? "";
-    document.getElementById("hostDescription").value = data.description ?? "";
-    document.getElementById("hostSSL").checked = !!data.ssl_enabled;
-    if (data.visibility == 2) {
-        document.getElementById("hostVisibilityAlias").checked = true;
-    } else if (data.visibility == 1){
-        document.getElementById("hostVisibilityGlobal").checked = true;
-    } else {
-        document.getElementById("hostVisibilityLocal").checked = true;
+        // Pre-fill the form fields
+        document.getElementById("hostName").value = data.name ?? "";
+        document.getElementById("hostIPv4").value = data.ipv4 ?? "";
+        document.getElementById("hostIPv6").value = data.ipv6 ?? "";
+        document.getElementById("hostMAC").value = data.mac ?? "";
+        document.getElementById("hostDescription").value = data.description ?? "";
+        document.getElementById("hostSSL").checked = !!data.ssl_enabled;
+        if (data.visibility == 2) {
+            document.getElementById("hostVisibilityAlias").checked = true;
+        } else if (data.visibility == 1){
+            document.getElementById("hostVisibilityGlobal").checked = true;
+        } else {
+            document.getElementById("hostVisibilityLocal").checked = true;
+        }
+
+    } catch (err) {
+        console.error(err?.message || "Error loading device");
+        showToast(err?.message || "Error loading device", false);
     }
 }
 
@@ -406,92 +386,34 @@ async function saveHost(hostData) {
         return false;
     }
 
-    if (editingHostId !== null) {
-        // Update existing host
-        const res = await fetch(`/api/hosts/${editingHostId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(hostData)
-        });
+    try {
+        let result;
 
-        // Success without JSON
-        if (res.status === 204) {
-            showToast('Host updated successfully', true);
-            return true;
+        if (editingHostId !== null) {
+            // Update
+            result = await serviceUpdateHost(editingHostId, hostData);
+        } else {
+            // Create
+            result = await serviceCreateHost(hostData);
         }
 
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
+        const msg = (typeof result === 'object' && result?.message)
+            ? result.message
+            : editingHostId !== null
+                ? 'Host updated successfully'
+                : 'Host created successfully';
 
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
+        showToast(msg, true);
 
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error updating host`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Host updated successfully', true);
         return true;
 
-    } else {
-        // Create new host
-        const res = await fetch(`/api/hosts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(hostData)
-        });
-
-        // Success without JSON
-        if (res.status === 204) {
-            showToast('Host created successfully', true);
-            return true;
-        }
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error adding host`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Host created successfully', true);
-        return true
+    } catch (err) {
+        console.error(err?.message || "Error saving host");
+        showToast(err?.message || "Error saving host", false);
     }
+
+    return false;
+
 }
 
 // -----------------------------
@@ -539,7 +461,7 @@ async function handleAddHostSubmit(e) {
         if (ok !== false) {
             // close modal and reload hosts
             closeAddHostModal();
-            await loadDevices();
+            await fetchDevices();
             updateTable();
             return true
         }
@@ -556,11 +478,14 @@ async function handleAddHostSubmit(e) {
 // Handle delete device action
 // -----------------------------
 async function handleDeleteDevice(e, el) {
+
+    let host = false;
+
     // Prevent default action
     e.preventDefault();
 
     // Get device ID
-    const id = el.dataset.deviceId;
+    let id = el.dataset.deviceId;
 
     if (!id) {
         console.warn('Delete: device id not valid for delete:', id);
@@ -568,60 +493,41 @@ async function handleDeleteDevice(e, el) {
         return;
     }
 
-    let deleteUrl = "";
-
-    // Static or Dynamic?
-    if (id.startsWith("s-")) {
-        // static → delete su DB
-        deleteUrl = `/api/hosts/${id.slice(2)}`
-    } else if (id.startsWith("d-")) {
-        // dynamic → delete su DHCP server
-        deleteUrl = `/api/dhcp/leases/${id.slice(2)}`
+    // host or lease
+    if (id !== null) {
+        // Static or Dynamic?
+        if (id.startsWith("s-")) {
+            // static
+            host = true;
+        } else if (id.startsWith("d-")) {
+            // dynamic
+            host = false;
+        } else {
+            throw new Error("Invalid Device ID format for edit");
+        }
+        id = Number(id.slice(2));
     } else {
-        console.error("Delete: unknown device type:", id);
-        showToast("Delete: unknown device type:", false);
-        return;
+        throw new Error("Invalid Device ID for edit");
     }
 
-    // Execute delete
     try {
-        // Fetch data
-        const res = await fetch(deleteUrl, {
-            method: 'DELETE',
-            headers: { 'Accept': 'application/json' },
-        });
+       if(host){
+            const result = await serviceDeleteHost(id);
 
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
+        } else {
+            const result = await serviceDeleteDHCPLease(id);
         }
 
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
+        const msg = (typeof result === 'object' && result?.message)
+            ? result.message
+            : 'Host deleted successfully';
 
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error deleting device`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Device deleted successfully', true);
+        showToast(msg, true);
 
         // Reload devices
         await fetchDevices();
         updateTable();
+
         return true;
 
     } catch (err) {
@@ -647,7 +553,7 @@ const actionHandlers = {
     // Reload DNS
     reloadDns: async () => {
         try {
-            const result = await reloadDNS();
+            const result = await serviceReloadDNS();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DNS reload successfully';
@@ -659,7 +565,7 @@ const actionHandlers = {
     // Reload DHCP
     reloadDhcp: async () => {
         try {
-            const result = await reloadDHCP();
+            const result = await serviceReloadDHCP();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DHCP reload successfully';

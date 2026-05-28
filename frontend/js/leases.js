@@ -1,7 +1,7 @@
 // Import common js
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch } from './common.js';
-import { reloadDNS, reloadDHCP } from './services.js';
-import { apiMap, fetchData } from './api.js';
+// Import services
+import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLeases, serviceDeleteDHCPLease, serviceGetDHCPLease, serviceCreateHost} from './services.js';
 
 // -----------------------------
 // State variables
@@ -25,7 +25,7 @@ async function fetchLeases () {
         loader.style.display = "block";
 
         // Fetch leases
-        allLeases = await fetchData(apiMap.leases);
+        allLeases = await serviceGetDHCPLeases();
         viewLeases = [...allLeases];
 
     } catch (err) {
@@ -272,49 +272,27 @@ async function addHost(id) {
     // Clear form first
     clearAddHostForm();
 
-    // Fetch lease
-    const res = await fetch(`/api/dhcp/leases/${id}`, {
-        headers: { Accept: 'application/json' },
-    });
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Fetch failed for lease ${id}: ${res.statusText}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data;
     try {
-        data = await res.json();
-    } catch {
-        throw new Error(`Fetch failed for lease ${id}: Invalid JSON payload`);
-    }
+       const data = await serviceGetDHCPLease(id);
 
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg = data?.detail?.message?.trim();
-        const base = `Fetch failed for lease ${id}`;
-        const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-        err.status = res.status;
-        throw err;
-    }
+      // Pre-fill the form fields
+      document.getElementById("hostName").value = data.name ?? "";
+      document.getElementById("hostIPv4").value = data.ipv4 ?? "";
+      document.getElementById("hostIPv6").value = data.ipv6 ?? "";
+      document.getElementById("hostMAC").value = data.mac ?? "";
+      document.getElementById("hostDescription").value = data.description ?? "";
+      document.getElementById("hostSSL").checked = !!data.ssl_enabled;
+      if (data.visibility == 2) {
+          document.getElementById("hostVisibilityAlias").checked = true;
+      } else if (data.visibility == 1){
+          document.getElementById("hostVisibilityGlobal").checked = true;
+      } else {
+          document.getElementById("hostVisibilityLocal").checked = true;
+        }
 
-    // Pre-fill the form fields
-    document.getElementById("hostName").value = data.name ?? "";
-    document.getElementById("hostIPv4").value = data.ipv4 ?? "";
-    document.getElementById("hostIPv6").value = data.ipv6 ?? "";
-    document.getElementById("hostMAC").value = data.mac ?? "";
-    document.getElementById("hostDescription").value = data.description ?? "";
-    document.getElementById("hostSSL").checked = !!data.ssl_enabled;
-    if (data.visibility == 2) {
-        document.getElementById("hostVisibilityAlias").checked = true;
-    } else if (data.visibility == 1){
-        document.getElementById("hostVisibilityGlobal").checked = true;
-    } else {
-        document.getElementById("hostVisibilityLocal").checked = true;
+    } catch (err) {
+        console.error(err?.message || "Error loading lease");
+        showToast(err?.message || "Error loading lease", false);
     }
 }
 
@@ -343,48 +321,26 @@ async function saveHost(hostData) {
         return false;
     }
 
-    // Create new host
-    const res = await fetch(`/api/hosts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(hostData)
-    });
-
-    // Success without JSON
-    if (res.status === 204) {
-        showToast('Host created successfully', true);
-        return true;
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`${res.status}: ${res.statusText}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data;
     try {
-        data = await res.json();
-    } catch {
-        throw new Error('Invalid JSON payload');
+        const result = await serviceCreateHost(hostData);
+
+        const msg = (typeof result === 'object' && result?.message)
+            ? result.message
+            : 'Host created successfully';
+
+        showToast(msg, true);
+
+        return true;
+
+    } catch (err) {
+        console.error(err?.message || "Error saving host");
+        showToast(err?.message || "Error saving host", false);
     }
 
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg = data?.detail?.message?.trim();
-        const base = `Error adding host`;
-        const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-        err.status = res.status;
-        throw err;
-    }
+    return false;
 
-    // Success
-    showToast(data?.message || 'Host created successfully', true);
-    return true
 }
+
 // -----------------------------
 // Prepare add host form
 // -----------------------------
@@ -451,50 +407,23 @@ async function handleDeleteLease(e, el) {
     // Get lease ID
     const id = Number(el.dataset.leaseId);
     if (!Number.isFinite(id)) {
-        console.warn('Delete: lease id not valid for delete:', id);
         showToast('Lease id not valid for delete', false);
         return;
     }
 
-    // Execute delete
     try {
-        // Fetch data
-        const res = await fetch(`/api/dhcp/leases/${id}`, {
-            method: 'DELETE',
-            headers: { 'Accept': 'application/json' },
-        });
+        const result = await serviceDeleteDHCPLease(id);
 
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
+        const msg = (typeof result === 'object' && result?.message)
+            ? result.message
+            : 'Lease deleted successfully';
 
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error deleting lease`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Lease deleted successfully', true);
+        showToast(msg, true);
 
         // Reload leases
         await fetchLeases();
         updateTable();
+
         return true;
 
     } catch (err) {
@@ -520,7 +449,7 @@ const actionHandlers = {
     // Reload DNS
     reloadDns: async () => {
         try {
-            const result = await reloadDNS();
+            const result = await serviceReloadDNS();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DNS reload successfully';
@@ -532,7 +461,7 @@ const actionHandlers = {
     // Reload DHCP
     reloadDhcp: async () => {
         try {
-            const result = await reloadDHCP();
+            const result = await serviceReloadDHCP();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DHCP reload successfully';
@@ -626,7 +555,7 @@ function initModalLifecycle() {
             try {
                 await addHost(id);
             } catch (err) {
-                showToast(err?.message || "Error loading host for edit", false);
+                showToast(err?.message || "Error loading host", false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
                     closeAddHostModal(lastTriggerEl);

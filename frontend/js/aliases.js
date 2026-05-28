@@ -1,7 +1,7 @@
 // Import common js
 import { loadModals, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch } from './common.js';
-import { reloadDNS, reloadDHCP } from './services.js';
-import { apiMap, fetchData } from './api.js';
+// Import services
+import { serviceReloadDNS, serviceReloadDHCP, serviceGetAliases, serviceGetAlias, serviceCreateAlias, serviceUpdateAlias, serviceDeleteAlias } from './services.js';
 
 // -----------------------------
 // State variables
@@ -12,7 +12,7 @@ let editingAliasId = null;
 const sortState = { sortDirection: {}, lastSort: null };
 
 // -----------------------------
-// Fetch hosts from API
+// Fetch aliases from API
 // -----------------------------
 async function fetchAliases () {
     const loader = document.getElementById("loader");
@@ -26,7 +26,7 @@ async function fetchAliases () {
         loader.style.display = "block";
 
         // Fetch aliases
-        allAliases = await fetchData(apiMap.aliases);
+        allAliases = await serviceGetAliases();
         viewAliases = [...allAliases];
 
     } catch (err) {
@@ -247,50 +247,27 @@ async function editAlias(id) {
     // Clear form first
     clearAddAliasForm();
 
-    // Fetch alias
-    const res = await fetch(`/api/aliases/${id}`, {
-        headers: { Accept: 'application/json' },
-    });
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Fetch failed for alias ${id}: ${res.statusText}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data;
     try {
-        data = await res.json();
-    } catch {
-        throw new Error(`Fetch failed for alias ${id}: Invalid JSON payload`);
-    }
+        const data = await serviceGetAlias(id);
 
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg = data?.detail?.message?.trim();
-        const base = `Fetch failed for alias ${id}`;
-        const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-        err.status = res.status;
-        throw err;
-    }
+        // Store the ID of the alias being edited
+        editingAliasId = id;
 
-    // Store the ID of the alias being edited
-    editingAliasId = id;
-
-    // Pre-fill the form fields
-    document.getElementById("aliasName").value = data.name ?? "";
-    document.getElementById("aliasTarget").value = data.target ?? "";
-    document.getElementById("aliasDescription").value = data.description ?? "";
-    document.getElementById("aliasSSL").checked = !!data.ssl_enabled;
-    if (data.visibility == 2) {
-        document.getElementById("aliasVisibilityAlias").checked = true;
-    } else if (data.visibility == 1){
-        document.getElementById("aliasVisibilityGlobal").checked = true;
-    } else {
-        document.getElementById("aliasVisibilityLocal").checked = true;
+        // Pre-fill the form fields
+        document.getElementById("aliasName").value = data.name ?? "";
+        document.getElementById("aliasTarget").value = data.target ?? "";
+        document.getElementById("aliasDescription").value = data.description ?? "";
+        document.getElementById("aliasSSL").checked = !!data.ssl_enabled;
+        if (data.visibility == 2) {
+            document.getElementById("aliasVisibilityAlias").checked = true;
+        } else if (data.visibility == 1){
+            document.getElementById("aliasVisibilityGlobal").checked = true;
+        } else {
+            document.getElementById("aliasVisibilityLocal").checked = true;
+        }
+    } catch (err) {
+        console.error(err?.message || "Error loading alias");
+        showToast(err?.message || "Error loading alias", false);
     }
 }
 
@@ -309,92 +286,34 @@ async function saveAlias(aliasData) {
         return false;
     }
 
-    if (editingAliasId !== null) {
-        // Update existing alias
-        const res = await fetch(`/api/aliases/${editingAliasId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(aliasData)
-        });
+    try {
+        let result;
 
-        // Success without JSON
-        if (res.status === 204) {
-            showToast('Alias updated successfully', true);
-            return true;
+        if (editingAliasId !== null) {
+            // Update
+            result = await serviceUpdateAlias(editingAliasId, aliasData);
+        } else {
+            // Create
+            result = await serviceCreateAlias(aliasData);
         }
 
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
+        const msg = (typeof result === 'object' && result?.message)
+            ? result.message
+            : editingAliasId !== null
+                ? 'Alias updated successfully'
+                : 'Alias created successfully';
 
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
+        showToast(msg, true);
 
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error updating alias`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Alias updated successfully', true);
         return true;
 
-    } else {
-        // Create new alias
-        const res = await fetch(`/api/aliases`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(aliasData)
-        });
-
-        // Success without JSON
-        if (res.status === 204) {
-            showToast('Alias created successfully', true);
-            return true;
-        }
-
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error adding alias`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Alias created successfully', true);
-        return true
+    } catch (err) {
+        console.error(err?.message || "Error saving alias");
+        showToast(err?.message || "Error saving alias", false);
     }
+
+    return false;
+
 }
 
 // -----------------------------
@@ -440,7 +359,7 @@ async function handleAddAliasSubmit(e) {
         if (ok !== false) {
             // close modal and reload aliases
             closeAddAliasModal();
-            await loadAliases();
+            await fetchAliases();
             updateTable();
             return true
         }
@@ -463,50 +382,23 @@ async function handleDeleteAlias(e, el) {
     // Get alias ID
     const id = Number(el.dataset.aliasId);
     if (!Number.isFinite(id)) {
-        console.warn('Delete: alias id not valid for delete:', id);
         showToast('Alias id not valid for delete', false);
         return;
     }
 
-    // Execute delete
     try {
-        // Fetch data
-        const res = await fetch(`/api/aliases/${id}`, {
-            method: 'DELETE',
-            headers: { 'Accept': 'application/json' },
-        });
+        const result = await serviceDeleteAlias(id);
 
-        // Check content-type to avoid parsing errors
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const err = new Error(`${res.status}: ${res.statusText}`);
-            err.status = res.status;
-            throw err;
-        }
+        const msg = (typeof result === 'object' && result?.message)
+            ? result.message
+            : 'Alias deleted successfully';
 
-        // Check JSON
-        let data;
-        try {
-            data = await res.json();
-        } catch {
-            throw new Error('Invalid JSON payload');
-        }
-
-        // Check JSON errors
-        if (!res.ok) {
-            const serverMsg = data?.detail?.message?.trim();
-            const base = `Error deleting alias`;
-            const err = new Error(serverMsg ? `${base}: ${serverMsg}` : base);
-            err.status = res.status;
-            throw err;
-        }
-
-        // Success
-        showToast(data?.message || 'Alias deleted successfully', true);
+        showToast(msg, true);
 
         // Reload aliases
         await fetchAliases();
         updateTable();
+
         return true;
 
     } catch (err) {
@@ -532,7 +424,7 @@ const actionHandlers = {
     // Reload DNS
     reloadDns: async () => {
         try {
-            const result = await reloadDNS();
+            const result = await serviceReloadDNS();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DNS reload successfully';
@@ -544,7 +436,7 @@ const actionHandlers = {
     // Reload DHCP
     reloadDhcp: async () => {
         try {
-            const result = await reloadDHCP();
+            const result = await serviceReloadDHCP();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'DHCP reload successfully';
@@ -631,7 +523,7 @@ function initModalLifecycle() {
     modalEl.addEventListener('show.bs.modal', async (ev) => {
         lastTriggerEl = ev.relatedTarget; // trigger (Add o Edit)
 
-        // check Add or Edit mode based on presence of data-host-id in the trigger element
+        // check Add or Edit mode based on presence of data-alias-id in the trigger element
         const id = Number(lastTriggerEl?.dataset?.aliasId);
 
         if (Number.isFinite(id)) {

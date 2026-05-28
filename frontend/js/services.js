@@ -1,7 +1,10 @@
+// import api
+import { apiRequest, apiGet, apiPost } from './api.js';
+
 // -------------------------------------------------------
-// API Health Check
+// Check Abount
 // -------------------------------------------------------
-export async function apiCheck() {
+export async function serviceCheckAbount() {
     const pill = document.getElementById('api-pill');
     if (!pill) return;
 
@@ -22,431 +25,269 @@ export async function apiCheck() {
     }
 }
 
+// -------------------------------------------------------
+// Check Health
+// -------------------------------------------------------
+export async function serviceCheckHealth() {
+    return await apiGet("/api/health", "Error performing health check");
+}
+
 // -----------------------------
 // Reload DNS
 // -----------------------------
-export async function reloadDNS() {
-    let res;
-    try {
-        // Fetch data
-        res = await fetch('/api/dns/reload', {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' },
-        });
-    } catch (err) {
-        const msg = 'Network error while reloading DNS' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
+export async function serviceReloadDNS() {
+    const data = await apiPost(
+        "/api/dns/reload",
+        null,
+        "Error reloading DNS"
+    );
 
-    // Success without JSON
-    if (res.status === 204) {
-        return true;
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error reloading DNS: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error reloading DNS: Invalid JSON payload');
-    }
-
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error reloading DNS' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
-
-    if (res.ok && (data.status === 'success' || data.code === 'DNS_RELOAD_OK')) {
-        // Success
-        return data?.message ? { message: data.message } : true;
-    } else {
-        // Failed with JSON error message
-        return data?.message ? { message: data.message } : false;
-    }
+    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Reload DHCP action
 // -----------------------------
-export async function reloadDHCP() {
-    let res;
-    try {
-        // Fetch data
-        res = await fetch(`/api/dhcp/reload`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' },
-        });
-    } catch (err) {
-        const msg = 'Network error while reloading DHCP' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
+export async function serviceReloadDHCP() {
+    const data = await apiPost(
+        "/api/dhcp/reload",
+        null,
+        "Error reloading DHCP"
+    );
 
-    // Success without JSON
-    if (res.status === 204) {
-        return true;
-    }
+    return data?.message ? { message: data.message } : true;
+}
 
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error reloading DHCP: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
+// -----------------------------
+// Get DHCP Leaseses
+// -----------------------------
+export async function serviceGetDHCPLeases() {
+    return await apiGet("/api/dhcp/leases", "Error loading DHCP leases");
+}
 
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error reloading DHCP: Invalid JSON payload');
-    }
+// -----------------------------
+// Get a single DHCP Leases
+// -----------------------------
+export async function serviceGetDHCPLease(id) {
+    return await apiRequest(
+        `/api/dhcp/leases/${id}`,
+        { method: "GET" },
+        `Error loading host ${id}`
+    );
+}
 
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error reloading DHCP' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
+// -----------------------------
+// Delete Hosts
+// -----------------------------
+export async function serviceDeleteDHCPLease(id) {
+    const data = await apiRequest(
+        `/api/dhcp/leases/${id}`,
+        { method: "DELETE" },
+        "Error deleting host"
+    );
 
-    if (res.ok && (data.status === 'success' || data.code === 'DHCP_RELOAD_OK')) {
-        // Success
-        return data?.message ? { message: data.message } : true;
-    } else {
-        // Failed with JSON error message
-        return data?.message ? { message: data.message } : false;
-    }
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Get Hosts
+// -----------------------------
+export async function serviceGetHosts() {
+    return await apiGet("/api/hosts", "Error loading hosts");
+}
+
+// -----------------------------
+// Get a single host
+// -----------------------------
+export async function serviceGetHost(id) {
+    return await apiRequest(
+        `/api/hosts/${id}`,
+        { method: "GET" },
+        `Error loading host ${id}`
+    );
+}
+
+// -----------------------------
+// Create a new host
+// -----------------------------
+export async function serviceCreateHost(hostData) {
+    const data = await apiRequest(
+        "/api/hosts",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(hostData)
+        },
+        "Error creating host"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Update an host
+// -----------------------------
+export async function serviceUpdateHost(id, hostData) {
+    const data = await apiRequest(
+        `/api/hosts/${id}`,
+        {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(hostData)
+        },
+        "Error updating host"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Delete Hosts
+// -----------------------------
+export async function serviceDeleteHost(id) {
+    const data = await apiRequest(
+        `/api/hosts/${id}`,
+        { method: "DELETE" },
+        "Error deleting host"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Get Aliases
+// -----------------------------
+export async function serviceGetAliases() {
+    return await apiGet("/api/aliases", "Error loading aliases");
+}
+
+// -----------------------------
+// Get a single alias
+// -----------------------------
+export async function serviceGetAlias(id) {
+    return await apiRequest(
+        `/api/aliases/${id}`,
+        { method: "GET" },
+        `Error loading alias ${id}`
+    );
+}
+
+// -----------------------------
+// Create a new alias
+// -----------------------------
+export async function serviceCreateAlias(aliasData) {
+    const data = await apiRequest(
+        "/api/aliases",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(aliasData)
+        },
+        "Error creating alias"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Update an alias
+// -----------------------------
+export async function serviceUpdateAlias(id, aliasData) {
+    const data = await apiRequest(
+        `/api/aliases/${id}`,
+        {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(aliasData)
+        },
+        "Error updating alias"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Delete Alias
+// -----------------------------
+export async function serviceDeleteAlias(id) {
+    const data = await apiRequest(
+        `/api/aliases/${id}`,
+        { method: "DELETE" },
+        "Error deleting alias"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Get Devices
+// -----------------------------
+export async function serviceGetDevices() {
+    return await apiGet("/api/devices", "Error loading Devices");
 }
 
 // -------------------------------------------------------
 // Create a Backup
 // -------------------------------------------------------
-export async function CreateBackup() {
-    let res;
+export async function serviceBackupCreate() {
+    const data = await apiPost(
+        "/api/backup/create",
+        null,
+        "Error performing backup"
+    );
 
-    try {
-        // Fetch data
-        res = await fetch(`/api/backup/create`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' },
-        });
-
-    } catch (err) {
-        const msg = 'Network error while performing backup' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
-
-    // Success without JSON
-    if (res.status === 204) {
-        return true;
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error performing backup: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error performing backup: Invalid JSON payload');
-    }
-
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error performing backup' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
-
-    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_CREATE_OK')) {
-        // Success
+    if (data.status === 'success') {
         return data?.message ? { message: data.message } : true;
-    } else if (res.ok && (data.status === 'partial' || data.code === 'BACKUP_PARTIAL')) {
-        // Partial success
+    }
+
+    if (data.status === 'partial') {
         return data?.message
             ? { message: data.message, partial: true }
             : { partial: true };
-    } else {
-        // Failed with JSON error message
-        return data?.message ? { message: data.message } : false;
     }
+
+    return false;
 }
 
 // -------------------------------------------------------
 // Fetch Backups list
 // -------------------------------------------------------
-export async function fetchBackups() {
-    let res;
-
-    try {
-        // Fetch data
-        res = await fetch(`/api/backup/list`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-        });
-
-    } catch (err) {
-        const msg = 'Network error while fetching backups' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
-
-    // Success without JSON
-    if (res.status === 204) {
-        return [];
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error fetching backups: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error fetching backups: Invalid JSON payload');
-    }
-
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error fetching backups' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
-
-    return (data ?? []);
+export async function serviceBackupList() {
+    return await apiGet("/api/backup/list", "Error fetching backups");
 }
 
 // -------------------------------------------------------
 // Restore a Backup
 // -------------------------------------------------------
-export async function RestoreBackup(id) {
-    let res;
+export async function serviceBackupRestore(id) {
+    const data = await apiPost(
+        "/api/backup/restore",
+        { backup_id: id },
+        "Error performing restore"
+    );
 
-    try {
-        // Fetch data
-        res = await fetch(`/api/backup/restore`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ backup_id: id })
-        });
-
-    } catch (err) {
-        const msg = 'Network error while performing restore' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
-
-    // Success without JSON
-    if (res.status === 204) {
-        return true;
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error performing restore: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error performing restore: Invalid JSON payload');
-    }
-
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error performing restore' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
-
-    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_RESTORE_OK')) {
-        // Success
+    if (data.status === 'success') {
         return data?.message ? { message: data.message } : true;
-    } else if (res.ok && (data.status === 'partial' || data.code === 'BACKUP_RESTORE_PARTIAL')) {
-        // Partial success
+    }
+
+    if (data.status === 'partial') {
         return data?.message
             ? { message: data.message, partial: true }
             : { partial: true };
-    } else {
-        // Failed with JSON error message
-        return data?.message ? { message: data.message } : false;
     }
+
+    return false;
 }
 
 // -------------------------------------------------------
 // Delete a Backup
 // -------------------------------------------------------
 export async function deleteBackup(id) {
-    let res;
+    const data = await apiPost(
+        "/api/backup/delete",
+        { backup_id: id },
+        "Error performing delete"
+    );
 
-    try {
-        // Fetch data
-        res = await fetch(`/api/backup/delete`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ backup_id: id })
-        });
-
-    } catch (err) {
-        const msg = 'Network error while performing delete' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
-
-    // Success without JSON
-    if (res.status === 204) {
-        return true;
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error performing delete: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error performing delete: Invalid JSON payload');
-    }
-
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error performing delete' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
-
-    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_DELETEE_OK')) {
-        // Success
-        return data?.message ? { message: data.message } : true;
-    } else {
-        // Failed with JSON error message
-        return data?.message ? { message: data.message } : false;
-    }
-}
-
-// -------------------------------------------------------
-// Check Health
-// -------------------------------------------------------
-export async function checkHealth() {
-    let res;
-
-    try {
-        // Fetch data
-        res = await fetch(`/api/health`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-    } catch (err) {
-        const msg = 'Network error while performing health check' + (err?.message ? `: ${err.message}` : '');
-        throw new Error(msg, { cause: err });
-    }
-
-    // Success without JSON
-    if (res.status === 204) {
-        return true;
-    }
-
-    // Check content-type to avoid parsing errors
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const err = new Error(`Error performing health check: ${res.status}: ${res.statusText || 'Unexpected response'}`);
-        err.status = res.status;
-        throw err;
-    }
-
-    // Check JSON
-    let data = {};
-    try {
-        data = await res.json();
-    } catch {
-        throw new Error('Error performing health check: Invalid JSON payload');
-    }
-
-    // Check JSON errors
-    if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
-        const err = new Error('Error performing health check' + (serverMsg ? `: ${serverMsg}` : ''));
-        err.status = res.status;
-        throw err;
-    }
-
-    return (data ?? []);
+    return data?.message ? { message: data.message } : true;
 }
