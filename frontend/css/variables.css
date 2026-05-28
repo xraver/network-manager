@@ -3,6 +3,7 @@
    ================================ */
 :root {
     --accent: #4da3ff;
+    --accent-rgb: 77, 163, 255;
     --accent-hover: #1f8bff;
 
     --bg-dark: #111;
@@ -20,4 +21,10 @@
 
     --icon-color: var(--accent);
     --icon-color-hover: var(--accent-hover);
+
+    --bg-hover: rgba(0, 0, 0, 0.04);
+    --bg-hover-accent: rgba(var(--accent-rgb), 0.08);
+
+    --bg-selected: rgba(var(--accent-rgb), 0.12);
+    --border-selected: rgba(var(--accent-rgb), 0.4);
 }

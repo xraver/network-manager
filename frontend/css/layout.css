@@ -430,8 +430,24 @@ td.actions {
     padding: 20px 24px;
     border-left: 4px solid var(--accent);
     border-radius: 6px;
-    width: 320px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.modal-content-sm {
+    width: 320px;
+}
+
+.modal-content-md {
+    width: 500px;
+}
+
+.modal-content-lg {
+    width: 800px;
+}
+
+.modal-content-xl {
+    width: 95vw;
+    max-width: 1200px;
 }
 
 .modal-content h3 {

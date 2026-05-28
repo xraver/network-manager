@@ -1,12 +1,12 @@
 <!-- AddHost -->
 <div class="modal fade" id="addHostModal" tabindex="-1" aria-labelledby="addHostTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
-        <div class="modal-content addhost-modal">
+        <div class="modal-content modal-content-sm addhost-modal">
             <!-- Header scuro con logo/brand -->
             <div class="modal-header addhost-header">
                 <div class="d-flex align-items-center gap-2">
                     <!-- Emoji o icona -->
-                    <span class="title-icon" aria-hidden="true">🖧</span>
+                    <span class="title-icon" aria-hidden="true"><i class="bi bi-hdd-network"></i></span>
                     <h5 class="modal-title mb-0" id="addHostTitle">Aggiungi Host</h5>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
@@ -76,12 +76,12 @@
 <!-- AddAlias -->
 <div class="modal fade" id="addAliasModal" tabindex="-1" aria-labelledby="addAliasTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
-        <div class="modal-content addhost-modal">
+        <div class="modal-content modal-content-sm addhost-modal">
             <!-- Header scuro con logo/brand -->
             <div class="modal-header addhost-header">
                 <div class="d-flex align-items-center gap-2">
                     <!-- Emoji o icona -->
-                    <span class="title-icon" aria-hidden="true">🖧</span>
+                    <span class="title-icon" aria-hidden="true"><i class="bi bi-diagram-2"></i></span>
                     <h5 class="modal-title mb-0" id="addAliasTitle">Aggiungi Alias</h5>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
@@ -138,13 +138,13 @@
     </div>
 </div>
 
-<!-- Modal Restorebackup -->
+<!-- Modal Restore backup -->
 <div id="restoreModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="restoreTitle">
-    <div class="modal-content addhost-modal">
+    <div class="modal-content modal-content-xl addhost-modal">
         <div class="addhost-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
-                <span class="title-icon">💾</span>
-                <span id="restoreTitle" class="modal-title">Execute Restore</span>
+                <span class="title-icon"><i class="bi bi-arrow-counterclockwise"></i></span>
+                <span id="restoreTitle" class="modal-title">Restore Backup</span>
             </div>
             <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeRestoreModal"></button>
         </div>
@@ -165,10 +165,10 @@
 <!-- Modal Health -->
 <div id="healthModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content addhost-modal">
+        <div class="modal-content modal-content-md addhost-modal">
             <div class="addhost-header d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="title-icon">❤️‍🩹</span>
+                    <span class="title-icon"><i class="bi bi-heart-pulse"></i></span>
                     <span id="healthTitle" class="modal-title">Health Status</span>
                 </div>
                 <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeHealthModal"></button>
