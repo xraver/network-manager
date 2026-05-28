@@ -141,14 +141,14 @@ export async function reloadDHCP() {
 }
 
 // -------------------------------------------------------
-// Execute Backup
+// Create a Backup
 // -------------------------------------------------------
-export async function doBackup() {
+export async function CreateBackup() {
     let res;
 
     try {
         // Fetch data
-        res = await fetch(`/api/backup`, {
+        res = await fetch(`/api/backup/create`, {
             method: 'POST',
             headers: { 'Accept': 'application/json' },
         });
@@ -192,7 +192,7 @@ export async function doBackup() {
         throw err;
     }
 
-    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_OK')) {
+    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_CREATE_OK')) {
         // Success
         return data?.message ? { message: data.message } : true;
     } else if (res.ok && (data.status === 'partial' || data.code === 'BACKUP_PARTIAL')) {
@@ -207,16 +207,74 @@ export async function doBackup() {
 }
 
 // -------------------------------------------------------
-// Execute Restore
+// Fetch Backups list
 // -------------------------------------------------------
-export async function doRestore(id) {
+export async function fetchBackups() {
     let res;
 
     try {
         // Fetch data
-        res = await fetch(`/api/restore`, {
-            method: 'POST',
+        res = await fetch(`/api/backup/list`, {
+            method: 'GET',
             headers: { 'Accept': 'application/json' },
+        });
+
+    } catch (err) {
+        const msg = 'Network error while fetching backups' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
+    }
+
+    // Success without JSON
+    if (res.status === 204) {
+        return [];
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error fetching backups: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error fetching backups: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error fetching backups' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    return (data ?? []);
+}
+
+// -------------------------------------------------------
+// Restore a Backup
+// -------------------------------------------------------
+export async function RestoreBackup(id) {
+    let res;
+
+    try {
+        // Fetch data
+        res = await fetch(`/api/backup/restore`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ backup_id: id })
         });
 
@@ -259,14 +317,79 @@ export async function doRestore(id) {
         throw err;
     }
 
-    if (res.ok && (data.status === 'success' || data.code === 'RESTORE_OK')) {
+    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_RESTORE_OK')) {
         // Success
         return data?.message ? { message: data.message } : true;
-    } else if (res.ok && (data.status === 'partial' || data.code === 'RESTORE_PARTIAL')) {
+    } else if (res.ok && (data.status === 'partial' || data.code === 'BACKUP_RESTORE_PARTIAL')) {
         // Partial success
         return data?.message
             ? { message: data.message, partial: true }
             : { partial: true };
+    } else {
+        // Failed with JSON error message
+        return data?.message ? { message: data.message } : false;
+    }
+}
+
+// -------------------------------------------------------
+// Delete a Backup
+// -------------------------------------------------------
+export async function deleteBackup(id) {
+    let res;
+
+    try {
+        // Fetch data
+        res = await fetch(`/api/backup/delete`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ backup_id: id })
+        });
+
+    } catch (err) {
+        const msg = 'Network error while performing delete' + (err?.message ? `: ${err.message}` : '');
+        throw new Error(msg, { cause: err });
+    }
+
+    // Success without JSON
+    if (res.status === 204) {
+        return true;
+    }
+
+    // Check content-type to avoid parsing errors
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+        const err = new Error(`Error performing delete: ${res.status}: ${res.statusText || 'Unexpected response'}`);
+        err.status = res.status;
+        throw err;
+    }
+
+    // Check JSON
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error('Error performing delete: Invalid JSON payload');
+    }
+
+    // Check JSON errors
+    if (!res.ok) {
+        const serverMsg =
+            data?.detail?.message?.trim()
+            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
+            || data?.message?.trim()
+            || data?.error?.message?.trim()
+            || (typeof data?.error === 'string' ? data.error.trim() : '');
+        const err = new Error('Error performing delete' + (serverMsg ? `: ${serverMsg}` : ''));
+        err.status = res.status;
+        throw err;
+    }
+
+    if (res.ok && (data.status === 'success' || data.code === 'BACKUP_DELETEE_OK')) {
+        // Success
+        return data?.message ? { message: data.message } : true;
     } else {
         // Failed with JSON error message
         return data?.message ? { message: data.message } : false;

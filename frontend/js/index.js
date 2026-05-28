@@ -2,26 +2,134 @@
 // IMPORT
 // -------------------------------------------------------
 import { loadModals, showToast } from './common.js';
-import { apiCheck, reloadDNS, reloadDHCP, doBackup, doRestore, checkHealth } from './services.js';
+import { apiCheck, reloadDNS, reloadDHCP, CreateBackup, fetchBackups, RestoreBackup, deleteBackup, checkHealth } from './services.js';
 
 // -------------------------------------------------------
-// RESTORE MODAL OPEN/CLOSE
+// BACKUP MODAL OPEN/CLOSE
 // -------------------------------------------------------
-function openRestoreModal() {
-    const modal = document.getElementById('restoreModal');
-    const input = document.getElementById('restoreBackupId');
+async function openBackupModal() {
+
+    const modal = document.getElementById('backupModal');
     if (!modal) return;
-
     modal.style.display = 'flex';
-    if (input) {
-        input.value = input.value?.trim() ?? '';
-        setTimeout(() => input.focus(), 50);
+
+    const tbody = document.getElementById("backupList");
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    Loading backups...
+                </td>
+            </tr>
+        `;
+    }
+
+    try {
+        const data = await fetchBackups();
+        renderBackupList(data);
+    } catch (err) {
+        console.error(err);
+        showToast("Error loading backups", false);
     }
 }
 
-function closeRestoreModal() {
-    const modal = document.getElementById('restoreModal');
+function closeBackupModal() {
+    const modal = document.getElementById('backupModal');
     if (modal) modal.style.display = 'none';
+}
+
+// -------------------------------------------------------
+// Manage Backup List Rendering (usa fetchData() con apiMap.backups)
+// -------------------------------------------------------
+function renderBackupList(data) {
+    const tbody = document.getElementById("backupList");
+    tbody.innerHTML = "";
+
+    if (!data?.backups || !Array.isArray(data.backups) || data.backups.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    No backups available
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    data.backups.sort((a, b) =>
+        new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    );
+
+    data.backups.forEach((b, index) => {
+        const tr = document.createElement("tr");
+        const formattedDate = new Date(b.created_at).toLocaleString();
+        const formattedSize = (b.size_bytes / 1024).toFixed(2) + " KB";
+
+        // radio
+        const tdRadio = document.createElement("td");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "backupSelect";
+        radio.value = b.name;
+        radio.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.querySelectorAll("#backupList tr")
+                .forEach(r => r.classList.remove("table-active"));
+
+            tr.classList.add("table-active");
+        });
+        tdRadio.appendChild(radio);
+
+        // name
+        const tdName = document.createElement("td");
+        tdName.textContent = b.name;
+
+        // date
+        const tdDate = document.createElement("td");
+        tdDate.textContent = formattedDate;
+
+        // size
+        const tdSize = document.createElement("td");
+        tdSize.textContent = formattedSize;
+        tdSize.classList.add("text-end");
+
+        // actions (DELETE)
+        const tdActions = document.createElement("td");
+        tdActions.classList.add("text-end");
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn btn-sm btn-outline-danger";
+        deleteBtn.title = "Delete backup";
+        deleteBtn.innerHTML = `<i class="bi bi-trash-fill text-danger"></i>`;
+        deleteBtn.setAttribute("data-action", "deleteBackup");
+        deleteBtn.setAttribute("data-id", b.name);
+        tdActions.appendChild(deleteBtn);
+
+        // Append all columns
+        tr.append(tdRadio, tdName, tdDate, tdSize, tdActions);
+
+        if (index === 0) {
+            radio.checked = true;
+            tr.classList.add("table-active");
+        }
+
+        // click su tutta la riga = selezione radio
+        tr.addEventListener("click", () => {
+            radio.checked = true;
+
+            // highlight selected row
+            document.querySelectorAll("#backupList tr")
+                .forEach(r => r.classList.remove("table-active"));
+
+            tr.classList.add("table-active");
+        });
+
+        tbody.appendChild(tr);
+    });
+}
+
+function getSelectedBackup() {
+    const selected = document.querySelector('input[name="backupSelect"]:checked');
+    return selected ? selected.value : null;
 }
 
 // -------------------------------------------------------
@@ -145,9 +253,10 @@ function renderHealth(data) {
 // Action Handlers
 // -------------------------------------------------------
 const actionHandlers = {
-    // Backup
+    // Create Backup
     startBackup: async (e, el) => {
         const btn = el;
+        const modal = document.getElementById('backupModal');
 
         if (!btn) return;
 
@@ -158,17 +267,13 @@ const actionHandlers = {
         label.textContent = ' Exporting…';
 
         try {
-            const result = await doBackup();
+            const result = await CreateBackup();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
-                        : 'Backup compleated successfully';
-            if (result?.partial) {
-                // partial success
-                showToast(msg, false);
-            } else {
-                // success
-                showToast(msg, true);
-            }
+                        : 'Backup completed successfully';
+            showToast(msg, !result?.partial);
+            // Close modal
+            if (modal) modal.style.display = 'none';
         } catch (err) {
             showToast(err?.message || "Error performing backup", false);
         } finally {
@@ -176,18 +281,14 @@ const actionHandlers = {
             btn.disabled = false;
         }
     },
-    // Restore
+    // Restore Backup
     startRestore: async (e, el) => {
         const btn = el;
-        const input = document.getElementById('restoreBackupId');
-        const modal = document.getElementById('restoreModal');
+        const modal = document.getElementById('backupModal');
 
-        if (!btn || !input) return;
-
-        const id = input.value.trim();
+        const id = getSelectedBackup();
         if (!id) {
-            showToast('Specify a Backup ID', false);
-            input.focus();
+            showToast('Select a backup', false);
             return;
         }
 
@@ -198,20 +299,13 @@ const actionHandlers = {
         label.textContent = ' Restoring…';
 
         try {
-            const result = await doRestore();
+            const result = await RestoreBackup(id);
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'Restore completed successfully';
-            if (result?.partial) {
-                // partial success
-                showToast(msg, false);
-            } else {
-                // success
-                showToast(msg, true);
-            }
-            // Close modal and reset input
+            showToast(msg, !result?.partial);
+            // Close modal
             if (modal) modal.style.display = 'none';
-            input.value = '';
         } catch (err) {
             showToast(err?.message || "Error performing restore", false);
         } finally {
@@ -219,8 +313,38 @@ const actionHandlers = {
             btn.disabled = false;
         }
     },
-    openRestoreModal,       // managed by boostrap
-    closeRestoreModal,      // managed by boostrap
+    // Delete Backup
+    deleteBackup: async (e, el) => {
+
+        e.stopPropagation();
+
+        const id = el.dataset.id;
+        if (!id) return;
+
+        const confirmDelete = confirm(`Delete backup "${id}" ?`);
+        if (!confirmDelete) return;
+
+        try {
+            const result = await deleteBackup(id);
+
+            const msg = (typeof result === 'object' && result?.message)
+                ? result.message
+                : 'Backup deleted successfully';
+
+            showToast(msg, true);
+
+            // reload list
+            const data = await fetchBackups();
+            renderBackupList(data);
+
+        } catch (err) {
+            console.error(err);
+            showToast(err?.message || "Error deleting backup", false);
+        }
+    },
+
+    openBackupModal,       // managed by boostrap
+    closeBackupModal,      // managed by boostrap
     // Reload DNS
     reloadDns: async () => {
         try {
@@ -277,8 +401,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         showToast(err?.message || "Error loading modals", false);
     }
 
-    // Init Restore Backup Modal (backdrop click to close)
-    initRestoreBackupModal();
+    // Init Backup Modal (backdrop click to close)
+    initBackupModal();
 });
 
 // -------------------------------------------------------
@@ -305,20 +429,20 @@ document.addEventListener('click', async (e) => {
 // -------------------------------------------------------
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        closeRestoreModal();
+        closeBackupModal();
         closeHealthModal();
     }
 });
 
 // -------------------------------------------------------
-// Init Restore Backup Modal (backdrop click to close)
+// Init Backup Modal (backdrop click to close)
 // -------------------------------------------------------
-function initRestoreBackupModal() {
-    const restoreModal = document.getElementById('restoreModal');
-    if (!restoreModal) return;
+function initBackupModal() {
+    const backupModal = document.getElementById('backupModal');
+    if (!backupModal) return;
 
-    restoreModal.addEventListener('click', (e) => {
-        if (e.target === restoreModal) closeRestoreModal();
+    backupModal.addEventListener('click', (e) => {
+        if (e.target === backupModal) closeBackupModal();
     });
 }
 

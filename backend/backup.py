@@ -5,8 +5,9 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+from pathlib import Path
 import time
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 import zipfile
 
 # Import local modules
@@ -21,9 +22,6 @@ from backend.log.log import get_logger
 # Logger initialization
 logger = get_logger(__name__)
 
-# Timestamp used for backup file naming
-TIMESTAMP = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
 # Backup files to include in the archive (must match metadata structure)
 backup_files = [
     config.BACKUP_METADATA_FILE,
@@ -35,9 +33,43 @@ backup_files = [
 remove_backup_files = True
 
 # ---------------------------------------------------------
+# Internal: Generate Filestamp
+# ---------------------------------------------------------
+def generate_timestamps() -> dict:
+    now = datetime.now(timezone.utc)
+
+    return {
+        "iso": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "file": now.strftime("%Y%m%d_%H%M%S"),
+    }
+
+# ---------------------------------------------------------
+# Internal: Build summary JSON
+# ---------------------------------------------------------
+def build_result(operations: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+
+    summary = {
+        "total": len(operations),
+        "success": sum(1 for op in operations.values() if op.get("status") == "success"),
+        "failed": sum(1 for op in operations.values() if op.get("status") == "failure"),
+    }
+
+    errors = sum(
+        ((op.get("errors") or []) for op in operations.values()),
+        []
+    )
+
+    return {
+        **operations,
+        "summary": summary,
+        "errors": errors,
+    }
+
+# ---------------------------------------------------------
 # Internal: Calculate file checksum
 # ---------------------------------------------------------
-def file_checksum(path: str) -> str:
+def file_checksum(path: Union[str, Path]) -> str:
+    path = Path(path)
     h = hashlib.sha256()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
@@ -45,46 +77,54 @@ def file_checksum(path: str) -> str:
     return h.hexdigest()
 
 # ---------------------------------------------------------
-# Create Backup Archive (ZIP)
+# Internal: Create Backup Archive (ZIP)
 # ---------------------------------------------------------
-def create_backup_archive(timestamp: Optional[str] = None) -> Dict[str, Any]:
+def create_backup_archive(
+    *,
+    zip_name: Optional[str] = None,
+    zip_dir: Optional[str] = None,
+    files_dir: Optional[str] = None,
+    remove_files: bool = False
+) -> Dict[str, Any]:
 
     # Initialization
     start_ns = time.monotonic_ns()
     count = 0
     errors: List[str] = []
-    ts = timestamp or TIMESTAMP
 
     try:
-        # File paths
-        backup_dir = settings.BACKUP_PATH
-        zip_name = f"backup_{ts}.zip"
-        zip_path = os.path.join(backup_dir, zip_name)
+        # --- Paths ---
+        base_zip_dir = Path(zip_dir or settings.BACKUP_PATH)
+        base_files_dir = Path(files_dir or settings.BACKUP_PATH)
+        base_zip_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create ZIP
-        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        # zip name
+        if not zip_name:
+            ts = time.strftime("%Y%m%d_%H%M%S")
+            zip_name = f"backup_{ts}.zip"
+        zip_file = base_zip_dir / zip_name
 
+        # --- Create ZIP ---
+        with zipfile.ZipFile(zip_file, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for fname in backup_files:
-                fpath = os.path.join(backup_dir, fname)
-
-                if not os.path.isfile(fpath):
+                fpath = base_files_dir / fname
+                if not fpath.is_file():
                     raise FileNotFoundError(f"Missing file for archive: {fname}")
-
-                # arcname evita path assoluti dentro lo zip
                 z.write(fpath, arcname=fname)
-
-                # increment count of included files
                 count += 1
 
-        # Calcolo SHA256 dello zip
-        archive_sha256 = file_checksum(zip_path)
+        # --- Checksum ---
+        archive_sha256 = file_checksum(zip_file)
 
-        if remove_backup_files == True:
-            # Remove files after archiving (optional, can be commented out if you want to keep them)
+        # --- Cleanup ---
+        if remove_files:
             for fname in backup_files:
-                fpath = os.path.join(backup_dir, fname)
-                if os.path.isfile(fpath):
-                    os.remove(fpath)
+                fpath = base_files_dir / fname
+                fpath.unlink(missing_ok=True)
+            # Remove folder if empty
+            p = base_files_dir
+            if p.is_dir() and not any(p.iterdir()):
+                p.rmdir()
 
     except Exception as e:
         logger.exception("create_backup_archive failed: %s", str(e).strip())
@@ -92,46 +132,93 @@ def create_backup_archive(timestamp: Optional[str] = None) -> Dict[str, Any]:
 
     took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
-    if errors:
-        result: Dict[str, Any] = {
-            "status": "failure",
-            "file": zip_path,
-            "errors": errors,
-            "took_ms": took_ms,
-        }
-    else:
-        result: Dict[str, Any] = {
-            "status": "success",
-            "file": zip_path,
-            "count": count,
-            "sha256": archive_sha256,
-            "took_ms": took_ms,
-        }
+    return {
+        "status": "failure" if errors else "success",
+        "file": str(zip_file) if not errors else None,
+        "count": count if not errors else 0,
+        "sha256": archive_sha256 if not errors else None,
+        "errors": errors,
+        "took_ms": took_ms,
+    }
 
-    return result
+# ---------------------------------------------------------
+# Internal: Unzip Backup Archive (ZIP)
+# ---------------------------------------------------------
+def unzip_backup_archive(
+    *,
+    zip_path: Optional[str] = None,
+    zip_name: Optional[str] = None,
+    zip_dir: Optional[str] = None,
+    extract_dir: Optional[str] = None
+) -> Dict[str, Any]:
 
+    # Initialization
+    start_ns = time.monotonic_ns()
+    count = 0
+    errors: List[str] = []
+
+    try:
+        # --- Resolve paths ---
+        base_zip_dir = zip_dir or settings.BACKUP_PATH
+
+        if not zip_path:
+            if not zip_name:
+                raise ValueError("Either zip_path or zip_name must be provided")
+
+            zip_path = Path(base_zip_dir) / zip_name
+
+        base_extract_dir = extract_dir or settings.BACKUP_PATH
+        Path(base_extract_dir).mkdir(parents=True, exist_ok=True)
+
+        # --- Unzip ---
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall(base_extract_dir)
+            count = len(z.namelist())
+
+    except Exception as e:
+        logger.exception("unzip_backup_archive failed: %s", str(e).strip())
+        errors.append(str(e))
+
+    took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+
+    return {
+        "status": "failure" if errors else "success",
+        "file": str(zip_path),
+        "extract_dir": str(base_extract_dir) if not errors else None,
+        "count": count if not errors else 0,
+        "errors": errors,
+        "took_ms": took_ms,
+    }
 
 # ---------------------------------------------------------
 # Save Hosts DB
 # ---------------------------------------------------------
-def store_hosts(timestamp: Optional[str] = None) -> Dict[str, Any]:
+def store_hosts(
+    *,
+    timestamp: str,
+    filename: Optional[str] = None,
+    filepath: Optional[str] = None,
+) -> Dict[str, Any]:
 
     # Initialization
     start_ns = time.monotonic_ns()
-    path = os.path.join(settings.BACKUP_PATH, config.BACKUP_HOSTS_FILE)
+    filepath = Path(filepath or settings.BACKUP_PATH)
+    filename = filename or config.BACKUP_HOSTS_FILE
+    file = filepath / filename
+    filepath.mkdir(parents=True, exist_ok=True)
     count_stored = 0
     count_loaded = 0
     errors: List[str] = []
-    ts = timestamp or TIMESTAMP
 
     try:
         # Get Hosts List
         hosts = get_hosts()
         count_loaded = len(hosts)
 
-        with open(path, "w", encoding="utf-8") as f:
+        # Backup Hosts DB
+        with open(file, "w", encoding="utf-8") as f:
             data = {
-                "generated_at": ts,
+                "generated_at": timestamp,
                 "count": count_loaded,
                 "hosts": hosts,
             }
@@ -146,7 +233,7 @@ def store_hosts(timestamp: Optional[str] = None) -> Dict[str, Any]:
     if errors:
         result: Dict[str, Any] = {
             "status": "failure",
-            "file": path,
+            "file": str(file),
             "errors": errors,
             "took_ms": took_ms,
         }
@@ -154,7 +241,7 @@ def store_hosts(timestamp: Optional[str] = None) -> Dict[str, Any]:
         count_stored = count_loaded
         result: Dict[str, Any] = {
             "status": "success",
-            "file": path,
+            "file": str(file),
             "count_loaded": count_loaded,
             "count_stored": count_stored,
             "took_ms": took_ms,
@@ -165,20 +252,24 @@ def store_hosts(timestamp: Optional[str] = None) -> Dict[str, Any]:
 # ---------------------------------------------------------
 # Restore Hosts DB
 # ---------------------------------------------------------
-def restore_hosts(file: Optional[str] = None) -> Dict[str, Any]:
+def restore_hosts(
+    filepath: Optional[str] = None,
+    filename: Optional[str] = None,
+    remove_file: bool = False
+) -> Dict[str, Any]:
 
     # Initialization
     start_ns = time.monotonic_ns()
-    if file is None:
-        file = config.BACKUP_HOSTS_FILE
-    path = os.path.join(settings.BACKUP_PATH, file)
+    filepath = Path(filepath or settings.BACKUP_PATH)
+    filename = filename or config.BACKUP_HOSTS_FILE
+    file = filepath / filename
     count_restored = 0
     count_loaded = 0
     hosts: List[Dict[str, Any]] = []
     errors: List[str] = []
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(file, "r", encoding="utf-8") as f:
             data = json.load(f)
             hosts = data.get("hosts", [])
             count_loaded = data.get("count", 0)
@@ -196,7 +287,7 @@ def restore_hosts(file: Optional[str] = None) -> Dict[str, Any]:
     if errors:
         result: Dict[str, Any] = {
             "status": "failure",
-            "file": path,
+            "file": str(file),
             "errors": errors,
             "took_ms": took_ms,
         }
@@ -204,26 +295,37 @@ def restore_hosts(file: Optional[str] = None) -> Dict[str, Any]:
         count_stored = count_loaded
         result: Dict[str, Any] = {
             "status": "success",
-            "file": path,
+            "file": str(file),
             "count_loaded": count_loaded,
             "count_stored": count_stored,
             "took_ms": took_ms,
         }
+
+    # --- Cleanup ---
+    if remove_file:
+        file.unlink(missing_ok=True)
 
     return result
 
 # ---------------------------------------------------------
 # Save Aliases DB
 # ---------------------------------------------------------
-def store_aliases(timestamp: Optional[str] = None) -> Dict[str, Any]:
+def store_aliases(
+    *,
+    timestamp: str,
+    filename: Optional[str] = None,
+    filepath: Optional[str] = None,
+) -> Dict[str, Any]:
 
     # Initialization
     start_ns = time.monotonic_ns()
-    path = os.path.join(settings.BACKUP_PATH, config.BACKUP_ALIASES_FILE)
+    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath.mkdir(parents=True, exist_ok=True)
+    filename = filename or config.BACKUP_ALIASES_FILE
+    file = filepath / filename
     count_stored = 0
     count_loaded = 0
     errors: List[str] = []
-    ts = timestamp or TIMESTAMP
 
     try:
         # Get Aliases List
@@ -231,10 +333,9 @@ def store_aliases(timestamp: Optional[str] = None) -> Dict[str, Any]:
         count_loaded = len(aliases)
 
         # Backup Aliases DB
-        path = os.path.join(settings.BACKUP_PATH, config.BACKUP_ALIASES_FILE)
-        with open(path, "w", encoding="utf-8") as f:
+        with open(file, "w", encoding="utf-8") as f:
             data = {
-                "generated_at": ts,
+                "generated_at": timestamp,
                 "count": count_loaded,
                 "aliases": aliases,
             }
@@ -249,7 +350,7 @@ def store_aliases(timestamp: Optional[str] = None) -> Dict[str, Any]:
     if errors:
         result: Dict[str, Any] = {
             "status": "failure",
-            "file": path,
+            "file": str(file),
             "errors": errors,
             "took_ms": took_ms,
         }
@@ -257,7 +358,7 @@ def store_aliases(timestamp: Optional[str] = None) -> Dict[str, Any]:
         count_stored = count_loaded
         result: Dict[str, Any] = {
             "status": "success",
-            "file": path,
+            "file": str(file),
             "count_loaded": count_loaded,
             "count_stored": count_stored,
             "took_ms": took_ms,
@@ -268,20 +369,25 @@ def store_aliases(timestamp: Optional[str] = None) -> Dict[str, Any]:
 # ---------------------------------------------------------
 # Restore Aliases DB
 # ---------------------------------------------------------
-def restore_aliases(file: Optional[str] = None) -> Dict[str, Any]:
+def restore_aliases(
+    filepath: Optional[str] = None,
+    filename: Optional[str] = None,
+    remove_file: bool = False
+) -> Dict[str, Any]:
+
 
     # Initialization
     start_ns = time.monotonic_ns()
-    if file is None:
-        file = config.BACKUP_ALIASES_FILE
-    path = os.path.join(settings.BACKUP_PATH, file)
+    filepath = Path(filepath or settings.BACKUP_PATH)
+    filename = filename or config.BACKUP_ALIASES_FILE
+    file = filepath / filename
     count_restored = 0
     count_loaded = 0
     aliases: List[Dict[str, Any]] = []
     errors: List[str] = []
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(file, "r", encoding="utf-8") as f:
             data = json.load(f)
             aliases = data.get("aliases", [])
             count_loaded = data.get("count", 0)
@@ -299,7 +405,7 @@ def restore_aliases(file: Optional[str] = None) -> Dict[str, Any]:
     if errors:
         result: Dict[str, Any] = {
             "status": "failure",
-            "file": path,
+            "file": str(file),
             "errors": errors,
             "took_ms": took_ms,
         }
@@ -307,29 +413,41 @@ def restore_aliases(file: Optional[str] = None) -> Dict[str, Any]:
         count_stored = count_loaded
         result: Dict[str, Any] = {
             "status": "success",
-            "file": path,
+            "file": str(file),
             "count_loaded": count_loaded,
             "count_stored": count_stored,
             "took_ms": took_ms,
         }
 
+
+    # --- Cleanup ---
+    if remove_file:
+        file.unlink(missing_ok=True)
+
     return result
 
 # ---------------------------------------------------------
-# Save Metadata DB
+# Save Metadata
 # ---------------------------------------------------------
-def store_metadata(timestamp: Optional[str] = None) -> Dict[str, Any]:
+def store_metadata(
+    *,
+    timestamp: str,
+    filename: Optional[str] = None,
+    filepath: Optional[str] = None,
+) -> Dict[str, Any]:
 
     # Initialization
     start_ns = time.monotonic_ns()
-    path = os.path.join(settings.BACKUP_PATH, config.BACKUP_METADATA_FILE)
+    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath.mkdir(parents=True, exist_ok=True)
+    filename = filename or config.BACKUP_METADATA_FILE
+    file = filepath / filename
     errors: List[str] = []
-    ts = timestamp or TIMESTAMP
 
     try:
-        with open(path, "w", encoding="utf-8") as f:
+        with open(file, "w", encoding="utf-8") as f:
             data = {
-                "generated_at": ts,
+                "generated_at": timestamp,
                 "backup_version": config.BACKUP_VERSION,
                 "db_structure_version": config.BACKUP_DB_STRUCTURE_VERSION,
                 "file_count": 2,
@@ -337,12 +455,12 @@ def store_metadata(timestamp: Optional[str] = None) -> Dict[str, Any]:
                     {
                         "name": "hosts",
                         "file": config.BACKUP_HOSTS_FILE,
-                        "sha256": file_checksum(os.path.join(settings.BACKUP_PATH, config.BACKUP_HOSTS_FILE)),
+                        "sha256": file_checksum(filepath / config.BACKUP_HOSTS_FILE),
                     },
                     {
                         "name": "aliases",
                         "file": config.BACKUP_ALIASES_FILE,
-                        "sha256": file_checksum(os.path.join(settings.BACKUP_PATH, config.BACKUP_ALIASES_FILE)),
+                        "sha256": file_checksum(filepath / config.BACKUP_ALIASES_FILE),
                     },
                 ]
             }
@@ -357,7 +475,7 @@ def store_metadata(timestamp: Optional[str] = None) -> Dict[str, Any]:
     if errors:
         result: Dict[str, Any] = {
             "status": "failure",
-            "file": path,
+            "file": str(file),
             "version": config.BACKUP_VERSION,
             "db_structure_version": config.BACKUP_DB_STRUCTURE_VERSION,
             "errors": errors,
@@ -366,7 +484,7 @@ def store_metadata(timestamp: Optional[str] = None) -> Dict[str, Any]:
     else:
         result: Dict[str, Any] = {
             "status": "success",
-            "file": path,
+            "file": str(file),
             "version": config.BACKUP_VERSION,
             "db_structure_version": config.BACKUP_DB_STRUCTURE_VERSION,
             "file_count": 2,
@@ -378,14 +496,20 @@ def store_metadata(timestamp: Optional[str] = None) -> Dict[str, Any]:
 # ---------------------------------------------------------
 # Check Metadata
 # ---------------------------------------------------------
-def check_metadata() -> Dict[str, Any]:
+def check_metadata(
+    filepath: Optional[str] = None,
+    filename: Optional[str] = None,
+    remove_file: bool = False
+) -> Dict[str, Any]:
 
     # Initialization
     start_ns = time.monotonic_ns()
-    path = os.path.join(settings.BACKUP_PATH, config.BACKUP_METADATA_FILE)
+    filepath = Path(filepath or settings.BACKUP_PATH)
+    filename = filename or config.BACKUP_METADATA_FILE
+    file = filepath / filename
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(file, "r", encoding="utf-8") as f:
             metadata = json.load(f)
 
         # Validate structure
@@ -411,17 +535,16 @@ def check_metadata() -> Dict[str, Any]:
             if "sha256" not in file_meta:
                 raise ValueError(f"Missing checksum for file: {file_meta.get('file')}")
 
-            file_path = os.path.join(settings.BACKUP_PATH, file_meta["file"])
-
-            if not os.path.isfile(file_path):
+            backup_file = filepath / file_meta["file"]
+            if not backup_file.is_file():
                 raise FileNotFoundError(f"Backup file not found: {file_meta['file']}")
 
-            if file_checksum(file_path) != file_meta["sha256"]:
+            if file_checksum(backup_file) != file_meta["sha256"]:
                 raise ValueError(f"Checksum mismatch for file: {file_meta['file']}")
 
         result: Dict[str, Any] = {
             "status": "success",
-            "file": path,
+            "file": str(file),
             "version": metadata.get("backup_version"),
             "db_structure_version": metadata.get("db_structure_version"),
             "file_count": metadata.get("file_count"),
@@ -433,111 +556,160 @@ def check_metadata() -> Dict[str, Any]:
         logger.exception("check_metadata failed reading metadata: %s", str(e).strip())
         result = {
             "status": "failure",
-            "file": path,
+            "file": str(file),
             "errors": [str(e)],
             "took_ms": (time.monotonic_ns() - start_ns) / 1_000_000,
         }
+
+    # --- Cleanup ---
+    if remove_file:
+        file.unlink(missing_ok=True)
 
     return result
 
 # ---------------------------------------------------------
 # Backup DB
 # ---------------------------------------------------------
-def backup() -> Dict[str, Any]:
+def backup_create() -> Dict[str, Any]:
 
     # Ensure backup directory exists
-    os.makedirs(settings.BACKUP_PATH, exist_ok=True)
+    base_dir = Path(settings.BACKUP_PATH)
+    base_dir.mkdir(parents=True, exist_ok=True)
 
     # Timestamp used for backup file naming
-    timestamp = TIMESTAMP
+    ts = generate_timestamps()
+    timestamp = ts["iso"]           # per metadata/API
+    file_timestamp = ts["file"]      # per filename
 
-    # Hosts
-    hosts_result = store_hosts(timestamp)
-    # Aliases
-    aliases_result = store_aliases(timestamp)
-    # Metadata (must be last to ensure it reflects the actual state of files)
-    metadata_result = store_metadata(timestamp)
-    # Create ZIP archive only if all individual file operations succeeded
-    archive_result = create_backup_archive(timestamp)
-    # Process errors from individual operations
-    errors = ((metadata_result.get("errors") or [])
-            + (hosts_result.get("errors") or [])
-            + (aliases_result.get("errors") or [])
-            + (archive_result.get("errors") or [])
-    )
+    # Create zip folder
+    zip_name = f"backup_{file_timestamp}.zip"
+    backup_path=base_dir / f"backup_{file_timestamp}"
+    backup_path.mkdir(parents=True, exist_ok=True)
 
-    # Compute summary
-    operations = [metadata_result, hosts_result, aliases_result, archive_result]
-    summary = {
-        "total": len(operations),
-        "success": sum(1 for op in operations if op.get("status") == "success"),
-        "failed": sum(1 for op in operations if op.get("status") == "failure"),
+    # Init struttura unica
+    operations = {
+        "metadata": {},
+        "hosts": {},
+        "aliases": {},
+        "archive": {},
     }
 
-    # Collect errors and results
-    result = {
-        "metadata": metadata_result,
-        "hosts": hosts_result,
-        "aliases": aliases_result,
-        "archive": archive_result,
-        "summary": summary,
-    }
+    # --- STEP ---
+    operations["hosts"] = store_hosts(timestamp=timestamp, filepath=backup_path)
+    operations["aliases"] = store_aliases(timestamp=timestamp, filepath=backup_path)
+    operations["metadata"] = store_metadata(timestamp=timestamp, filepath=backup_path)
 
-    return result
+    # Zip Creation
+    operations["archive"] = create_backup_archive(zip_name=zip_name, files_dir=backup_path, remove_files=remove_backup_files)
+
+    return build_result(operations)
+
+# ---------------------------------------------------------
+# Get list of available backup files in backup directory
+# ---------------------------------------------------------
+def backup_list() -> List[Dict[str, Any]]:
+
+    # Initialization
+    backup_dir = Path(settings.BACKUP_PATH)
+    backups = []
+
+    if backup_dir.is_dir():
+        for filepath in backup_dir.iterdir():
+            if filepath.name.startswith("backup_") and filepath.suffix == ".zip":
+                backups.append({
+                    "file": str(filepath),
+                    "name": filepath.name,
+                    "created_at": datetime.fromtimestamp(filepath.stat().st_mtime, timezone.utc).isoformat(),
+                    "size_bytes": filepath.stat().st_size,
+                })
+
+    return backups
 
 # ---------------------------------------------------------
 # Restore DB
 # ---------------------------------------------------------
-def restore(cleanup: bool = True) -> Dict[str, Any]:
+def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
 
-    # Check metadata first to ensure backup is valid before applying changes
-    metadata_result = check_metadata()
-    if(metadata_result.get("status") != "success"):
-        return {
-            "metadata": metadata_result,
-            "hosts": None,
-            "aliases": None,
-            "summary": {
-                "total": 1,
-                "success": 0,
-                "failed": 1,
-            },
-        }
+    # Init struttura unica
+    operations = {
+        "archive": {},
+        "metadata": {},
+        "hosts": {},
+        "aliases": {},
+    }
 
+    # Check if backup file exists
+    backup_dir = Path(settings.BACKUP_PATH)
+    backup_file = backup_dir / backup_id
+    extract_dir = backup_dir / Path(backup_id).stem
+
+    if not backup_file.is_file():
+        logger.error(f"Backup file not found: {backup_file}")
+        raise FileNotFoundError("Backup file not found")
+
+    # --- ARCHIVE ---
+    operations["archive"] = unzip_backup_archive(zip_name=backup_id, extract_dir=extract_dir)
+    if operations["archive"].get("status") != "success":
+        return build_result(operations)
+
+    # --- METADATA ---
+    operations["metadata"] = check_metadata(filepath=extract_dir, remove_file=remove_backup_files)
+    if operations["metadata"].get("status") != "success":
+        return build_result(operations)
+
+    # --- CLEANUP ---
     if cleanup:
         try:
             reset_hosts_db()
             reset_aliases_db()
-
         except Exception as e:
             logger.exception("Cleanup failed %s", str(e).strip())
             raise
 
-    for f in metadata_result["files"]:
+    # --- RESTORE FILES ---
+    for f in operations["metadata"]["files"]:
         if f["name"] == "hosts":
-            hosts_result = restore_hosts(f["file"])
+            operations["hosts"] = restore_hosts(filepath=extract_dir, filename=f["file"], remove_file=remove_backup_files)
 
         elif f["name"] == "aliases":
-            aliases_result = restore_aliases(f["file"])
+            operations["aliases"] = restore_aliases(filepath=extract_dir, filename=f["file"], remove_file=remove_backup_files)
 
-    errors = ((metadata_result.get("errors") or [])
-            + (hosts_result.get("errors") or [])
-            + (aliases_result.get("errors") or [])
-    )
+    if remove_backup_files:
+        p = Path(extract_dir)
+        if p.is_dir() and not any(p.iterdir()):
+            p.rmdir()
 
-    # Compute summary
-    operations = [metadata_result, hosts_result, aliases_result]
-    summary = {
-        "total": len(operations),
-        "success": sum(1 for op in operations if op.get("status") == "success"),
-        "failed": sum(1 for op in operations if op.get("status") == "failure"),
+    return build_result(operations)
+
+# ---------------------------------------------------------
+# Delete Backup Archive
+# ---------------------------------------------------------
+def backup_delete(backup_id: str) -> Dict[str, Any]:
+
+    # Initialization
+    start_ns = time.monotonic_ns()
+    errors: List[str] = []
+
+    backup_dir = Path(settings.BACKUP_PATH)
+    backup_file = backup_dir / backup_id
+
+    try:
+        # Check if file exists
+        if not backup_file.is_file():
+            raise FileNotFoundError(f"Backup file not found: {backup_id}")
+
+        # Remove file
+        backup_file.unlink()
+
+    except Exception as e:
+        logger.exception("delete_backup failed: %s", str(e).strip())
+        errors.append(str(e))
+
+    took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+
+    return {
+        "status": "failure" if errors else "success",
+        "file": str(backup_file) if not errors else None,
+        "errors": errors,
+        "took_ms": took_ms,
     }
-
-    result = {
-        "metadata": metadata_result,
-        "hosts": hosts_result,
-        "aliases": aliases_result,
-        "summary": summary,
-    }
-
-    return result

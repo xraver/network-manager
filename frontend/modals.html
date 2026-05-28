@@ -139,25 +139,52 @@
 </div>
 
 <!-- Modal Restore backup -->
-<div id="restoreModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="restoreTitle">
+<div id="backupModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
     <div class="modal-content modal-content-xl addhost-modal">
         <div class="addhost-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <span class="title-icon"><i class="bi bi-arrow-counterclockwise"></i></span>
-                <span id="restoreTitle" class="modal-title">Restore Backup</span>
+                <span id="backupTitle" class="modal-title">Restore Backup</span>
             </div>
-            <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeRestoreModal"></button>
+            <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeBackupModal"></button>
         </div>
 
         <div class="modal-body">
-            <label for="restoreBackupId" class="form-label">Backup ID</label>
-            <input type="text" id="restoreBackupId" class="form-control" placeholder="e.g., bk_20260317_200100" />
-            <small class="text-muted">Select the backup ID to restore.</small>
+            <label class="form-label">Available backups</label>
+
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-hover table-sm align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th class="text-end">Size</th>
+                            <th style="width: 60px;" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backupList">
+                        <!-- populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Hidden input opzionale se vuoi mantenere compatibilità -->
+            <input type="hidden" id="restoreBackupId" />
+
+            <small class="text-muted">Select one backup to restore.</small>
         </div>
 
         <div class="modal-footer modal-buttons">
-            <button type="button" class="btn btn-primary" data-action="startRestore"><span class="label">Start Restore</span></button>
-            <button type="button" class="btn btn-outline-primary" data-action="closeRestoreModal"><span class="label">Cancel</span></button>
+            <button type="button" class="btn btn-primary" data-action="startBackup">
+                <i class="bi bi-cloud-upload me-1"></i><span class="label">Create Backup</span>
+            </button>
+            <button type="button" class="btn btn-primary" data-action="startRestore">
+                <i class="bi bi-cloud-download me-1"></i><span class="label">Restore Restore</span>
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-action="closeBackupModal">
+                <i class="bi bi-x-circle me-1"></i><span class="label">Cancel</span>
+            </button>
         </div>
     </div>
 </div>

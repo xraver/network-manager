@@ -368,6 +368,28 @@ select.form-select:focus,
 }
 
 /* ================================
+   Backup Table
+================================ */
+
+.table tbody#backupList tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.table tbody#backupList tr:hover > td {
+    background-color: var(--bg-hover);
+}
+
+.table tbody#backupList tr.table-active > td {
+    background-color: var(--bg-selected);
+    border-color: var(--border-selected);
+}
+
+.table tbody#backupList tr.table-active:hover > td {
+    background-color: rgba(var(--accent-rgb), 0.25);
+}
+
+/* ================================
    Actions column
    ================================ */
 td.actions {
