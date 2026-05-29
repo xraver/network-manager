@@ -3,8 +3,6 @@
 # Import standard modules
 import bcrypt
 import json
-import logging
-import os
 
 # Import local modules
 from backend.db.db import get_db, register_init
@@ -32,7 +30,8 @@ def get_user_by_username(username):
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT * FROM users WHERE username = ?", (username,))
-    return cur.fetchone()
+    row = cur.fetchone()
+    return dict(row) if row else None
 
 # -----------------------------
 # Create User
@@ -41,20 +40,25 @@ def create_user(username, password_hash, email=None, is_admin=0, modules=None):
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("""
-        INSERT INTO users (
-            username, password_hash, email, is_admin, modules, status,
-            created_at, updated_at, password_changed_at
-        ) VALUES (?, ?, ?, ?, ?, 'active', strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
-    """, (
-        username,
-        password_hash,
-        email,
-        is_admin,
-        json.dumps(modules or [])
-    ))
-
-    conn.commit()
+    try:
+        cur.execute("""
+            INSERT INTO users (
+                username, password_hash, email, is_admin, modules, status,
+                created_at, updated_at, password_changed_at
+            ) VALUES (?, ?, ?, ?, ?, 'active', strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
+        """, (
+            username,
+            password_hash,
+            email,
+            is_admin,
+            json.dumps(modules or [])
+        ))
+        conn.commit()
+        return cur.lastrowid
+    except Exception as err:
+        conn.rollback()
+        logger.error(f"USERS DB: Error creating user - {err}")
+        raise
 
 # -----------------------------
 # Create Users Table
@@ -103,6 +107,6 @@ def init_db_users_defaults(cur):
         password_hash,
         "admin@example.com",
         1,
-        '["dns","dhcp"]',
+        json.dumps(["dns", "dhcp"]),
         "active"
     ))

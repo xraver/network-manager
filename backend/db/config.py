@@ -2,6 +2,7 @@
 
 # Import local modules
 from backend.db.db import get_db, register_init
+from backend.utils import to_bool
 
 # Import Settings
 from backend.settings.settings import settings
@@ -12,11 +13,18 @@ from backend.log.log import get_logger
 logger = get_logger(__name__)
 
 # ---------------------------------------------------------
+# Internal: wrapper to to_bool
+# ---------------------------------------------------------
+def _to_bool(v):
+    result = to_bool(v)
+    return result if result is not None else False
+
+# ---------------------------------------------------------
 # Type mapping for config keys
 # ---------------------------------------------------------
 CONFIG_TYPES = {
     "LOG_LEVEL": str,
-    "LOG_TO_FILE": lambda v: v.lower() in ("1", "true", "yes"),
+    "LOG_TO_FILE": _to_bool,
     "EXTERNAL_NAME": str,
     "LOGIN_MAX_ATTEMPTS": int,
     "LOGIN_WINDOW_SECONDS": int,

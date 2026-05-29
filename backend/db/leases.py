@@ -13,21 +13,21 @@ from backend.settings.settings import settings
 # Import Logging
 from backend.log.log import get_logger
 
+ALIASES_MAP = {
+    "client_id": "client-id",
+    "valid_lifetime": "valid-lft",
+    "subnet_id": "subnet-id",
+    "fqdn_fwd": "fqdn-fwd",
+    "fqdn_rev": "fqdn-rev",
+    "user_context": "user-context",
+    "pool_id": "pool-id",
+}
+
 # -----------------------------
 # Normalizes column names to expected keys
 # -----------------------------
 def _norm(col: str) -> str:
-    col = (col or "").strip()
-    aliases = {
-        "client_id": "client-id",
-        "valid_lifetime": "valid-lft",
-        "subnet_id": "subnet-id",
-        "fqdn_fwd": "fqdn-fwd",
-        "fqdn_rev": "fqdn-rev",
-        "user_context": "user-context",
-        "pool_id": "pool-id",
-    }
-    return aliases.get(col, col)
+    return ALIASES_MAP.get((col or "").strip(), col)
 
 # Logger initialization
 logger = get_logger(__name__)
@@ -49,40 +49,37 @@ def get_leases(filter_devices: bool = False) -> List[Dict[str, Any]]:
         if not reader.fieldnames:
             return []
 
-        if(filter_devices != True):
-            for raw in reader:
-                rec = { _norm(k): (v if v is not None else "") for k, v in raw.items() }
+        for raw in reader:
+            rec = {_norm(k): (v if v is not None else "") for k, v in raw.items()}
 
+            base = {
+                "ipv4": rec.get("address", "").strip() or None,
+                "mac": rec.get("hwaddr", "").strip().lower() or None,
+                "name": rec.get("hostname", "").strip() or None,
+                "dhcp_state": rec.get("state", "").strip() or None,
+            }
+
+            if not filter_devices:
                 item = {
-                    "id":             index,
-                    "ipv4":           rec.get("address", "").strip() or None,
-                    "mac":            rec.get("hwaddr", "").strip().lower() or None,
-                    "client_id":      rec.get("client-id", "").strip() or None,
+                    "id": index,
+                    **base,
+                    "client_id": rec.get("client-id", "").strip() or None,
                     "valid_lifetime": to_int(rec.get("valid-lft", "")),
-                    "expire":         rec.get("expire", "").strip() or None,
-                    "subnet_id":      to_int(rec.get("subnet-id", "")),
-                    "fqdn_fwd":       to_bool(rec.get("fqdn-fwd", "")),
-                    "fqdn_rev":       to_bool(rec.get("fqdn-rev", "")),
-                    "name":           rec.get("hostname", "").strip() or None,
-                    "dhcp_state":     rec.get("state", "").strip() or None,
-                    "user_context":   rec.get("user-context", "").strip() or None,  # spesso JSON serializzato
-                    "pool_id":        to_int(rec.get("pool-id", "")),
+                    "expire": rec.get("expire", "").strip() or None,
+                    "subnet_id": to_int(rec.get("subnet-id", "")),
+                    "fqdn_fwd": to_bool(rec.get("fqdn-fwd", "")),
+                    "fqdn_rev": to_bool(rec.get("fqdn-rev", "")),
+                    "user_context": rec.get("user-context", "").strip() or None,
+                    "pool_id": to_int(rec.get("pool-id", "")),
                 }
-                leases.append(item)
-                index += 1
-        else:
-            for raw in reader:
-                rec = { _norm(k): (v if v is not None else "") for k, v in raw.items() }
-
+            else:
                 item = {
-                    "id":             f"d-{index}",
-                    "ipv4":           rec.get("address", "").strip() or None,
-                    "mac":            rec.get("hwaddr", "").strip().lower() or None,
-                    "name":           rec.get("hostname", "").strip() or None,
-                    "dhcp_state":     rec.get("state", "").strip() or None,
+                    "id": f"d-{index}",  # Frontend requires this format
+                    **base,
                 }
-                leases.append(item)
-                index += 1
+
+            leases.append(item)
+            index += 1
 
     return leases
 
@@ -130,7 +127,7 @@ def delete_lease(lease_id: int):
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
-    with path.open("r") as f:
+    with path.open("r", encoding="utf-8", newline="") as f:
         lines = f.readlines()
 
     # file empty or only header
@@ -146,8 +143,8 @@ def delete_lease(lease_id: int):
         raise ValueError(f"Lease index out of range: {lease_id}")
 
     # delete the line
-    deleted_line = data_lines.pop(index)
+    data_lines.pop(index)
 
     # Rewrite the file without the deleted line
-    with path.open("w") as f:
+    with path.open("w", encoding="utf-8", newline="") as f:
         f.writelines([header] + data_lines)

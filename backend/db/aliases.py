@@ -107,7 +107,7 @@ def add_alias(data: Dict[str, Any]) -> int:
 
     except sqlite3.IntegrityError:
         conn.rollback()
-        return -1
+        raise ValueError("Alias already exists or unique constraint failed")
 
     except Exception as err:
         conn.rollback()
@@ -127,7 +127,8 @@ def update_alias(alias_id: int, data: Dict[str, Any]) -> bool:
         cur = conn.execute(
             """
             UPDATE aliases
-            SET name=?, target=?, description=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
+            SET name=?, target=?, description=?, ssl_enabled=?, visibility=?,
+                last_updated=strftime('%Y-%m-%dT%H:%M:%SZ','now')
             WHERE id=?
             """,
             (

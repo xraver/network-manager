@@ -48,8 +48,10 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Check MAC
     mac = data.get("mac")
-    if mac and not MAC_RE.match(mac):
-        raise ValueError(f"Invalid MAC address: {mac}")
+    if mac:
+        mac = mac.strip()
+        if not MAC_RE.match(mac):
+            raise ValueError(f"Invalid MAC address: {mac}")
 
     # Check description
     description = data.get("description")
@@ -65,7 +67,7 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
         "name": normalize(name),
         "ipv4": normalize(ipv4),
         "ipv6": normalize(ipv6),
-        "mac": normalize(mac),
+        "mac": normalize(mac).lower() if mac else None,
         "description": normalize(description),
         "ssl_enabled": ssl_enabled,
         "visibility": visibility,
@@ -89,16 +91,18 @@ def ipv4_sort_key(h: Dict[str, Any]):
 # -----------------------------
 def get_hosts(filter_devices: bool = False) -> List[Dict[str, Any]]:
     conn = get_db()
-    if (filter_devices != True):
-        cur = conn.execute("SELECT * FROM hosts")
-    else:
-        cur = conn.execute("SELECT id, ipv4, mac, name, description FROM hosts WHERE ipv4 IS NOT NULL")
+    query = (
+        "SELECT * FROM hosts"
+        if not filter_devices
+        else "SELECT id, ipv4, mac, name, description FROM hosts WHERE ipv4 IS NOT NULL"
+    )
+    cur = conn.execute(query)
 
     rows = []
     for r in cur.fetchall():
         item = dict(r)
-        if (filter_devices == True):
-            item["id"] = f"s-{item['id']}"
+        if filter_devices:
+            item["id"] = f"s-{item['id']}"  # Frontend requires this format
         rows.append(item)
     rows.sort(key=ipv4_sort_key)
     return rows
@@ -151,7 +155,7 @@ def add_host(data: Dict[str, Any]) -> int:
 
     except sqlite3.IntegrityError:
         conn.rollback()
-        return -1
+        raise ValueError("Host already exists or unique constraint failed")
 
     except Exception as err:
         conn.rollback()
@@ -171,7 +175,8 @@ def update_host(host_id: int, data: Dict[str, Any]) -> bool:
         cur = conn.execute(
             """
             UPDATE hosts
-            SET name=?, ipv4=?, ipv6=?, mac=?, description=?, ssl_enabled=?, visibility=?, last_updated=CURRENT_TIMESTAMP
+            SET name=?, ipv4=?, ipv6=?, mac=?, description=?, ssl_enabled=?, visibility=?,
+                last_updated=strftime('%Y-%m-%dT%H:%M:%SZ','now')
             WHERE id=?
             """,
             (
