@@ -3,8 +3,10 @@
 # import standard modules
 import uvicorn
 
-# Import Settings & Logging
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.config import get_config
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

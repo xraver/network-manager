@@ -6,8 +6,9 @@ import sqlite3
 import time
 import os
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

@@ -10,8 +10,10 @@ import backend.db.users
 import backend.db.hosts
 import backend.db.aliases
 
-# Import Settings & Logging
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.config import get_config
+# Import Logging
 from backend.log.log import setup_logging, get_logger
 
 # ------------------------------------------------------------------------------

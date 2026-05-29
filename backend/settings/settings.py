@@ -114,6 +114,11 @@ class Settings(BaseModel):
 
     # Backup
     BACKUP_PATH: Path = Field(default_factory=lambda: Path(os.getenv("BACKUP_PATH", default.BACKUP_PATH)))
+    BACKUP_VERSION: str = Field(default_factory=lambda: config.BACKUP_VERSION)
+    BACKUP_DB_STRUCTURE_VERSION: str = Field(default_factory=lambda: config.BACKUP_DB_STRUCTURE_VERSION)
+    BACKUP_METADATA_FILE: str = Field(default_factory=lambda: config.BACKUP_METADATA_FILE)
+    BACKUP_HOSTS_FILE: str = Field(default_factory=lambda: config.BACKUP_HOSTS_FILE)
+    BACKUP_ALIASES_FILE: str = Field(default_factory=lambda: config.BACKUP_ALIASES_FILE)
 
     # APP Features
     PING_WORKERS: int = Field(default_factory=lambda: to_int(os.getenv("PING_WORKERS"), default.PING_WORKERS))

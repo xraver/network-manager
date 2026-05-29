@@ -19,7 +19,7 @@ DB_RESET = False
 # ---------------------------------------------------------
 # Log
 # ---------------------------------------------------------
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "info"
 LOG_TO_FILE = False
 LOG_FILE = "app.log"
 LOG_ACCESS_FILE = "access.log"

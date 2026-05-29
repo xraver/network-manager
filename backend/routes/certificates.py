@@ -11,8 +11,9 @@ import os
 from backend.db.hosts import get_hosts_certificates
 from backend.db.aliases import get_aliases_certificates
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

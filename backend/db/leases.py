@@ -5,10 +5,13 @@ import csv
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Import Settings & Logging
-from backend.settings.settings import settings
-from backend.log.log import get_logger
+# Import local modules
 from backend.utils import to_bool, to_int
+
+# Import Settings
+from backend.settings.settings import settings
+# Import Logging
+from backend.log.log import get_logger
 
 # -----------------------------
 # Normalizes column names to expected keys

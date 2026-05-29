@@ -23,8 +23,9 @@ from backend.routes.dhcp import router as dhcp_router
 # Import Security
 from backend.security import is_logged_in, apply_session
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

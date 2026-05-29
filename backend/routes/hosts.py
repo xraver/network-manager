@@ -15,8 +15,9 @@ from backend.db.hosts import (
     delete_host
 )
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

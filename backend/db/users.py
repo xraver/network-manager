@@ -9,8 +9,9 @@ import os
 # Import local modules
 from backend.db.db import get_db, register_init
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

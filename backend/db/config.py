@@ -7,8 +7,9 @@ import sqlite3
 # Import local modules
 from backend.db.db import get_db, register_init
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization
@@ -18,9 +19,9 @@ logger = get_logger(__name__)
 # Type mapping for config keys
 # ---------------------------------------------------------
 CONFIG_TYPES = {
-    "external_name": str,
-    "login_max_attempts": int,
-    "login_window_seconds": int,
+    "EXTERNAL_NAME": str,
+    "LOGIN_MAX_ATTEMPTS": int,
+    "LOGIN_WINDOW_SECONDS": int,
 }
 
 # ---------------------------------------------------------
@@ -28,7 +29,10 @@ CONFIG_TYPES = {
 # ---------------------------------------------------------
 _config_cache = {}
 
-def invalidate_config(key=None):
+# ---------------------------------------------------------
+# Clear cache
+# ---------------------------------------------------------
+def clear_cache(key=None):
     """Clear cached config entry (or full cache)."""
     if key:
         _config_cache.pop(key, None)

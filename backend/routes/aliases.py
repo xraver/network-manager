@@ -15,8 +15,9 @@ from backend.db.aliases import (
     delete_alias
 )
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

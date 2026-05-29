@@ -9,12 +9,13 @@ import ipaddress
 import time
 
 # Import local modules
-from backend.db.config import get_config
 from backend.db.hosts import get_hosts
 from backend.db.aliases import get_aliases
 
-# Import Settings & Logging
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.config import get_config
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization
@@ -77,7 +78,7 @@ async def api_dns_reload(request: Request):
                 f.write(line)
 
         # Get Ext_Cname
-        ext_cname = get_config("external_name")
+        ext_cname = get_config("EXTERNAL_NAME")
 
         # Save DNS Host and Aliases for the EXT DNS
         path = settings.DNS_HOST_FILE.with_name(

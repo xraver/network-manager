@@ -9,8 +9,9 @@ from itsdangerous import TimestampSigner
 # Import local modules
 from backend.db.users import get_user_by_username
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization

@@ -6,11 +6,11 @@ from fastapi.responses import FileResponse
 import time
 
 # Import local modules
-from backend.db.config import get_config
 from backend.security import verify_login, apply_session, close_session
 
-# Import Settings & Logging
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.config import get_config
 
 # Create Router
 router = APIRouter()
@@ -22,9 +22,9 @@ def check_rate_limit(ip: str):
     now = time.time()
     attempts = login_attempts.get(ip, [])
     # tieni solo tentativi negli ultimi LOGIN_WINDOW_SECONDS secondi
-    attempts = [t for t in attempts if now - t < int(get_config("login_window_seconds"))]
+    attempts = [t for t in attempts if now - t < get_config("LOGIN_WINDOW_SECONDS")]
 
-    if len(attempts) >= int(get_config("login_max_attempts")):
+    if len(attempts) >= get_config("LOGIN_MAX_ATTEMPTS"):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={

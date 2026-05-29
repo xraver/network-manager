@@ -14,9 +14,9 @@ import zipfile
 from backend.db.hosts import get_hosts, add_host, reset_hosts_db
 from backend.db.aliases import get_aliases, add_alias, reset_aliases_db
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
-from backend.settings import config
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization
@@ -24,9 +24,9 @@ logger = get_logger(__name__)
 
 # Backup files to include in the archive (must match metadata structure)
 backup_files = [
-    config.BACKUP_METADATA_FILE,
-    config.BACKUP_HOSTS_FILE,
-    config.BACKUP_ALIASES_FILE,
+    settings.BACKUP_METADATA_FILE,
+    settings.BACKUP_HOSTS_FILE,
+    settings.BACKUP_ALIASES_FILE,
 ]
 
  # Set to True to remove individual backup files after creating the archive (optional, can be set to False for debugging)
@@ -203,7 +203,7 @@ def store_hosts(
     # Initialization
     start_ns = time.monotonic_ns()
     filepath = Path(filepath or settings.BACKUP_PATH)
-    filename = filename or config.BACKUP_HOSTS_FILE
+    filename = filename or settings.BACKUP_HOSTS_FILE
     file = filepath / filename
     filepath.mkdir(parents=True, exist_ok=True)
     count_stored = 0
@@ -261,7 +261,7 @@ def restore_hosts(
     # Initialization
     start_ns = time.monotonic_ns()
     filepath = Path(filepath or settings.BACKUP_PATH)
-    filename = filename or config.BACKUP_HOSTS_FILE
+    filename = filename or settings.BACKUP_HOSTS_FILE
     file = filepath / filename
     count_restored = 0
     count_loaded = 0
@@ -321,7 +321,7 @@ def store_aliases(
     start_ns = time.monotonic_ns()
     filepath = Path(filepath or settings.BACKUP_PATH)
     filepath.mkdir(parents=True, exist_ok=True)
-    filename = filename or config.BACKUP_ALIASES_FILE
+    filename = filename or settings.BACKUP_ALIASES_FILE
     file = filepath / filename
     count_stored = 0
     count_loaded = 0
@@ -379,7 +379,7 @@ def restore_aliases(
     # Initialization
     start_ns = time.monotonic_ns()
     filepath = Path(filepath or settings.BACKUP_PATH)
-    filename = filename or config.BACKUP_ALIASES_FILE
+    filename = filename or settings.BACKUP_ALIASES_FILE
     file = filepath / filename
     count_restored = 0
     count_loaded = 0
@@ -440,7 +440,7 @@ def store_metadata(
     start_ns = time.monotonic_ns()
     filepath = Path(filepath or settings.BACKUP_PATH)
     filepath.mkdir(parents=True, exist_ok=True)
-    filename = filename or config.BACKUP_METADATA_FILE
+    filename = filename or settings.BACKUP_METADATA_FILE
     file = filepath / filename
     errors: List[str] = []
 
@@ -448,19 +448,19 @@ def store_metadata(
         with open(file, "w", encoding="utf-8") as f:
             data = {
                 "generated_at": timestamp,
-                "backup_version": config.BACKUP_VERSION,
-                "db_structure_version": config.BACKUP_DB_STRUCTURE_VERSION,
+                "backup_version": settings.BACKUP_VERSION,
+                "db_structure_version": settings.BACKUP_DB_STRUCTURE_VERSION,
                 "file_count": 2,
                 "files": [
                     {
                         "name": "hosts",
-                        "file": config.BACKUP_HOSTS_FILE,
-                        "sha256": file_checksum(filepath / config.BACKUP_HOSTS_FILE),
+                        "file": settings.BACKUP_HOSTS_FILE,
+                        "sha256": file_checksum(filepath / settings.BACKUP_HOSTS_FILE),
                     },
                     {
                         "name": "aliases",
-                        "file": config.BACKUP_ALIASES_FILE,
-                        "sha256": file_checksum(filepath / config.BACKUP_ALIASES_FILE),
+                        "file": settings.BACKUP_ALIASES_FILE,
+                        "sha256": file_checksum(filepath / settings.BACKUP_ALIASES_FILE),
                     },
                 ]
             }
@@ -476,8 +476,8 @@ def store_metadata(
         result: Dict[str, Any] = {
             "status": "failure",
             "file": str(file),
-            "version": config.BACKUP_VERSION,
-            "db_structure_version": config.BACKUP_DB_STRUCTURE_VERSION,
+            "version": settings.BACKUP_VERSION,
+            "db_structure_version": settings.BACKUP_DB_STRUCTURE_VERSION,
             "errors": errors,
             "took_ms": took_ms,
         }
@@ -485,8 +485,8 @@ def store_metadata(
         result: Dict[str, Any] = {
             "status": "success",
             "file": str(file),
-            "version": config.BACKUP_VERSION,
-            "db_structure_version": config.BACKUP_DB_STRUCTURE_VERSION,
+            "version": settings.BACKUP_VERSION,
+            "db_structure_version": settings.BACKUP_DB_STRUCTURE_VERSION,
             "file_count": 2,
             "took_ms": took_ms,
         }
@@ -505,7 +505,7 @@ def check_metadata(
     # Initialization
     start_ns = time.monotonic_ns()
     filepath = Path(filepath or settings.BACKUP_PATH)
-    filename = filename or config.BACKUP_METADATA_FILE
+    filename = filename or settings.BACKUP_METADATA_FILE
     file = filepath / filename
 
     try:
@@ -517,10 +517,10 @@ def check_metadata(
             raise ValueError("Invalid metadata: missing or invalid 'files'")
 
         # Validate versions
-        if metadata.get("backup_version") != config.BACKUP_VERSION:
+        if metadata.get("backup_version") != settings.BACKUP_VERSION:
             raise ValueError("Backup version mismatch")
 
-        if metadata.get("db_structure_version") != config.BACKUP_DB_STRUCTURE_VERSION:
+        if metadata.get("db_structure_version") != settings.BACKUP_DB_STRUCTURE_VERSION:
             raise ValueError("DB structure not compatible")
 
         # Validate files

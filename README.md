@@ -71,7 +71,7 @@ ADMIN_PASSWORD=admin
 LOGIN_MAX_ATTEMPTS=5
 LOGIN_WINDOW_SECONDS=600
 # --- Log ---
-LOG_LEVEL=INFO
+LOG_LEVEL=info
 LOG_TO_FILE=false
 # --- Session secret (optional but recommended in production) ---
 # SESSION_SECRET=****ReplaceWithYourSecret*****
@@ -94,7 +94,7 @@ services:
       DB_FILE: "/data/database.db"
       DB_RESET: "${DB_RESET:-false}"
       # Log
-      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
       LOG_TO_FILE: "${LOG_TO_FILE:-false}"
       LOG_FILE: "/data/app.log"
       LOG_ACCESS_FILE: "/data/access.log"

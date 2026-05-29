@@ -10,8 +10,9 @@ import time
 from backend.db.hosts import get_hosts
 from backend.db.leases import get_leases, get_lease, delete_lease
 
-# Import Settings & Logging
+# Import Settings
 from backend.settings.settings import settings
+# Import Logging
 from backend.log.log import get_logger
 
 # Logger initialization
