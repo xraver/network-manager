@@ -38,7 +38,7 @@ def print_welcome(logger):
     )
     logger.info(
         "Log: level=%s, to_file=%s, file=%s",
-        settings.LOG_LEVEL, settings.LOG_TO_FILE, str(settings.LOG_FILE)
+        get_config("LOG_LEVEL"), get_config("LOG_TO_FILE"), str(settings.LOG_FILE)
     )
     logger.info(
         "Users: admin=%s | password=%s | hash=%s | hash_file=%s",
@@ -58,7 +58,7 @@ def print_welcome(logger):
     )
     logger.info(
         "App features: ping_workers=%d",
-        settings.PING_WORKERS
+        get_config("PING_WORKERS")
     )
 
 # ------------------------------------------------------------------------------
@@ -80,7 +80,13 @@ def bootstrap():
     created = create_db(settings.DB_FILE, settings.DB_RESET)
 
     # Log Setup
-    setup_logging(level=settings.LOG_LEVEL, to_file=settings.LOG_TO_FILE, log_file=settings.LOG_FILE, log_access_file=settings.LOG_ACCESS_FILE)
+    setup_logging(
+        level=get_config("LOG_LEVEL"),
+        to_file=get_config("LOG_TO_FILE"),
+        log_file=settings.LOG_FILE,
+        log_access_file=settings.LOG_ACCESS_FILE
+    )
+
     logger = get_logger(__name__)
 
     print_welcome(logger)

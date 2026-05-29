@@ -49,14 +49,14 @@ def api_get_devices(request: Request):
 
     try:
         hosts = get_hosts(filter_devices=True)
-        with ThreadPoolExecutor(max_workers=settings.PING_WORKERS) as executor:
+        with ThreadPoolExecutor(max_workers=get_config("PING_WORKERS")) as executor:
             futures = [executor.submit(is_host_active, host["ipv4"]) for host in hosts]
             for i, future in enumerate(futures):
                 hosts[i]["dhcp_state"] = "static"
                 hosts[i]["active"] = future.result()
 
         leases = get_leases(filter_devices=True)
-        with ThreadPoolExecutor(max_workers=settings.PING_WORKERS) as executor:
+        with ThreadPoolExecutor(max_workers=get_config("PING_WORKERS")) as executor:
             futures = [executor.submit(is_host_active, lease["ipv4"]) for lease in leases]
             for i, future in enumerate(futures):
                 leases[i]["description"] = None

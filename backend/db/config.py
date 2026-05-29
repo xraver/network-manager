@@ -15,18 +15,24 @@ logger = get_logger(__name__)
 # Type mapping for config keys
 # ---------------------------------------------------------
 CONFIG_TYPES = {
+    "LOG_LEVEL": str,
+    "LOG_TO_FILE": lambda v: v.lower() in ("1", "true", "yes"),
     "EXTERNAL_NAME": str,
     "LOGIN_MAX_ATTEMPTS": int,
     "LOGIN_WINDOW_SECONDS": int,
+    "PING_WORKERS": int,
 }
 
 # ---------------------------------------------------------
 # Default Values
 # ---------------------------------------------------------
 CONFIG_DEFAULTS = {
+    "LOG_LEVEL": settings.LOG_LEVEL,
+    "LOG_TO_FILE": settings.LOG_TO_FILE,
     "EXTERNAL_NAME": settings.EXTERNAL_NAME,
     "LOGIN_MAX_ATTEMPTS": settings.LOGIN_MAX_ATTEMPTS,
     "LOGIN_WINDOW_SECONDS": settings.LOGIN_WINDOW_SECONDS,
+    "PING_WORKERS": settings.PING_WORKERS,
 }
 
 # ---------------------------------------------------------
@@ -47,7 +53,31 @@ def clear_cache(key=None):
 # ---------------------------------------------------------
 # Return a specific config value (with cache + type casting)
 # ---------------------------------------------------------
+def set_config(key, value):
+    if key not in CONFIG_TYPES:
+        logger.warning("Config key not typed: %s", key)
+
+    # salva sempre come stringa
+    str_value = str(value)
+
+    conn = get_db()
+    conn.execute(
+        "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)",
+        (key, str_value),
+    )
+    conn.commit()
+
+    # invalida cache
+    clear_cache(key)
+
+# ---------------------------------------------------------
+# Return a specific config value (with cache + type casting)
+# ---------------------------------------------------------
 def get_config(key):
+
+    if key not in CONFIG_TYPES:
+        logger.warning("Invalid config key: %s", key)
+
     # ---- Cache hit ----
     if key in _config_cache:
         return _config_cache[key]
@@ -58,7 +88,10 @@ def get_config(key):
     row = cur.fetchone()
 
     if not row:
-        return None
+        value = getattr(settings, key, None)
+        logger.warning("Config key not found in database: %s (using default: %s)", key, value)
+        _config_cache[key] = value
+        return value
 
     raw_value = row["value"]
 
@@ -72,6 +105,13 @@ def get_config(key):
     # ---- Save in cache ----
     _config_cache[key] = value
     return value
+
+# ---------------------------------------------------------
+# Return a specific config value or default
+# ---------------------------------------------------------
+def get_config_or(key, default):
+    value = get_config(key)
+    return value if value is not None else default
 
 # ---------------------------------------------------------
 # Create Config DB Tables
