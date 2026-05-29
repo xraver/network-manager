@@ -181,7 +181,7 @@ def css_variables(request: Request):
 
 # CSS Layout
 def css_layout(request: Request):
-    return FileResponse(settings.FRONTEND_PATH, "css/layout.css")
+    return FileResponse(settings.FRONTEND_PATH / "css/layout.css")
 
 # JS Common
 def js_common(request: Request):
