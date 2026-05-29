@@ -4,7 +4,7 @@
 import logging
 
 # Import backend modules
-from backend.db.db import init_db
+from backend.db.db import configure_db, create_db
 import backend.db.config
 import backend.db.users
 import backend.db.hosts
@@ -70,34 +70,14 @@ def print_goodbye(logger):
         settings.APP_NAME, settings.APP_VERSION
     )
 
-# ================================
-# Create DB if needed
-# ================================
-def create_db(logger):
-    db_path = settings.DB_FILE
-
-    # Reset database if requested
-    if settings.DB_RESET and db_path.exists():
-        logger.info("Removing existing database: %s", db_path)
-        db_path.unlink()
-
-    # Skip creation if DB already exists
-    if db_path.exists():
-        logger.info("Database already exists. Nothing to do.")
-        return
-
-    logger.info("Creating database: %s", db_path)
-
-    # Ensure directory exists
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Initialize DB tables
-    init_db()
-
 # ------------------------------------------------------------------------------
 # Bootstrap: setup logging, print welcome, create DB, etc.
 # ------------------------------------------------------------------------------
 def bootstrap():
+    # Set Database
+    configure_db(settings.DB_FILE)
+    # Create or update database
+    created = create_db(settings.DB_FILE, settings.DB_RESET)
 
     # Log Setup
     setup_logging(level=settings.LOG_LEVEL, to_file=settings.LOG_TO_FILE, log_file=settings.LOG_FILE, log_access_file=settings.LOG_ACCESS_FILE)
@@ -105,5 +85,7 @@ def bootstrap():
 
     print_welcome(logger)
 
-    # Create or update database
-    create_db(logger)
+    if created:
+        logger.info("Database created: %s", settings.DB_FILE)
+    else:
+        logger.info("Database already exists. Nothing to do.")
