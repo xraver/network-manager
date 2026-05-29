@@ -30,12 +30,12 @@ This project is currently under development. For upcoming tasks and planned impr
 
 ## ✨ Features
 
-- Static frontend served by the application (`FRONTEND_DIR`)
+- Static frontend served by the application (`FRONTEND_PATH`)
 - Persistent SQLite database (`/data/database.db`)
 - Configurable logging to console and/or file
 - Login protection with configurable rate-limit
 - Admin credentials configurable via env or Docker secrets
-- Support for `SESSION_SECRET`: custom key for cookies (if missing, it is generated automatically)
+- Support for `SESSION_SECRET`: custom key for cookie signing (required in production; auto-generated in development if not provided)
 
 ---
 
@@ -76,7 +76,7 @@ LOG_TO_FILE=false
 # --- Session secret (optional but recommended in production) ---
 # SESSION_SECRET=****ReplaceWithYourSecret*****
 ```
-If SESSION_SECRET is not set, the app generates a random key on each restart -> existing sessions become invalid.
+If SESSION_SECRET is not set, the application generates a new random key at each restart, which invalidates all existing sessions.
 
 ### 3) 🐳 Example `docker-compose.yml`
 ```yaml
@@ -89,7 +89,7 @@ services:
       - "${HTTP_PORT:-8000}:8000"
     environment:
       # Frontend
-      FRONTEND_DIR: "/app/frontend"
+      FRONTEND_PATH: "/app/frontend"
       # Database
       DB_FILE: "/data/database.db"
       DB_RESET: "${DB_RESET:-false}"
@@ -126,7 +126,7 @@ secrets:
 ## 🔧 Supported environment variables
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `FRONTEND_DIR` | /app/frontend | Frontend directory |
+| `FRONTEND_PATH` | /app/frontend | Frontend directory |
 | `DATA_PATH`| /data | Data Path for DB and Backups |
 | `DB_FILE` | database.db | SQLite file |
 | `DB_RESET` | false | Reset DB on every startup |

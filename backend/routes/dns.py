@@ -5,7 +5,6 @@ from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
 import asyncio
 import json
-import os
 import ipaddress
 import time
 
@@ -81,7 +80,9 @@ async def api_dns_reload(request: Request):
         ext_cname = get_config("external_name")
 
         # Save DNS Host and Aliases for the EXT DNS
-        path = settings.DNS_HOST_FILE + "_ext"
+        path = settings.DNS_HOST_FILE.with_name(
+            settings.DNS_HOST_FILE.name + "_ext"
+        )
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
                 name   = h.get("name").ljust(20)

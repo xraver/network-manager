@@ -5,7 +5,6 @@ from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
 import ipaddress
 import time
-import os
 
 # Import local modules
 from backend.db.aliases import (
@@ -32,12 +31,12 @@ router = APIRouter()
 # Aliass page
 @router.get("/aliases")
 def aliases(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "aliases.html"))
+    return FileResponse(settings.FRONTEND_PATH / "aliases.html")
 
 # Serve aliases.js
 @router.get("/js/aliases.js")
 def js_aliases():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/aliases.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/aliases.js")
 
 # ---------------------------------------------------------
 # Get Aliass

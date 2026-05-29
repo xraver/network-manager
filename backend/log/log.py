@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import logging.config
-import os
 from typing import Optional
 
 # Module-level flag to prevent re-initialization
@@ -58,8 +57,7 @@ def build_log_config(level: str = "INFO", to_file: bool = False, log_file: Optio
     if to_file:
         if log_file is not None:
             # Ensure the log directory exists and add a rotating file handler
-            log_dir = os.path.dirname(log_file) or "."
-            os.makedirs(log_dir, exist_ok=True)
+            log_file.parent.mkdir(parents=True, exist_ok=True)
             # handler for generic log
             handlers["file"] = {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -74,8 +72,7 @@ def build_log_config(level: str = "INFO", to_file: bool = False, log_file: Optio
             active_handlers.append("file")
         if log_access_file is not None:
             # Ensure the log directory exists and add a rotating file handler
-            log_dir = os.path.dirname(log_access_file) or "."
-            os.makedirs(log_dir, exist_ok=True)
+            log_access_file.parent.mkdir(parents=True, exist_ok=True)
             # handler for access log
             handlers["access_file"] = {
                 "class": "logging.handlers.RotatingFileHandler",

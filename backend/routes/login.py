@@ -3,7 +3,6 @@
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
-import os
 import time
 
 # Import local modules
@@ -45,17 +44,17 @@ def check_rate_limit(ip: str):
 # Login page
 @router.get("/login")
 def login_page(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "login.html"))
+    return FileResponse(settings.FRONTEND_PATH / "login.html")
 
 # Serve login.js
 @router.get("/js/login.js")
 def css_login():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/login.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/login.js")
 
 # Serve session.js
 @router.get("/js/session.js")
 def css_login():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/session.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/session.js")
 
 # ---------------------------------------------------------
 # Login API

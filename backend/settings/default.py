@@ -3,7 +3,7 @@
 # ---------------------------------------------------------
 # Frontend
 # ---------------------------------------------------------
-FRONTEND_DIR = "/app/frontend"
+FRONTEND_PATH = "/app/frontend"
 
 # ---------------------------------------------------------
 # Data Path (DB + Backup)
@@ -34,9 +34,9 @@ EXTERNAL_NAME = "dyndns.example.com"
 # Web
 # ---------------------------------------------------------
 HTTP_HOST = "0.0.0.0"
-HTTP_PORT = "8000"
-LOGIN_MAX_ATTEMPTS = "5"
-LOGIN_WINDOW_SECONDS = "600"
+HTTP_PORT = 8000
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_WINDOW_SECONDS = 600
 
 # ---------------------------------------------------------
 # Admin
@@ -48,8 +48,8 @@ ADMIN_PASSWORD_HASH_FILE = "/run/secrets/admin_password_hash"
 # ---------------------------------------------------------
 # DNS
 # ---------------------------------------------------------
-DNS_HOST_FILE=f"/dns/etc/{DOMAIN}/hosts.inc"
-DNS_ALIAS_FILE=f"/dns/etc/{DOMAIN}/aliases.inc"
+DNS_HOST_FILE = "/dns/etc/{domain}/hosts.inc"
+DNS_ALIAS_FILE = "/dns/etc/{domain}/aliases.inc"
 DNS_REVERSE_FILE="/dns/etc/reverse/hosts.inc"
 
 # ---------------------------------------------------------

@@ -4,7 +4,6 @@
 from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
 import json
-import os
 import time
 
 # Import local modules
@@ -27,12 +26,12 @@ router = APIRouter()
 # Leases page
 @router.get("/leases")
 def leases(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "leases.html"))
+    return FileResponse(settings.FRONTEND_PATH / "leases.html")
 
 # Serve leases.js
 @router.get("/js/leases.js")
 def js_leases():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/leases.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/leases.js")
 
 # ---------------------------------------------------------
 # Reload

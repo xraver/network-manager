@@ -1,7 +1,6 @@
 # backend/db/db.py
 
 # Import standard modules
-import os
 import sqlite3
 
 # Import Settings & Logging
@@ -27,7 +26,7 @@ def register_init(func):
 def get_db():
     global _connection
     if _connection is None:
-        os.makedirs(os.path.dirname(settings.DB_FILE) or ".", exist_ok=True)
+        settings.DB_FILE.parent.mkdir(parents=True, exist_ok=True)
         _connection = sqlite3.connect(settings.DB_FILE, check_same_thread=False)
         _connection.row_factory = sqlite3.Row
         _connection.execute("PRAGMA foreign_keys = ON;")

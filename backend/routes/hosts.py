@@ -5,7 +5,6 @@ from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
 import ipaddress
 import time
-import os
 
 # Import local modules
 from backend.db.hosts import (
@@ -32,12 +31,12 @@ router = APIRouter()
 # Hosts page
 @router.get("/hosts")
 def hosts(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "hosts.html"))
+    return FileResponse(settings.FRONTEND_PATH / "hosts.html")
 
 # Serve hosts.js
 @router.get("/js/hosts.js")
 def js_hosts():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/hosts.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/hosts.js")
 
 # ---------------------------------------------------------
 # Get Hosts

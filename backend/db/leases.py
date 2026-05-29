@@ -2,7 +2,6 @@
 
 # import standard modules
 import csv
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -37,7 +36,7 @@ def get_leases(filter_devices: bool = False) -> List[Dict[str, Any]]:
     leases = []
     index = 1  # 1-based id for frontend
 
-    path = Path(settings.DHCP4_LEASES_FILE)
+    path = settings.DHCP4_LEASES_FILE
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
@@ -88,7 +87,7 @@ def get_leases(filter_devices: bool = False) -> List[Dict[str, Any]]:
 # SELECT SINGLE LEASE
 # -----------------------------
 def get_lease(lease_id: int) -> Optional[Dict[str, Any]]:
-    path = Path(settings.DHCP4_LEASES_FILE)
+    path = settings.DHCP4_LEASES_FILE
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
@@ -124,7 +123,7 @@ def get_lease(lease_id: int) -> Optional[Dict[str, Any]]:
 # -----------------------------
 def delete_lease(lease_id: int):
 
-    path = Path(settings.DHCP4_LEASES_FILE)
+    path = settings.DHCP4_LEASES_FILE
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 

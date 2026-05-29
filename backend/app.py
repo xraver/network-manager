@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Callable
-import os
 
 # Import Routers
 from backend.routes.about import router as about_router
@@ -166,39 +165,39 @@ async def session_middleware(request: Request, call_next):
 # ------------------------------------------------------------------------------
 # Homepage
 def home(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "index.html"))
+    return FileResponse(settings.FRONTEND_PATH / "index.html")
 
 # Homepage JS
 def js_home(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/index.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/index.js")
 
 # Modals
 def modals(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "modals.html"))
+    return FileResponse(settings.FRONTEND_PATH / "modals.html")
 
 # CSS variables
 def css_variables(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/variables.css"))
+    return FileResponse(settings.FRONTEND_PATH / "css/variables.css")
 
 # CSS Layout
 def css_layout(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "css/layout.css"))
+    return FileResponse(settings.FRONTEND_PATH, "css/layout.css")
 
 # JS Common
 def js_common(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/common.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/common.js")
 
 # JS API
 def js_api(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/api.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/api.js")
 
 # JS Services
 def js_services(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/services.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/services.js")
 
 # favicon
 def favicon(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "favicon.ico"))
+    return FileResponse(settings.FRONTEND_PATH / "favicon.ico")
 
 # ------------------------------------------------------------------------------
 # Creates and configures the FastAPI app

@@ -6,7 +6,6 @@ from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
 import ipaddress
 import time
-import os
 
 # Import local modules
 from backend.db.hosts import get_hosts
@@ -30,12 +29,12 @@ router = APIRouter()
 # Devices page
 @router.get("/devices")
 def devices(request: Request):
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "devices.html"))
+    return FileResponse(settings.FRONTEND_PATH / "devices.html")
 
 # Serve devices.js
 @router.get("/js/devices.js")
 def js_devices():
-    return FileResponse(os.path.join(settings.FRONTEND_DIR, "js/devices.js"))
+    return FileResponse(settings.FRONTEND_PATH / "js/devices.js")
 
 # ---------------------------------------------------------
 # Get Devices

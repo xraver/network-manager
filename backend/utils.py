@@ -1,18 +1,7 @@
 # backend/db/utils.py
 
 # Import standard modules
-import os
-import platform
 import subprocess
-
-# -----------------------------
-# Load hash from file
-# -----------------------------
-def load_hash(path: str):
-    if path and os.path.exists(path):
-        with open(path, "r") as f:
-            return f.read().strip()
-    return None
 
 # -----------------------------
 # Normalize string (strip and convert empty to None)
@@ -23,25 +12,25 @@ def normalize(value):
 # -----------------------------
 # convert string to int (returns None if conversion fails)
 # -----------------------------
-def to_int(v: str):
+def to_int(v: str, default: int | None = None) -> int | None:
     v = (v or "").strip()
     if not v or v.lower() == "null":
-        return None
+        return default
     try:
         return int(v)
     except ValueError:
-        return None
+        return default
 
 # -----------------------------
 # convert string to bool (returns None if conversion fails)
 # -----------------------------
-def to_bool(v: str):
+def to_bool(v: str, default: bool | None = None) -> bool | None:
     v = (v or "").strip().lower()
     if v in ("true", "1", "yes", "y"):
         return True
     if v in ("false", "0", "no", "n"):
         return False
-    return None
+    return default
 
 # -----------------------------
 # check if host is active (ping)
