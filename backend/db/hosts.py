@@ -222,7 +222,7 @@ def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
     # HOSTS TABLE
     cur.execute(
         """
-        CREATE TABLE hosts (
+        CREATE TABLE IF NOT EXISTS hosts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             ipv4 TEXT,
@@ -235,12 +235,12 @@ def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
         );
         """
     )
-    cur.execute("CREATE INDEX idx_hosts_name ON hosts(name);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_hosts_name ON hosts(name);")
 
     # TXT TABLE
     cur.execute(
         """
-        CREATE TABLE txt_records (
+        CREATE TABLE IF NOT EXISTS txt_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             value TEXT NOT NULL,
@@ -250,9 +250,7 @@ def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
         );
         """
     )
-    cur.execute("CREATE INDEX idx_txt_host ON txt_records(host_id);")
-
-    logger.info("HOSTS DB: Tables initialized successfully")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_txt_host ON txt_records(host_id);")
 
 # -----------------------------
 # Reset Hosts DB Table

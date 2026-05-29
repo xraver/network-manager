@@ -1,9 +1,5 @@
 # backend/db/config.py
 
-# Import standard modules
-import os
-import sqlite3
-
 # Import local modules
 from backend.db.db import get_db, register_init
 
@@ -22,6 +18,15 @@ CONFIG_TYPES = {
     "EXTERNAL_NAME": str,
     "LOGIN_MAX_ATTEMPTS": int,
     "LOGIN_WINDOW_SECONDS": int,
+}
+
+# ---------------------------------------------------------
+# Default Values
+# ---------------------------------------------------------
+CONFIG_DEFAULTS = {
+    "EXTERNAL_NAME": settings.EXTERNAL_NAME,
+    "LOGIN_MAX_ATTEMPTS": settings.LOGIN_MAX_ATTEMPTS,
+    "LOGIN_WINDOW_SECONDS": settings.LOGIN_WINDOW_SECONDS,
 }
 
 # ---------------------------------------------------------
@@ -69,22 +74,25 @@ def get_config(key):
     return value
 
 # ---------------------------------------------------------
-# Initialize Config DB Table
+# Create Config DB Tables
 # ---------------------------------------------------------
 @register_init
-def init_db_hosts_table(cur):
+def init_db_config_table(cur):
 
     # CONFIG TABLE
     cur.execute("""
-        CREATE TABLE config (
+        CREATE TABLE IF NOT EXISTS config (
             key TEXT PRIMARY KEY,
             value TEXT
         );
     """)
 
-    # Initial values from settings (as strings in DB)
-    cur.execute("INSERT INTO config (key, value) VALUES (?, ?)", ("external_name", settings.EXTERNAL_NAME))
-    cur.execute("INSERT INTO config (key, value) VALUES (?, ?)", ("login_max_attempts", str(settings.LOGIN_MAX_ATTEMPTS)))
-    cur.execute("INSERT INTO config (key, value) VALUES (?, ?)", ("login_window_seconds", str(settings.LOGIN_WINDOW_SECONDS)))
+# ---------------------------------------------------------
+# Initialize Config DB Tables
+# ---------------------------------------------------------
+@register_init
+def init_db_config_defaults(cur):
 
-    logger.info("CONFIG DB: Tables initialized successfully")
+    # Add configuration parameters
+    for key, value in CONFIG_DEFAULTS.items():
+        cur.execute("INSERT OR IGNORE INTO config VALUES (?, ?)", (key, str(value)))

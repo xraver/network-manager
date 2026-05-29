@@ -171,12 +171,12 @@ def delete_alias(alias_id: int) -> bool:
 # Initialize Aliases DB Table
 # -----------------------------
 @register_init
-def init_db_alias_table(cur: sqlite3.Cursor) -> None:
+def init_db_aliases_table(cur: sqlite3.Cursor) -> None:
 
     # ALIASES TABLE
     cur.execute(
         """
-        CREATE TABLE aliases (
+        CREATE TABLE IF NOT EXISTS aliases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             target TEXT NOT NULL,
@@ -187,9 +187,7 @@ def init_db_alias_table(cur: sqlite3.Cursor) -> None:
         );
         """
     )
-    cur.execute("CREATE INDEX idx_aliases_name ON aliases(name);")
-
-    logger.info("ALIASES DB: Database initialized successfully")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_aliases_name ON aliases(name);")
 
 # -----------------------------
 # Reset Aliases DB Table

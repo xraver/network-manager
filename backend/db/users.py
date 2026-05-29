@@ -81,24 +81,28 @@ def init_db_users_table(cur):
             updated_at INTEGER NOT NULL
         );
     """)
-    cur.execute("CREATE INDEX idx_users_username ON users(username);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);")
+
+# -----------------------------
+# Populate Users Tables
+# -----------------------------
+@register_init
+def init_db_users_defaults(cur):
     # Insert default admin user
-    if not settings.ADMIN_PASSWORD_HASH:
-        settings.ADMIN_PASSWORD_HASH = hash_password(settings.ADMIN_PASSWORD)
+    if settings.ADMIN_PASSWORD_HASH:
+        password_hash = settings.ADMIN_PASSWORD_HASH
     else:
-        settings.ADMIN_PASSWORD = "(hidden)"
+        password_hash = hash_password(settings.ADMIN_PASSWORD)
     cur.execute("""
-        INSERT INTO users (
+        INSERT or IGNORE INTO users (
             username, password_hash, email, is_admin, modules, status,
             created_at, updated_at, password_changed_at
         ) VALUES (?, ?, ?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'), strftime('%s','now'));
     """, (
         settings.ADMIN_USER,
-        settings.ADMIN_PASSWORD_HASH,
+        password_hash,
         "admin@example.com",
         1,
         '["dns","dhcp"]',
         "active"
     ))
-
-    logger.info("USERS DB: Tables initialized successfully")
