@@ -77,7 +77,7 @@ def bootstrap():
     # Set Database
     configure_db(settings.DB_FILE)
     # Create or update database
-    created = create_db(settings.DB_FILE, settings.DB_RESET)
+    created = create_db(settings.DB_RESET)
 
     # Log Setup
     setup_logging(

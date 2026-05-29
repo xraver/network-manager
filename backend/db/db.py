@@ -19,36 +19,53 @@ def register_init(func):
 # Configure database (path)
 # -----------------------------
 def configure_db(path: Path):
-    global _db_path
+    global _db_path, _connection
+
+    if _connection is not None:
+        raise RuntimeError("Database already initialized")
+
     _db_path = path
+
 
 # -----------------------------
 # Init Database
 # -----------------------------
 def init_db():
-
     conn = get_db()
     cur = conn.cursor()
 
-    for func in _init_functions:
+    for func in sorted(_init_functions, key=lambda f: f.__name__):
         func(cur)
 
     conn.commit()
 
 # -----------------------------
-# Init Database
+# Create Database
 # -----------------------------
-def create_db(db_path: Path, reset: bool = False):
-    if reset and db_path.exists():
-        db_path.unlink()
+def create_db(reset: bool = False):
+    global _connection
 
-    created = not db_path.exists()
+    if _db_path is None:
+        raise RuntimeError("Database not configured. Call configure_db() first.")
 
-    db_path.parent.mkdir(parents=True, exist_ok=True)
+    if reset:
+        if _connection is not None:
+            _connection.close()
+            _connection = None
 
+        if _db_path.exists():
+            _db_path.unlink()
+
+    # check if db exists
+    existed_before = _db_path.exists()
+
+    # ensure connection (creates DB file if missing)
+    get_db()
+
+    # ensure schema
     init_db()
 
-    return created
+    return not existed_before
 
 # -----------------------------
 # Connect to the database
