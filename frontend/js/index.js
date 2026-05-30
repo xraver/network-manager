@@ -2,7 +2,7 @@
 // IMPORT
 // -------------------------------------------------------
 import { loadModals, showToast } from './common.js';
-import { serviceCheckAbount, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, deleteBackup} from './services.js';
+import { serviceCheckAbount, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDownloadBackup, serviceDeleteBackup} from './services.js';
 
 // -------------------------------------------------------
 // BACKUP MODAL OPEN/CLOSE
@@ -93,9 +93,18 @@ function renderBackupList(data) {
         tdSize.textContent = formattedSize;
         tdSize.classList.add("text-end");
 
-        // actions (DELETE)
+        // actions
         const tdActions = document.createElement("td");
         tdActions.classList.add("text-end");
+        // download button
+        const downloadBtn = document.createElement("button");
+        downloadBtn.className = "btn btn-sm btn-outline-primary me-2";
+        downloadBtn.title = "Download backup";
+        downloadBtn.innerHTML = `<i class="bi bi-download text-primary"></i>`;
+        downloadBtn.setAttribute("data-action", "downloadBackup");
+        downloadBtn.setAttribute("data-id", b.name);
+        tdActions.appendChild(downloadBtn);
+        // delete button
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "btn btn-sm btn-outline-danger";
         deleteBtn.title = "Delete backup";
@@ -272,8 +281,9 @@ const actionHandlers = {
                         ? result.message
                         : 'Backup completed successfully';
             showToast(msg, !result?.partial);
-            // Close modal
-            if (modal) modal.style.display = 'none';
+            // reload list
+            const data = await serviceBackupList();
+            renderBackupList(data);
         } catch (err) {
             showToast(err?.message || "Error performing backup", false);
         } finally {
@@ -305,12 +315,33 @@ const actionHandlers = {
                         : 'Restore completed successfully';
             showToast(msg, !result?.partial);
             // Close modal
-            if (modal) modal.style.display = 'none';
+            //if (modal) modal.style.display = 'none';
         } catch (err) {
             showToast(err?.message || "Error performing restore", false);
         } finally {
             label.textContent = originalLabel;
             btn.disabled = false;
+        }
+    },
+    // Download Backup
+    downloadBackup: async (e, el) => {
+        e.stopPropagation();
+
+        const id = el.dataset.id;
+        if (!id) return;
+
+        try {
+            const result = await serviceDownloadBackup(id);
+
+            const msg = (typeof result === 'object' && result?.message)
+                ? result.message
+                : 'Backup downloaded successfully';
+
+            showToast(msg, true);
+
+        } catch (err) {
+            console.error(err);
+            showToast(err?.message || "Error downloading backup", false);
         }
     },
     // Delete Backup
@@ -325,7 +356,7 @@ const actionHandlers = {
         if (!confirmDelete) return;
 
         try {
-            const result = await deleteBackup(id);
+            const result = await serviceDeleteBackup(id);
 
             const msg = (typeof result === 'object' && result?.message)
                 ? result.message
@@ -342,7 +373,18 @@ const actionHandlers = {
             showToast(err?.message || "Error deleting backup", false);
         }
     },
-
+    refreshBackupList: async () => {
+        try {
+            const data = await serviceBackupList();
+            const msg = (typeof result === 'object' && result?.message)
+                        ? result.message
+                        : 'Backup list refreshed successfully';
+            showToast(msg, true);
+            renderBackupList(data);
+        } catch (err) {
+            showToast(err?.message || "Error refreshing backup list", false);
+        }
+    },
     openBackupModal,       // managed by boostrap
     closeBackupModal,      // managed by boostrap
     // Reload DNS

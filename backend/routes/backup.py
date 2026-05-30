@@ -1,8 +1,8 @@
 # backend/routes/backup.py
 
 # import standard modules
-from fastapi import APIRouter, HTTPException, status
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import Response, JSONResponse, FileResponse
+from pathlib import Path
 from pydantic import BaseModel
 import time
 from typing import Dict, Any
@@ -10,6 +10,8 @@ from typing import Dict, Any
 # Import local modules
 from backend.backup import backup_create, backup_list, backup_restore, backup_delete
 
+# Import Settings
+from backend.settings.settings import settings
 # Import Logging
 from backend.log.log import get_logger
 
@@ -87,7 +89,7 @@ def build_operation_response(
     }
 
 # ---------------------------------------------------------
-# API ENDPOINTS
+# API: Create Backup
 # ---------------------------------------------------------
 @router.post("/api/backup/create")
 async def api_backup_create():
@@ -224,3 +226,28 @@ async def api_backup_delete(payload: BackupDeleteRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"code": "BACKUP_DELETE_ERROR", "message": "Internal error"},
         )
+
+# ---------------------------------------------------------
+# API: Download backup
+# ---------------------------------------------------------
+@router.get("/api/backup/download/{backup_id}")
+def download_backup(backup_id: str):
+    backup_dir = Path(settings.BACKUP_PATH)
+
+    zip_path = backup_dir / f"{backup_id}"
+
+    if not zip_path.exists():
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "code": "BACKUP_NOT_FOUND",
+                    "status": "failure",
+                    "message": "Backup not found",
+                },
+            )
+
+    return FileResponse(
+        path=zip_path,
+        filename=zip_path.name,
+        media_type="application/zip"
+    )

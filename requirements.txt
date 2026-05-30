@@ -2,3 +2,4 @@ bcrypt
 fastapi
 itsdangerous
 uvicorn[standard]
+python-multipart

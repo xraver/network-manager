@@ -1,5 +1,5 @@
 // import api
-import { apiRequest, apiGet, apiPost } from './api.js';
+import { apiRequest, apiGet, apiPost, apiDownload } from './api.js';
 
 // -------------------------------------------------------
 // Check Abount
@@ -280,9 +280,32 @@ export async function serviceBackupRestore(id) {
 }
 
 // -------------------------------------------------------
+// Download a Backup
+// -------------------------------------------------------
+export async function serviceDownloadBackup(id) {
+    const res = await apiDownload(
+        `/api/backup/download/${encodeURIComponent(id)}`,
+        "Error downloading backup"
+    );
+
+    const blob = await res.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = id;
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+// -------------------------------------------------------
 // Delete a Backup
 // -------------------------------------------------------
-export async function deleteBackup(id) {
+export async function serviceDeleteBackup(id) {
     const data = await apiPost(
         "/api/backup/delete",
         { backup_id: id },

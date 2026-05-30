@@ -70,10 +70,16 @@ export async function apiRequest(
     return data;
 }
 
+// -------------------------------------------------------
+// API Get
+// -------------------------------------------------------
 export function apiGet(url, errorPrefix = 'Fetch error') {
     return apiRequest(url, { method: 'GET' }, errorPrefix);
 }
 
+// -------------------------------------------------------
+// API Post
+// -------------------------------------------------------
 export function apiPost(url, payload, errorPrefix = 'Request error') {
     return apiRequest(
         url,
@@ -84,4 +90,46 @@ export function apiPost(url, payload, errorPrefix = 'Request error') {
         },
         errorPrefix
     );
+}
+
+// -------------------------------------------------------
+// API Download
+// -------------------------------------------------------
+export async function apiDownload(url, errorPrefix = 'Download error') {
+    let res;
+
+    try {
+        res = await fetch(url);
+    } catch (err) {
+        throw new Error(`${errorPrefix}: network error`);
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+
+    // JSON message (error)
+    if (contentType.includes("application/json")) {
+        let data;
+
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error(`${errorPrefix}: Invalid error payload`);
+        }
+
+        const msg =
+            data?.detail?.message ||
+            data?.message ||
+            "Download failed";
+
+        throw new Error(`${errorPrefix}: ${msg}`);
+    }
+
+    // File
+    if (!res.ok) {
+        throw new Error(
+            `${errorPrefix}: ${res.status} ${res.statusText || ''}`.trim()
+        );
+    }
+
+    return res;
 }
