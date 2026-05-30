@@ -2,7 +2,7 @@
 // IMPORT
 // -------------------------------------------------------
 import { loadModals, showToast } from './common.js';
-import { serviceCheckAbount, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDownloadBackup, serviceDeleteBackup} from './services.js';
+import { serviceCheckAbount, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDeleteBackup, serviceDownloadBackup, serviceUploadBackup } from './services.js';
 
 // -------------------------------------------------------
 // BACKUP MODAL OPEN/CLOSE
@@ -323,27 +323,6 @@ const actionHandlers = {
             btn.disabled = false;
         }
     },
-    // Download Backup
-    downloadBackup: async (e, el) => {
-        e.stopPropagation();
-
-        const id = el.dataset.id;
-        if (!id) return;
-
-        try {
-            const result = await serviceDownloadBackup(id);
-
-            const msg = (typeof result === 'object' && result?.message)
-                ? result.message
-                : 'Backup downloaded successfully';
-
-            showToast(msg, true);
-
-        } catch (err) {
-            console.error(err);
-            showToast(err?.message || "Error downloading backup", false);
-        }
-    },
     // Delete Backup
     deleteBackup: async (e, el) => {
 
@@ -375,14 +354,78 @@ const actionHandlers = {
     },
     refreshBackupList: async () => {
         try {
-            const data = await serviceBackupList();
+            const result = await serviceBackupList();
             const msg = (typeof result === 'object' && result?.message)
                         ? result.message
                         : 'Backup list refreshed successfully';
             showToast(msg, true);
-            renderBackupList(data);
+            renderBackupList(result);
         } catch (err) {
             showToast(err?.message || "Error refreshing backup list", false);
+        }
+    },
+    // Download Backup
+    downloadBackup: async (e, el) => {
+        e.stopPropagation();
+
+        const id = el.dataset.id;
+        if (!id) return;
+
+        try {
+            const result = await serviceDownloadBackup(id);
+
+            const msg = (typeof result === 'object' && result?.message)
+                ? result.message
+                : 'Backup downloaded successfully';
+
+            showToast(msg, true);
+
+        } catch (err) {
+            console.error(err);
+            showToast(err?.message || "Error downloading backup", false);
+        }
+    },
+    // Upload Backup
+    uploadBackup: async (e, el) => {
+        const input = document.getElementById('backupUploadInput');
+        if (!input?.files?.length) {
+            showToast("Select a file first", false);
+            return;
+        }
+
+        const file = input.files[0];
+
+        const icon = el.querySelector('.icon');
+        const originalClass = icon?.className;
+
+        el.disabled = true;
+        if (icon) {
+            icon.className = "spinner-border spinner-border-sm icon";
+        }
+
+        try {
+            const result = await serviceUploadBackup(file);
+
+            const msg = (result?.message)
+                ? result.message
+                : 'Backup uploaded successfully';
+
+            showToast(msg, true);
+
+            console.log("Uploaded backup ID:", result?.backup_id);
+
+            input.value = '';
+
+            const data = await serviceBackupList();
+            renderBackupList(data);
+
+        } catch (err) {
+            showToast(err?.message || "Error uploading backup", false);
+        } finally {
+            if (icon && originalClass) {
+                icon.className = originalClass;
+            }
+            el.disabled = false;
         }
     },
     openBackupModal,       // managed by boostrap

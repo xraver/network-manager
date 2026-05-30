@@ -169,10 +169,21 @@
                 </table>
             </div>
 
-            <!-- Hidden input opzionale se vuoi mantenere compatibilità -->
+            <!-- Hidden input opzionale -->
             <input type="hidden" id="restoreBackupId" />
 
             <small class="text-muted">Select one backup to restore.</small>
+        </div>
+
+        <div class="modal-body">
+            <label class="form-label">Upload backup</label>
+            <div class="d-flex gap-2">
+                <input type="file" id="backupUploadInput" class="form-control" accept=".zip,.bak,.tar,.gz">
+                <button type="button" class="btn btn-primary" title="Upload backup file" aria-label="Upload backup file" data-action="uploadBackup">
+                    <i class="bi bi-upload icon"></i><span class="label"></span>
+                </button>
+            </div>
+            <small class="text-muted">Select a backup file to upload.</small>
         </div>
 
         <div class="modal-footer modal-buttons">

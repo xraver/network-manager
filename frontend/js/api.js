@@ -119,7 +119,7 @@ export async function apiDownload(url, errorPrefix = 'Download error') {
         const msg =
             data?.detail?.message ||
             data?.message ||
-            "Download failed";
+            errorPrefix;
 
         throw new Error(`${errorPrefix}: ${msg}`);
     }
@@ -132,4 +132,41 @@ export async function apiDownload(url, errorPrefix = 'Download error') {
     }
 
     return res;
+}
+
+// -------------------------------------------------------
+// API Upload (multipart/form-data)
+// -------------------------------------------------------
+export async function apiUpload(url, file, errorPrefix = "Upload error") {
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch(url, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!res.ok) {
+            let err;
+            try {
+                err = await res.json();
+            } catch {
+                throw new Error(errorPrefix);
+            }
+
+            const msg =
+                err?.detail?.message ||
+                err?.message ||
+                errorPrefix;
+
+            throw new Error(msg);
+        }
+
+        return await res.json();
+
+    } catch (err) {
+        console.error(err);
+        throw new Error(err.message || errorPrefix);
+    }
 }

@@ -294,13 +294,13 @@ select.form-select:focus,
    Icons
    ================================ */
 .icon {
-    color: var(--icon-color);
+    color: currentColor;
     display: inline-flex;
     align-items: center;
 }
 
 .icon:hover {
-    color: var(--icon-color-hover);
+    color: inherit;
 }
 
 .icon-static {

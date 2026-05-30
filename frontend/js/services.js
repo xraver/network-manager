@@ -1,5 +1,5 @@
 // import api
-import { apiRequest, apiGet, apiPost, apiDownload } from './api.js';
+import { apiRequest, apiGet, apiPost, apiDownload, apiUpload } from './api.js';
 
 // -------------------------------------------------------
 // Check Abount
@@ -280,6 +280,19 @@ export async function serviceBackupRestore(id) {
 }
 
 // -------------------------------------------------------
+// Delete a Backup
+// -------------------------------------------------------
+export async function serviceDeleteBackup(id) {
+    const data = await apiPost(
+        "/api/backup/delete",
+        { backup_id: id },
+        "Error performing delete"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -------------------------------------------------------
 // Download a Backup
 // -------------------------------------------------------
 export async function serviceDownloadBackup(id) {
@@ -303,14 +316,20 @@ export async function serviceDownloadBackup(id) {
 }
 
 // -------------------------------------------------------
-// Delete a Backup
+// Upload a Backup
 // -------------------------------------------------------
-export async function serviceDeleteBackup(id) {
-    const data = await apiPost(
-        "/api/backup/delete",
-        { backup_id: id },
-        "Error performing delete"
+export async function serviceUploadBackup(file) {
+    const data = await apiUpload(
+        "/api/backup/upload",
+        file,
+        "Error uploading backup"
     );
 
-    return data?.message ? { message: data.message } : true;
+    if (data?.status === 'success') {
+        return data?.message
+            ? { message: data.message, backup_id: data.backup_id }
+            : true;
+    }
+
+    return false;
 }

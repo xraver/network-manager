@@ -1,11 +1,14 @@
 # backend/routes/backup.py
 
 # import standard modules
+from fastapi import APIRouter, HTTPException, status, UploadFile, File
 from fastapi.responses import Response, JSONResponse, FileResponse
 from pathlib import Path
 from pydantic import BaseModel
+import shutil
 import time
 from typing import Dict, Any
+import zipfile
 
 # Import local modules
 from backend.backup import backup_create, backup_list, backup_restore, backup_delete
@@ -251,3 +254,91 @@ def download_backup(backup_id: str):
         filename=zip_path.name,
         media_type="application/zip"
     )
+
+# ---------------------------------------------------------
+# API: Upload backup
+# ---------------------------------------------------------
+@router.post("/api/backup/upload")
+def upload_backup(file: UploadFile = File(...)):
+
+    # Initialization
+    start_ns = time.monotonic_ns()
+
+    if not file.filename.endswith(".zip"):
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "BACKUP_UPLOAD_FAILED",
+                    "status": "failure",
+                    "message": "Only ZIP files allowed",
+                    "took_ms": took_ms,
+                },
+            )
+
+    backup_dir = Path(settings.BACKUP_PATH)
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    # safe filename
+    safe_name = Path(file.filename).name
+    target_path = backup_dir / safe_name
+
+    # prevent overwrite
+    if target_path.exists():
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "BACKUP_UPLOAD_FAILED",
+                    "status": "failure",
+                    "message": "Backup already exists",
+                    "took_ms": took_ms,
+                },
+            )
+
+    # validate ZIP
+    import zipfile
+    try:
+        with zipfile.ZipFile(file.file) as z:
+            if z.testzip() is not None:
+                took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+                raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail={
+                            "code": "BACKUP_UPLOAD_FAILED",
+                            "status": "failure",
+                            "message": "Corrupted ZIP file",
+                            "took_ms": took_ms,
+                        },
+                    )
+
+    except zipfile.BadZipFile:
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "BACKUP_UPLOAD_FAILED",
+                    "status": "failure",
+                    "message": "Invalid ZIP file",
+                    "took_ms": took_ms,
+                },
+            )
+
+    # reset pointer after validation
+    file.file.seek(0)
+
+    # save file
+    with target_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    backup_id = safe_name.replace(".zip", "")
+
+    took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+
+    return {
+        "code": "BACKUP_UPLOADED",
+        "status": "success",
+        "message": "Backup uploaded successfully",
+        "took_ms": took_ms,
+        "backup_id": backup_id,
+    }
