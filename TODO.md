@@ -104,7 +104,7 @@
 ### 🔧 Backup & Recovery
 - [X] Backup generation
 - [X] Backup restore
-- [ ] Backup/Restore from web
+- [X] Backup/Restore from web
 - [ ] Periodic backup of SQLite DB
 - [ ] Remote Git repository backup
 - [ ] Backup of generated configurations
