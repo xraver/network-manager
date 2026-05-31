@@ -14,7 +14,7 @@ from backend.db.aliases import get_aliases
 
 # Import Settings & Config
 from backend.settings.settings import settings
-from backend.db.config import get_config
+from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import get_logger
 

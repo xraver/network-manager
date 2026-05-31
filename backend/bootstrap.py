@@ -5,14 +5,14 @@ import logging
 
 # Import backend modules
 from backend.db.db import configure_db, create_db
-import backend.db.config
+import backend.db.settings
 import backend.db.users
 import backend.db.hosts
 import backend.db.aliases
 
 # Import Settings & Config
 from backend.settings.settings import settings
-from backend.db.config import get_config
+from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import setup_logging, get_logger
 

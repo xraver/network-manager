@@ -1,4 +1,4 @@
-# backend/db/config.py
+# backend/db/settings.py
 
 # Import local modules
 from backend.db.db import get_db, register_init

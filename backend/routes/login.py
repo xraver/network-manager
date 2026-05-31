@@ -10,7 +10,7 @@ from backend.security import verify_login, apply_session, close_session
 
 # Import Settings & Config
 from backend.settings.settings import settings
-from backend.db.config import get_config
+from backend.db.settings import get_config
 
 # Create Router
 router = APIRouter()
