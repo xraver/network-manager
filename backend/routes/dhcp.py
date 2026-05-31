@@ -26,12 +26,12 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Leases page
 @router.get("/leases")
-def leases(request: Request):
+def leases_page(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "leases.html")
 
 # Serve leases.js
 @router.get("/js/leases.js")
-def js_leases():
+def leases_js():
     return FileResponse(settings.FRONTEND_PATH / "js/leases.js")
 
 # ---------------------------------------------------------
@@ -176,7 +176,7 @@ def api_get_lease(request: Request, lease_id: int):
                     },
                 },
             )
-        return lease or []
+        return lease
 
     except FileNotFoundError as err:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000

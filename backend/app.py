@@ -165,39 +165,39 @@ async def session_middleware(request: Request, call_next):
 # FRONTEND Handlers
 # ------------------------------------------------------------------------------
 # Homepage
-def home(request: Request):
+def home_page(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "index.html")
 
 # Homepage JS
-def js_home(request: Request):
+def home_js(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "js/index.js")
 
 # Modals
-def modals(request: Request):
+def modals_page(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "modals.html")
 
 # CSS variables
-def css_variables(request: Request):
+def variables_css(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "css/variables.css")
 
 # CSS Layout
-def css_layout(request: Request):
+def layout_css(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "css/layout.css")
 
 # JS Common
-def js_common(request: Request):
+def common_js(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "js/common.js")
 
 # JS API
-def js_api(request: Request):
+def api_js(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "js/api.js")
 
 # JS Services
-def js_services(request: Request):
+def services_js(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "js/services.js")
 
 # favicon
-def favicon(request: Request):
+def favicon_ico(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "favicon.ico")
 
 # ------------------------------------------------------------------------------

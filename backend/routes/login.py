@@ -48,12 +48,12 @@ def login_page(request: Request):
 
 # Serve login.js
 @router.get("/js/login.js")
-def css_login():
+def login_js():
     return FileResponse(settings.FRONTEND_PATH / "js/login.js")
 
 # Serve session.js
 @router.get("/js/session.js")
-def css_login():
+def session_js():
     return FileResponse(settings.FRONTEND_PATH / "js/session.js")
 
 # ---------------------------------------------------------

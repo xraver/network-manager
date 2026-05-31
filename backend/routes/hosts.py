@@ -31,12 +31,12 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Hosts page
 @router.get("/hosts")
-def hosts(request: Request):
+def hosts_page(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "hosts.html")
 
 # Serve hosts.js
 @router.get("/js/hosts.js")
-def js_hosts():
+def hosts_js():
     return FileResponse(settings.FRONTEND_PATH / "js/hosts.js")
 
 # ---------------------------------------------------------
@@ -56,7 +56,7 @@ def api_get_hosts(request: Request):
         raise
 
     except Exception as err:
-        logger.exception("Error getting list host %s", str(err).strip())
+        logger.exception("Error getting list hosts %s", str(err).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -95,13 +95,13 @@ def api_get_host(request: Request, host_id: int):
                     },
                 },
             )
-        return host or []
+        return host
 
     except HTTPException:
         raise
 
     except Exception as err:
-        logger.exception("Error adding host %s: %s", host_id, str(err).strip())
+        logger.exception("Error getting host %s: %s", host_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

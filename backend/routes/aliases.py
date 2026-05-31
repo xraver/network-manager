@@ -31,12 +31,12 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Aliass page
 @router.get("/aliases")
-def aliases(request: Request):
+def aliases_page(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "aliases.html")
 
 # Serve aliases.js
 @router.get("/js/aliases.js")
-def js_aliases():
+def aliases_js():
     return FileResponse(settings.FRONTEND_PATH / "js/aliases.js")
 
 # ---------------------------------------------------------
@@ -55,7 +55,7 @@ def api_get_aliases(request: Request):
         raise
 
     except Exception as err:
-        logger.exception("Error getting list alias %s", str(err).strip())
+        logger.exception("Error getting list aliases %s", str(err).strip())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -100,7 +100,7 @@ def api_get_alias(request: Request, alias_id: int):
         raise
 
     except Exception as err:
-        logger.exception("Error adding alias %s: %s", alias_id, str(err).strip())
+        logger.exception("Error getting alias %s: %s", alias_id, str(err).strip())
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

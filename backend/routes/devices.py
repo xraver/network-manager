@@ -30,12 +30,12 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Devices page
 @router.get("/devices")
-def devices(request: Request):
+def devices_page(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "devices.html")
 
 # Serve devices.js
 @router.get("/js/devices.js")
-def js_devices():
+def devices_js():
     return FileResponse(settings.FRONTEND_PATH / "js/devices.js")
 
 # ---------------------------------------------------------

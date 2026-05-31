@@ -4,9 +4,8 @@
 from fastapi import APIRouter
 from datetime import datetime, timezone
 
-# Import Settings & Config
+# Import Settings
 from backend.settings.settings import settings
-from backend.db.settings import get_config
 
 # Create Router
 router = APIRouter()
