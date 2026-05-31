@@ -197,7 +197,7 @@ def services_js(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "js/services.js")
 
 # favicon
-def favicon_ico(request: Request):
+def favicon_icon(request: Request):
     return FileResponse(settings.FRONTEND_PATH / "favicon.ico")
 
 # ------------------------------------------------------------------------------
@@ -245,16 +245,16 @@ def create_app() -> FastAPI:
     app.middleware("http")(session_middleware)
 
     # Route per file del frontend
-    app.add_api_route("/", home, methods=["GET"])
-    app.add_api_route("/home", home, methods=["GET"])
-    app.add_api_route("/index.html", home, methods=["GET"])
-    app.add_api_route("/modals.html", modals, methods=["GET"])
-    app.add_api_route("/js/index.js", js_home, methods=["GET"])
-    app.add_api_route("/css/variables.css", css_variables, methods=["GET"])
-    app.add_api_route("/css/layout.css", css_layout, methods=["GET"])
-    app.add_api_route("/js/common.js", js_common, methods=["GET"])
-    app.add_api_route("/js/api.js", js_api, methods=["GET"])
-    app.add_api_route("/js/services.js", js_services, methods=["GET"])
-    app.add_api_route("/favicon.ico", favicon, methods=["GET"])
+    app.add_api_route("/", home_page, methods=["GET"])
+    app.add_api_route("/home", home_page, methods=["GET"])
+    app.add_api_route("/index.html", home_page, methods=["GET"])
+    app.add_api_route("/modals.html", modals_page, methods=["GET"])
+    app.add_api_route("/js/index.js", home_js, methods=["GET"])
+    app.add_api_route("/css/variables.css", variables_css, methods=["GET"])
+    app.add_api_route("/css/layout.css", layout_css, methods=["GET"])
+    app.add_api_route("/js/common.js", common_js, methods=["GET"])
+    app.add_api_route("/js/api.js", api_js, methods=["GET"])
+    app.add_api_route("/js/services.js", services_js, methods=["GET"])
+    app.add_api_route("/favicon.ico", favicon_icon, methods=["GET"])
 
     return app
