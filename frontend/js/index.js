@@ -24,12 +24,12 @@ async function openBackupModal() {
         `;
     }
 
+    // Refresh backup list
     try {
-        const data = await serviceBackupList();
-        renderBackupList(data);
+        const result = await serviceBackupList();
+        renderBackupList(result);
     } catch (err) {
-        console.error(err);
-        showToast("Error loading backups", false);
+        showToast(err?.message || "Error refreshing backup list", false);
     }
 }
 
@@ -281,14 +281,18 @@ const actionHandlers = {
                         ? result.message
                         : 'Backup completed successfully';
             showToast(msg, !result?.partial);
-            // reload list
-            const data = await serviceBackupList();
-            renderBackupList(data);
         } catch (err) {
             showToast(err?.message || "Error performing backup", false);
         } finally {
             label.textContent = originalLabel;
             btn.disabled = false;
+        }
+        // Refresh backup list
+        try {
+            const result = await serviceBackupList();
+            renderBackupList(result);
+        } catch (err) {
+            showToast(err?.message || "Error refreshing backup list", false);
         }
     },
     // Restore Backup
@@ -342,14 +346,16 @@ const actionHandlers = {
                 : 'Backup deleted successfully';
 
             showToast(msg, true);
-
-            // reload list
-            const data = await serviceBackupList();
-            renderBackupList(data);
-
         } catch (err) {
             console.error(err);
             showToast(err?.message || "Error deleting backup", false);
+        }
+        // Refresh backup list
+        try {
+            const result = await serviceBackupList();
+            renderBackupList(result);
+        } catch (err) {
+            showToast(err?.message || "Error refreshing backup list", false);
         }
     },
     refreshBackupList: async () => {
@@ -415,10 +421,6 @@ const actionHandlers = {
             console.log("Uploaded backup ID:", result?.backup_id);
 
             input.value = '';
-
-            const data = await serviceBackupList();
-            renderBackupList(data);
-
         } catch (err) {
             showToast(err?.message || "Error uploading backup", false);
         } finally {
@@ -426,6 +428,13 @@ const actionHandlers = {
                 icon.className = originalClass;
             }
             el.disabled = false;
+        }
+        // refresh backup list
+        try {
+            const result = await serviceBackupList();
+            renderBackupList(result);
+        } catch (err) {
+            showToast(err?.message || "Error refreshing backup list", false);
         }
     },
     openBackupModal,       // managed by boostrap
