@@ -244,6 +244,14 @@ body {
     filter: none;
 }
 
+.btn .icon {
+    color: currentColor;
+}
+
+.btn .icon:hover {
+    color: inherit;
+}
+
 /* ================================
    Form controls
    ================================ */
@@ -294,13 +302,13 @@ select.form-select:focus,
    Icons
    ================================ */
 .icon {
-    color: currentColor;
+    color: var(--icon-color);
     display: inline-flex;
     align-items: center;
 }
 
 .icon:hover {
-    color: inherit;
+    color: var(--icon-color);
 }
 
 .icon-static {
