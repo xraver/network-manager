@@ -77,7 +77,7 @@ export async function serviceGetDHCPLease(id) {
 }
 
 // -----------------------------
-// Delete Hosts
+// Delete DHCP Lease
 // -----------------------------
 export async function serviceDeleteDHCPLease(id) {
     const data = await apiRequest(

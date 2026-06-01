@@ -171,7 +171,7 @@ def delete_alias(alias_id: int) -> bool:
 # -----------------------------
 # Initialize Aliases DB Table
 # -----------------------------
-@register_init
+@register_init("create_aliases_table")
 def init_db_aliases_table(cur: sqlite3.Cursor) -> None:
 
     # ALIASES TABLE

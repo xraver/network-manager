@@ -63,7 +63,7 @@ def create_user(username, password_hash, email=None, is_admin=0, modules=None):
 # -----------------------------
 # Create Users Table
 # -----------------------------
-@register_init
+@register_init("create_users_table")
 def init_db_users_table(cur):
 
     # USERS TABLE
@@ -90,7 +90,7 @@ def init_db_users_table(cur):
 # -----------------------------
 # Populate Users Tables
 # -----------------------------
-@register_init
+@register_init("init_users_table", depends_on=["create_users_table"])
 def init_db_users_defaults(cur):
     # Insert default admin user
     if settings.ADMIN_PASSWORD_HASH:

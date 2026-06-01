@@ -221,7 +221,7 @@ def delete_host(host_id: int) -> bool:
 # -----------------------------
 # Initialize Hosts DB Table
 # -----------------------------
-@register_init
+@register_init("create_hosts_table")
 def init_db_hosts_table(cur: sqlite3.Cursor) -> None:
 
     # HOSTS TABLE

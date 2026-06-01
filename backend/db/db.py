@@ -6,14 +6,53 @@ import sqlite3
 
 _connection = None
 _db_path: Path | None = None
-_init_functions = []
+INIT_REGISTRY = {}
+
+# ---------------------------------------------------------
+# Internal: resolve init order based on dependencies
+# ---------------------------------------------------------
+def _resolve_init_order():
+    visited = set()
+    visiting = set()
+    order = []
+
+    def visit(name):
+        if name in visited:
+            return
+        if name in visiting:
+            raise RuntimeError(f"Circular dependency detected: {name}")
+
+        visiting.add(name)
+
+        for dep in INIT_REGISTRY[name]["depends_on"]:
+            if dep not in INIT_REGISTRY:
+                raise RuntimeError(f"Missing dependency: {dep}")
+            visit(dep)
+
+        visiting.remove(name)
+        visited.add(name)
+        order.append(name)
+
+    for name in INIT_REGISTRY:
+        visit(name)
+
+    return order
 
 # -----------------------------
 # Register DB Init Function
 # -----------------------------
-def register_init(func):
-    _init_functions.append(func)
-    return func
+def register_init(name, depends_on=None):
+    if depends_on is None:
+        depends_on = []
+
+    def decorator(func):
+        INIT_REGISTRY[name] = {
+            "func": func,
+            "depends_on": depends_on
+        }
+        return func
+
+    return decorator
 
 # -----------------------------
 # Configure database (path)
@@ -34,7 +73,10 @@ def init_db():
     conn = get_db()
     cur = conn.cursor()
 
-    for func in sorted(_init_functions, key=lambda f: f.__name__):
+    ordered_names = _resolve_init_order()
+
+    for name in ordered_names:
+        func = INIT_REGISTRY[name]["func"]
         func(cur)
 
     conn.commit()

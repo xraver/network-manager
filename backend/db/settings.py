@@ -124,7 +124,7 @@ def get_config_or(key, default):
 # ---------------------------------------------------------
 # Create Config DB Tables
 # ---------------------------------------------------------
-@register_init
+@register_init("create_settings_table")
 def init_db_config_table(cur):
 
     # CONFIG TABLE
@@ -138,7 +138,7 @@ def init_db_config_table(cur):
 # ---------------------------------------------------------
 # Initialize Config DB Tables
 # ---------------------------------------------------------
-@register_init
+@register_init("init_settings_table", depends_on=["create_settings_table"])
 def init_db_config_defaults(cur):
 
     # Add configuration parameters
