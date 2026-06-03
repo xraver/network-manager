@@ -35,6 +35,22 @@
 
 ---
 
+## ⚙️ Tool Configuration
+
+- [X] Configuration panel (UI + API for config management)
+- [X] Config parsing from Docker environment and database
+- [X] Config parsing and loading
+- [ ] Config validation (schema validation + logical consistency checks)
+- [X] Centralized path management (config, logs, backups, temp)
+- [X] Configurable logging (levels, rotation, per module)
+- [ ] Feature flags (DNS, DHCP, Git, backup, healthcheck)
+- [X] Config reload / application reload
+- [X] Initial configuration bootstrap
+- [X] Handling of missing configuration parameters (defaults / fallback)
+- [ ] Database migrations
+
+---
+
 ## 🧩 Configuration Generation
 
 ### 🧪 BIND (DNS)
@@ -99,7 +115,7 @@
 - [ ] DNS/DHCP input validation (hostname, IP, subnet)
 - [ ] Input sanitization against YAML/XML/JSON injection
 - [ ] Audit log of critical changes
-- [ ] Brute force protection (you already have this 👍)
+- [ ] Brute force protection
 
 ### 🔧 Backup & Recovery
 - [X] Backup generation
