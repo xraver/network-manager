@@ -1,5 +1,5 @@
 // Import common js
-import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch } from './common.js';
+import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch, handleReload } from './common.js';
 // Import services
 import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLeases, serviceDeleteDHCPLease, serviceGetDHCPLease, serviceCreateHost} from './services.js';
 
@@ -447,28 +447,24 @@ const actionHandlers = {
         // handled by bootstrap modal show event
     },
     // Reload DNS
-    reloadDns: async () => {
-        try {
-            const result = await serviceReloadDNS();
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'DNS reload successfully';
-            showToast(msg, true);
-        } catch (err) {
-            showToast(err?.message || "Error reloading DNS", false);
-        }
+    reloadDns: async (e, el) => {
+        await handleReload(
+            el,
+            serviceReloadDNS,
+            "DNS reload successfully",
+            "Error reloading DNS",
+            "Reloading DNS..."
+        );
     },
     // Reload DHCP
-    reloadDhcp: async () => {
-        try {
-            const result = await serviceReloadDHCP();
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'DHCP reload successfully';
-            showToast(msg, true);
-        } catch (err) {
-            showToast(err?.message || "Error reloading DHCP", false);
-        }
+    reloadDhcp: async (e, el) => {
+        await handleReload(
+            el,
+            serviceReloadDHCP,
+            "DHCP reload successfully",
+            "Error reloading DHCP",
+            "Reloading DHCP..."
+        );
     },
 };
 

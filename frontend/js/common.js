@@ -390,3 +390,59 @@ export function showConfirmModal(message = "Are you sure?") {
         modal.show();
     });
 }
+
+/**
+ * Generic handler for reload actions with UI feedback.
+ * Disables the button, shows a spinner, executes the async service,
+ * then restores the button and shows a toast message.
+ *
+ * @param {HTMLElement} button
+ * @param {Function} serviceFn
+ * @param {string} defaultSuccessMsg
+ * @param {string} defaultErrorMsg
+ * @param {string} [workingText]
+ */
+/**
+ * Generic handler for reload actions with UI feedback.
+ */
+export async function handleReload(
+    button,
+    serviceFn,
+    defaultSuccessMsg,
+    defaultErrorMsg,
+    workingText = "Working...",
+    keepDisabled = false
+) {
+
+    if (!button || button.disabled) return;
+
+    button.disabled = true;
+
+    const originalHTML = button.innerHTML;
+
+    // spinner + testo
+    button.innerHTML = `
+        <i class="bi bi-arrow-repeat spin"></i>
+        <span>${workingText}</span>
+    `;
+
+    try {
+        const result = await serviceFn();
+
+        const msg =
+            (result && typeof result === "object" && result.message)
+                ? result.message
+                : defaultSuccessMsg;
+
+        showToast(msg, true);
+
+    } catch (err) {
+        showToast(err?.message || defaultErrorMsg, false);
+
+    } finally {
+        if (!keepDisabled) {
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+        }
+    }
+}

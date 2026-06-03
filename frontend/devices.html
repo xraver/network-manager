@@ -91,18 +91,38 @@
                 </div>
 
                 <!-- Bottoni -->
-                <div class="col-12 col-md-auto d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary" title="Add Host" aria-label="Add Host"
+                <div class="col-12 col-md-auto d-flex align-items-center gap-2 flex-wrap">
+
+                    <!-- Add host -->
+                    <button
+                            class="btn btn-primary"
+                            title="Add Host"
+                            aria-label="Add Host"
                             data-bs-toggle="modal" data-bs-target="#addHostModal">
-                        <i class="bi bi-plus-lg"></i><span class="label"> Add Host</span>
+                        <i class="bi bi-plus-lg"></i>
+                        <span class="label"> Add Host</span>
                     </button>
-                    <button class="btn btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS"
+
+                    <!-- Separator -->
+                    <div class="vr mx-2"></div>
+
+                    <!-- Reload DNS -->
+                    <button
+                            class="btn btn-primary"
+                            title="Reload DNS (BIND)"
+                            aria-label="Reload DNS"
                             data-action="reloadDns">
-                        <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DNS</span>
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span class="label"> Reload DNS</span>
                     </button>
-                    <button class="btn btn-primary" title="Reload DHCP (Kea)" aria-label="Reload DHCP"
+
+                    <!-- Reload DNS -->
+                    <button class="btn btn-primary"
+                            title="Reload DHCP (Kea)"
+                            aria-label="Reload DHCP"
                             data-action="reloadDhcp">
-                        <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DHCP</span>
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span class="label"> Reload DHCP</span>
                     </button>
                 </div>
             </div>

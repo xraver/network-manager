@@ -1,5 +1,5 @@
 // Import common js
-import { loadModals, showToast, clearSearch, showConfirmModal } from './common.js';
+import { loadModals, showToast, clearSearch, showConfirmModal, handleReload } from './common.js';
 // Import services
 import { serviceGetConfigs, serviceGetConfig, serviceUpdateConfig, serviceResetConfig, serviceRestartApp, serviceIsAlive } from './services.js';
 
@@ -148,22 +148,25 @@ function collapseAllGroups() {
 }
 
 // -----------------------------
-// Overlay
-// -----------------------------
-function showRestartOverlay() {
-    document.getElementById("restartOverlay")
-        ?.classList.remove("d-none");
-}
-
-// -----------------------------
 // Polling to check if the system restarted properly
 // -----------------------------
-function startReconnectPolling() {
+function startReconnectPolling(button, originalHtmlButton) {
 
-    // overlay (opzionale ma consigliato)
-    showRestartOverlay();
+    if (!button) return;
+
+    const maxAttempts = 30; // 1 minuto
+    let attempts = 0;
 
     const interval = setInterval(async () => {
+
+        attempts++;
+        if (attempts > maxAttempts) {
+            clearInterval(interval);
+            showToast("Server did not come back online", false);
+            button.innerHTML = originalHtmlButton;
+            button.disabled = false;
+            return;
+        }
 
         try {
             // prova endpoint leggero
@@ -177,8 +180,6 @@ function startReconnectPolling() {
 
                 setTimeout(() => location.reload(), 500);
 
-                const btn = document.getElementById("restartBtn");
-                btn?.removeAttribute("disabled");
             }
         } catch (err) {
             console.log("Waiting for server...");
@@ -190,25 +191,23 @@ function startReconnectPolling() {
 // -----------------------------
 // Restart application
 // -----------------------------
-async function restartApp() {
-
+async function restartApp(button) {
     const confirmed = await showConfirmModal("Restart the application?");
     if (!confirmed) return;
 
-    const btn = document.getElementById("restartBtn");
-    btn?.setAttribute("disabled", "true");
+    const originalHtmlButton = button.innerHTML;
 
-    try {
-        await serviceRestartApp();
-        showToast("Application is restarting...", true);
+    const ok = await handleReload(
+        button,
+        serviceRestartApp,
+        "Application is restarting...",
+        "Error restarting application",
+        "Restarting...",
+        true
+    );
 
-        // wait restart
-        startReconnectPolling();
-
-    } catch (err) {
-        console.error(err?.message || "Error restarting application");
-        showToast(err?.message || "Error restarting application", false);
-        btn?.removeAttribute("disabled");
+    if (ok !== false) {
+        startReconnectPolling(button, originalHtmlButton);
     }
 }
 
@@ -694,6 +693,10 @@ const actionHandlers = {
     edit: () => {
         // handled by bootstrap modal show event
     },
+    // Reload DHCP
+    restartApp: async (e, el) => {
+        await restartApp(el)
+    },
 }
 
 // -----------------------------
@@ -826,8 +829,6 @@ function initEvents() {
         ?.addEventListener("click", expandAllGroups);
     document.getElementById("collapseAllBtn")
         ?.addEventListener("click", collapseAllGroups);
-    document.getElementById("restartBtn")
-        ?.addEventListener("click", restartApp);
 }
 
 // -----------------------------
