@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 import asyncio
 import json
 import ipaddress
+from pathlib import Path
 import time
 
 # Import local modules
@@ -41,7 +42,8 @@ async def api_dns_reload(request: Request):
         hosts = get_hosts()
 
         # Save DNS Hosts Configuration
-        path = settings.DNS_HOST_FILE
+        path = Path(get_config("DNS_HOST_FILE"))
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
                 name   = h.get("name").ljust(20)
@@ -51,7 +53,8 @@ async def api_dns_reload(request: Request):
                 f.write(line)
 
         # Save DNS Reverse Configuration
-        path = settings.DNS_REVERSE_FILE
+        path = Path(get_config("DNS_REVERSE_FILE"))
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
                 ip = h.get("ipv4")
@@ -60,7 +63,7 @@ async def api_dns_reload(request: Request):
                     rev    = f"{parts[-1]}.{parts[-2]}"
                     ip     = rev.ljust(20)
                     rtype  = "PTR".ljust(8)
-                    target = h.get("name")+ "." + settings.DOMAIN
+                    target = h.get("name")+ "." + get_config("DOMAIN")
                     line = f"{ip} IN {rtype} {target}\n"
                     f.write(line)
 
@@ -68,7 +71,8 @@ async def api_dns_reload(request: Request):
         aliases = get_aliases()
 
         # Save DNS Aliases Configuration
-        path = settings.DNS_ALIAS_FILE
+        path = Path(get_config("DNS_ALIAS_FILE"))
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             for a in aliases:
                 name   = a.get("name").ljust(20)
@@ -81,9 +85,10 @@ async def api_dns_reload(request: Request):
         ext_cname = get_config("EXTERNAL_NAME")
 
         # Save DNS Host and Aliases for the EXT DNS
-        path = settings.DNS_HOST_FILE.with_name(
-            settings.DNS_HOST_FILE.name + "_ext"
+        path = Path(get_config("DNS_HOST_FILE")).with_name(
+               Path(get_config("DNS_HOST_FILE")).name + "_ext"
         )
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             for h in hosts:
                 name   = h.get("name").ljust(20)
@@ -104,7 +109,7 @@ async def api_dns_reload(request: Request):
                 vis = a.get('visibility')
                 if (vis == 1):
                     rtype  = "CNAME".ljust(8)
-                    target = a.get("target") + "." + settings.DOMAIN + "."
+                    target = a.get("target") + "." + get_config("DOMAIN") + "."
                     line = f"{name} IN {rtype} {target}\n"
                     f.write(line)
                 if (vis == 2):

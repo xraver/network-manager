@@ -13,8 +13,9 @@ import zipfile
 # Import local modules
 from backend.backup import backup_create, backup_list, backup_restore, backup_delete
 
-# Import Settings
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import get_logger
 
@@ -235,7 +236,7 @@ async def api_backup_delete(payload: BackupDeleteRequest):
 # ---------------------------------------------------------
 @router.get("/api/backup/download/{backup_id}")
 def download_backup(backup_id: str):
-    backup_dir = Path(settings.BACKUP_PATH)
+    backup_dir = Path(get_config("BACKUP_PATH"))
 
     zip_path = backup_dir / f"{backup_id}"
 
@@ -276,7 +277,7 @@ def upload_backup(file: UploadFile = File(...)):
                 },
             )
 
-    backup_dir = Path(settings.BACKUP_PATH)
+    backup_dir = Path(get_config("BACKUP_PATH"))
     backup_dir.mkdir(parents=True, exist_ok=True)
 
     # safe filename

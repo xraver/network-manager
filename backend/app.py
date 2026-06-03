@@ -9,7 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Callable
 
 # Import Routers
-from backend.routes.about import router as about_router
+from backend.routes.system import router as system_router
 from backend.routes.devices import router as devices_router
 from backend.routes.backup import router as backup_router
 from backend.routes.certificates import router as certificates_router
@@ -19,6 +19,7 @@ from backend.routes.hosts import router as hosts_router
 from backend.routes.aliases import router as aliases_router
 from backend.routes.dns import router as dns_router
 from backend.routes.dhcp import router as dhcp_router
+from backend.routes.settings import router as settings_router
 
 # Import Security
 from backend.security import is_logged_in, apply_session
@@ -212,7 +213,7 @@ def create_app() -> FastAPI:
     )
 
     # Routers
-    app.include_router(about_router)
+    app.include_router(system_router)
     app.include_router(backup_router)
     app.include_router(devices_router)
     app.include_router(certificates_router)
@@ -222,6 +223,7 @@ def create_app() -> FastAPI:
     app.include_router(aliases_router)
     app.include_router(dns_router)
     app.include_router(dhcp_router)
+    app.include_router(settings_router)
 
     # CORS
     cors_origins = [

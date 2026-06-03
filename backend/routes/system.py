@@ -1,4 +1,4 @@
-# backend/system.py
+# backend/about.py
 
 # Import standard modules
 from fastapi import APIRouter

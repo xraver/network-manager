@@ -14,8 +14,9 @@ import zipfile
 from backend.db.hosts import get_hosts, add_host, reset_hosts_db
 from backend.db.aliases import get_aliases, add_alias, reset_aliases_db
 
-# Import Settings
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import get_logger
 
@@ -94,8 +95,8 @@ def create_backup_archive(
 
     try:
         # --- Paths ---
-        base_zip_dir = Path(zip_dir or settings.BACKUP_PATH)
-        base_files_dir = Path(files_dir or settings.BACKUP_PATH)
+        base_zip_dir = Path(zip_dir or get_config("BACKUP_PATH"))
+        base_files_dir = Path(files_dir or get_config("BACKUP_PATH"))
         base_zip_dir.mkdir(parents=True, exist_ok=True)
 
         # zip name
@@ -159,7 +160,7 @@ def unzip_backup_archive(
 
     try:
         # --- Resolve paths ---
-        base_zip_dir = zip_dir or settings.BACKUP_PATH
+        base_zip_dir = zip_dir or get_config("BACKUP_PATH")
 
         if not zip_path:
             if not zip_name:
@@ -167,7 +168,7 @@ def unzip_backup_archive(
 
             zip_path = Path(base_zip_dir) / zip_name
 
-        base_extract_dir = extract_dir or settings.BACKUP_PATH
+        base_extract_dir = extract_dir or get_config("BACKUP_PATH")
         Path(base_extract_dir).mkdir(parents=True, exist_ok=True)
 
         # --- Unzip ---
@@ -202,7 +203,7 @@ def store_hosts(
 
     # Initialization
     start_ns = time.monotonic_ns()
-    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath = Path(filepath or get_config("BACKUP_PATH"))
     filename = filename or settings.BACKUP_HOSTS_FILE
     file = filepath / filename
     filepath.mkdir(parents=True, exist_ok=True)
@@ -260,7 +261,7 @@ def restore_hosts(
 
     # Initialization
     start_ns = time.monotonic_ns()
-    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath = Path(filepath or get_config("BACKUP_PATH"))
     filename = filename or settings.BACKUP_HOSTS_FILE
     file = filepath / filename
     count_restored = 0
@@ -319,7 +320,7 @@ def store_aliases(
 
     # Initialization
     start_ns = time.monotonic_ns()
-    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath = Path(filepath or get_config("BACKUP_PATH"))
     filepath.mkdir(parents=True, exist_ok=True)
     filename = filename or settings.BACKUP_ALIASES_FILE
     file = filepath / filename
@@ -378,7 +379,7 @@ def restore_aliases(
 
     # Initialization
     start_ns = time.monotonic_ns()
-    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath = Path(filepath or get_config("BACKUP_PATH"))
     filename = filename or settings.BACKUP_ALIASES_FILE
     file = filepath / filename
     count_restored = 0
@@ -438,7 +439,7 @@ def store_metadata(
 
     # Initialization
     start_ns = time.monotonic_ns()
-    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath = Path(filepath or get_config("BACKUP_PATH"))
     filepath.mkdir(parents=True, exist_ok=True)
     filename = filename or settings.BACKUP_METADATA_FILE
     file = filepath / filename
@@ -504,7 +505,7 @@ def check_metadata(
 
     # Initialization
     start_ns = time.monotonic_ns()
-    filepath = Path(filepath or settings.BACKUP_PATH)
+    filepath = Path(filepath or get_config("BACKUP_PATH"))
     filename = filename or settings.BACKUP_METADATA_FILE
     file = filepath / filename
 
@@ -573,7 +574,7 @@ def check_metadata(
 def backup_create() -> Dict[str, Any]:
 
     # Ensure backup directory exists
-    base_dir = Path(settings.BACKUP_PATH)
+    base_dir = Path(get_config("BACKUP_PATH"))
     base_dir.mkdir(parents=True, exist_ok=True)
 
     # Timestamp used for backup file naming
@@ -610,7 +611,7 @@ def backup_create() -> Dict[str, Any]:
 def backup_list() -> List[Dict[str, Any]]:
 
     # Initialization
-    backup_dir = Path(settings.BACKUP_PATH)
+    backup_dir = Path(get_config("BACKUP_PATH"))
     backups = []
 
     if backup_dir.is_dir():
@@ -639,7 +640,7 @@ def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
     }
 
     # Check if backup file exists
-    backup_dir = Path(settings.BACKUP_PATH)
+    backup_dir = Path(get_config("BACKUP_PATH"))
     backup_file = backup_dir / backup_id
     extract_dir = backup_dir / Path(backup_id).stem
 
@@ -690,7 +691,7 @@ def backup_delete(backup_id: str) -> Dict[str, Any]:
     start_ns = time.monotonic_ns()
     errors: List[str] = []
 
-    backup_dir = Path(settings.BACKUP_PATH)
+    backup_dir = Path(get_config("BACKUP_PATH"))
     backup_file = backup_dir / backup_id
 
     try:

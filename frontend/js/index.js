@@ -1,8 +1,8 @@
 // -------------------------------------------------------
 // IMPORT
 // -------------------------------------------------------
-import { loadModals, showToast } from './common.js';
-import { serviceCheckAbount, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDeleteBackup, serviceDownloadBackup, serviceUploadBackup } from './services.js';
+import { loadModals, showToast, showConfirmModal } from './common.js';
+import { serviceIsAlive, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDeleteBackup, serviceDownloadBackup, serviceUploadBackup } from './services.js';
 
 // -------------------------------------------------------
 // BACKUP MODAL OPEN/CLOSE
@@ -36,6 +36,26 @@ async function openBackupModal() {
 function closeBackupModal() {
     const modal = document.getElementById('backupModal');
     if (modal) modal.style.display = 'none';
+}
+
+// -------------------------------------------------------
+// Manage Backup List Rendering (usa fetchData() con apiMap.backups)
+// -------------------------------------------------------
+export async function serviceCheckAbout() {
+    const pill = document.getElementById('api-pill');
+    if (!pill) return;
+
+    const ok = await serviceIsAlive();
+
+    if (ok) {
+        pill.textContent = 'API OK';
+        pill.classList.remove('btn-outline-primary');
+        pill.classList.add('btn-primary');
+    } else {
+        pill.textContent = 'API OFFLINE';
+    }
+
+    return ok;
 }
 
 // -------------------------------------------------------
@@ -335,8 +355,8 @@ const actionHandlers = {
         const id = el.dataset.id;
         if (!id) return;
 
-        const confirmDelete = confirm(`Delete backup "${id}" ?`);
-        if (!confirmDelete) return;
+        const confirmed = await showConfirmModal(`Delete backup "${id}" ?`);
+        if (!confirmed) return;
 
         try {
             const result = await serviceDeleteBackup(id);
@@ -465,7 +485,7 @@ const actionHandlers = {
     },
     // Check API status
     apiCheck: async () => {
-        const result = await serviceCheckAbount();
+        const result = await serviceCheckAbout();
         if(result) {
             showToast('API status updated succesfully', true);
         } else {
@@ -544,7 +564,7 @@ function initBackupModal() {
 // Periodic API Check
 // -------------------------------------------------------
 async function periodicTest() {
-    await serviceCheckAbount();
+    await serviceCheckAbout();
     setTimeout(periodicTest, 10000);
 }
 

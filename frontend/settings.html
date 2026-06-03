@@ -50,8 +50,8 @@
                         <a href="/hosts"   id="hostsBtn"     class="btn btn-primary"        aria-current="page">Hostname</a>
                         <a href="/aliases" id="aliasesBtn"   class="btn btn-primary"        aria-current="page">Alias</a>
                         <a href="/leases"  id="leasesBtn"    class="btn btn-primary"        aria-current="page">DHCP Leases</a>
-                        <a href="/devices" id="devicesBtn"   class="btn btn-primary active" aria-current="page">Devices</a>
-                        <a href="/settings" id="settingsBtn" class="btn btn-primary"        aria-current="page">Settings</a>
+                        <a href="/devices" id="devicesBtn"   class="btn btn-primary"        aria-current="page">Devices</a>
+                        <a href="/settings" id="settingsBtn" class="btn btn-primary active" aria-current="page">Settings</a>
                         <button id="logoutBtn" class="btn btn-primary">Logout</button>
                     </div>
                 </div>
@@ -69,8 +69,8 @@
                 <!-- Title -->
                 <div class="col-12 col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
-                        <span class="title-icon"><i class="bi bi-diagram-3-fill"></i></span>
-                        <span class="section-title">Devices List</span>
+                        <span class="title-icon"><i class="bi bi-gear"></i></span>
+                        <span class="section-title">Configuration Parameter List</span>
                     </h2>
                 </div>
 
@@ -85,24 +85,42 @@
                             id="searchInput"
                             placeholder="Search..."
                             class="form-control form-control-sm placeholder-italic"
-                            aria-label="Search hosts"
+                            aria-label="Search config"
                         >
                     </div>
                 </div>
 
                 <!-- Bottoni -->
-                <div class="col-12 col-md-auto d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary" title="Add Host" aria-label="Add Host"
-                            data-bs-toggle="modal" data-bs-target="#addHostModal">
-                        <i class="bi bi-plus-lg"></i><span class="label"> Add Host</span>
+                <div class="col-12 col-md-auto d-flex align-items-center gap-2 flex-wrap">
+
+	                <!-- Expand -->
+                    <button id="expandAllBtn"
+                            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 px-3"
+                            title="Expand all groups"
+                            aria-label="Expand all groups">
+                        <i class="bi bi-arrows-expand"></i>
+                        <span>Expand</span>
+	                </button>
+
+                    <!-- Collapse -->
+                    <button id="collapseAllBtn"
+                            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 px-3"
+                            title="Collapse all groups"
+                            aria-label="Collapse all groups">
+                        <i class="bi bi-arrows-collapse"></i>
+                        <span>Collapse</span>
                     </button>
-                    <button class="btn btn-primary" title="Reload DNS (BIND)" aria-label="Reload DNS"
-                            data-action="reloadDns">
-                        <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DNS</span>
-                    </button>
-                    <button class="btn btn-primary" title="Reload DHCP (Kea)" aria-label="Reload DHCP"
-                            data-action="reloadDhcp">
-                        <i class="bi bi-arrow-repeat"></i><span class="label"> Reload DHCP</span>
+
+                    <!-- Separator -->
+                    <div class="vr mx-2"></div>
+
+                    <!-- Restart -->
+                    <button id="restartBtn"
+                            class="btn btn-outline-danger d-flex align-items-center gap-2"
+                            title="Restart system"
+                            aria-label="Restart system">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span>Restart</span>
                     </button>
                 </div>
             </div>
@@ -113,13 +131,10 @@
     <table id="dataTable" class="table table-bordered table-hover align-middle d-none">
         <thead class="table-light">
             <tr>
-                <th data-type="ipv4"   data-sortable="true" data-sort="0">IP Address <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="mac"    data-sortable="true" data-sort="1">MAC Address<span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true" data-sort="2">Hostname   <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true" data-sort="3">Description<span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true" data-sort="4">State      <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="true" data-sort="5">Active     <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="false" data-sort="6">Actions   <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Parameter  <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Value      <span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Description<span class="sort-arrow" aria-hidden="true"></span></th>
+                <th data-type="string" data-sortable="false">Actions   <span class="sort-arrow" aria-hidden="true"></span></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -137,7 +152,7 @@
     <div id="modals-container"></div>
 
     <!-- Scripts -->
-    <script type="module" src="js/devices.js"></script>
+    <script type="module" src="js/settings.js"></script>
     <script type="module" src="js/session.js"></script>
 
     <!-- Bootstrap JS -->

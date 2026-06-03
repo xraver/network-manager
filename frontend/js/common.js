@@ -351,3 +351,42 @@ export function clearSearch() {
         input.blur();
     }
 }
+
+/**
+ * Show a confirmation modal with a custom message and return a Promise that resolves to true/false
+ * based on user action.
+ * @param {string} message - The message to display in the modal body.
+ * @returns {Promise<boolean>} - Resolves to true if user confirms, false if cancels.
+ */
+export function showConfirmModal(message = "Are you sure?") {
+    return new Promise((resolve) => {
+        const modalEl = document.getElementById('confirmModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+        const body = modalEl.querySelector("#confirmModalBody");
+        const okBtn = modalEl.querySelector("#confirmModalOk");
+
+        body.textContent = message;
+
+        const cleanUp = () => {
+            okBtn.removeEventListener("click", onConfirm);
+            modalEl.removeEventListener("hidden.bs.modal", onCancel);
+        };
+
+        const onConfirm = () => {
+            cleanUp();
+            resolve(true);
+            modal.hide();
+        };
+
+        const onCancel = () => {
+            cleanUp();
+            resolve(false);
+        };
+
+        okBtn.addEventListener("click", onConfirm);
+        modalEl.addEventListener("hidden.bs.modal", onCancel, { once: true });
+
+        modal.show();
+    });
+}

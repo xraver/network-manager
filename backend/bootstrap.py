@@ -46,15 +46,15 @@ def print_welcome(logger):
     )
     logger.info(
         "DNS: host file=%s | alias file=%s | reverse file=%s",
-        settings.DNS_HOST_FILE, settings.DNS_ALIAS_FILE, settings.DNS_REVERSE_FILE
+        get_config("DNS_HOST_FILE"), get_config("DNS_ALIAS_FILE"), get_config("DNS_REVERSE_FILE")
     )
     logger.info(
         "DHCP: ipv4 host file=%s | ipv4 leases file=%s | ipv6 host file=%s | ipv6 leases file=%s",
-        settings.DHCP4_HOST_FILE, settings.DHCP4_LEASES_FILE, settings.DHCP6_HOST_FILE, settings.DHCP6_LEASES_FILE
+        get_config("DHCP4_HOST_FILE"), get_config("DHCP4_LEASES_FILE"), get_config("DHCP6_HOST_FILE"), get_config("DHCP6_LEASES_FILE")
     )
     logger.info(
         "Backup: path=%s",
-        str(settings.BACKUP_PATH)
+        get_config("BACKUP_PATH")
     )
     logger.info(
         "App features: ping_workers=%d",

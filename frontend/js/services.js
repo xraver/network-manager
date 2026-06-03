@@ -4,23 +4,11 @@ import { apiRequest, apiGet, apiPost, apiDownload, apiUpload } from './api.js';
 // -------------------------------------------------------
 // Check Abount
 // -------------------------------------------------------
-export async function serviceCheckAbount() {
-    const pill = document.getElementById('api-pill');
-    if (!pill) return;
-
+export async function serviceIsAlive() {
     try {
-        const r = await fetch('/about');
-        if (r.ok) {
-            pill.textContent = 'API OK';
-            pill.classList.remove('btn-outline-primary');
-            pill.classList.add('btn-primary');
-            return true;
-        } else {
-            pill.textContent = `API ${r.status}`;
-            return false;
-        }
+        const r = await fetch('/about', { cache: "no-store" });
+        return r.ok;
     } catch {
-        pill.textContent = 'API OFFLINE';
         return false;
     }
 }
@@ -332,4 +320,65 @@ export async function serviceUploadBackup(file) {
     }
 
     return false;
+}
+
+// -----------------------------
+// Get the list of configuration parameters
+// -----------------------------
+export async function serviceGetConfigs() {
+    return await apiGet("/api/settings", "Error loading configuration parameters");
+}
+
+// -----------------------------
+// Get a single configuration parameter
+// -----------------------------
+export async function serviceGetConfig(key) {
+    return await apiRequest(
+        `/api/settings/${key}`,
+        { method: "GET" },
+        `Error loading configuration ${key}`
+    );
+}
+
+// -----------------------------
+// Update a configuration parameter
+// -----------------------------
+export async function serviceUpdateConfig(key, configData) {
+    const data = await apiRequest(
+        `/api/settings/${key}`,
+        {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(configData)
+        },
+        "Error updating configuration parameter"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Reset a configuration parameter to its default value
+// -----------------------------
+export async function serviceResetConfig(key) {
+    const data = await apiPost(
+        `/api/settings/${key}/reset`,
+        null,
+        "Error restoring default value"
+    );
+
+    return data?.message ? { message: data.message } : true;
+}
+
+// -----------------------------
+// Reset a configuration parameter to its default value
+// -----------------------------
+export async function serviceRestartApp(key) {
+    const data = await apiPost(
+        "/api/restart",
+        null,
+        "Error restarting application"
+    );
+
+    return data?.message ? { message: data.message } : true;
 }

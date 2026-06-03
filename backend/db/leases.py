@@ -8,8 +8,9 @@ from typing import Any, Dict, List, Optional
 # Import local modules
 from backend.utils import to_bool, to_int
 
-# Import Settings
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import get_logger
 
@@ -39,7 +40,7 @@ def get_leases(filter_devices: bool = False) -> List[Dict[str, Any]]:
     leases = []
     index = 1  # 1-based id for frontend
 
-    path = settings.DHCP4_LEASES_FILE
+    path = Path(get_config("DHCP4_LEASES_FILE"))
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
@@ -87,7 +88,7 @@ def get_leases(filter_devices: bool = False) -> List[Dict[str, Any]]:
 # SELECT SINGLE LEASE
 # -----------------------------
 def get_lease(lease_id: int) -> Optional[Dict[str, Any]]:
-    path = settings.DHCP4_LEASES_FILE
+    path = Path(get_config("DHCP4_LEASES_FILE"))
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
@@ -123,7 +124,7 @@ def get_lease(lease_id: int) -> Optional[Dict[str, Any]]:
 # -----------------------------
 def delete_lease(lease_id: int):
 
-    path = settings.DHCP4_LEASES_FILE
+    path = Path(get_config("DHCP4_LEASES_FILE"))
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 

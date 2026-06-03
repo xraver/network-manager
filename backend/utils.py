@@ -25,11 +25,19 @@ def to_int(v: str, default: int | None = None) -> int | None:
 # convert string to bool (returns None if conversion fails)
 # -----------------------------
 def to_bool(v: str, default: bool | None = None) -> bool | None:
-    v = (v or "").strip().lower()
-    if v in ("true", "1", "yes", "y"):
-        return True
-    if v in ("false", "0", "no", "n"):
-        return False
+    # bool
+    if isinstance(v, bool):
+        return v
+    # int
+    if isinstance(v, int):
+        return bool(v)
+    # strings
+    if isinstance(v, str):
+        v = v.strip().lower()
+        if v in ("true", "1", "yes", "y", "on"):
+            return True
+        if v in ("false", "0", "no", "n", "off"):
+            return False
     return default
 
 # -----------------------------

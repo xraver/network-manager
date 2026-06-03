@@ -4,14 +4,16 @@
 from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import FileResponse
 import json
+from pathlib import Path
 import time
 
 # Import local modules
 from backend.db.hosts import get_hosts
 from backend.db.leases import get_leases, get_lease, delete_lease
 
-# Import Settings
+# Import Settings & Config
 from backend.settings.settings import settings
+from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import get_logger
 
@@ -68,7 +70,8 @@ async def api_dhcp_reload(request: Request):
             })
 
         # Save DHCP4 Configuration
-        path = settings.DHCP4_HOST_FILE
+        path = Path(get_config("DHCP4_HOST_FILE"))
+        path.parent.mkdir(parents=True, exist_ok=True)
         data = {"reservations": kea4_hosts}
         full = json.dumps(data, indent=4, ensure_ascii=False)
         fragment = full.strip()[1:-1].strip() + "\n"
@@ -76,7 +79,8 @@ async def api_dhcp_reload(request: Request):
             f.write(fragment)
 
         # Save DHCP6 Configuration
-        path = settings.DHCP6_HOST_FILE
+        path = Path(get_config("DHCP6_HOST_FILE"))
+        path.parent.mkdir(parents=True, exist_ok=True)
         data = {"reservations": kea6_hosts}
         full = json.dumps(data, indent=4, ensure_ascii=False)
         fragment = full.strip()[1:-1].strip() + "\n"
