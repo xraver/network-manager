@@ -460,28 +460,24 @@ const actionHandlers = {
     openBackupModal,       // managed by boostrap
     closeBackupModal,      // managed by boostrap
     // Reload DNS
-    reloadDns: async () => {
-        try {
-            const result = await serviceReloadDNS();
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'DNS reload successfully';
-            showToast(msg, true);
-        } catch (err) {
-            showToast(err?.message || "Error reloading DNS", false);
-        }
+    reloadDns: async (e, el) => {
+        await handleReload(
+            el,
+            serviceReloadDNS,
+            "DNS reload successfully",
+            "Error reloading DNS",
+            "Reloading DNS..."
+        );
     },
     // Reload DHCP
-    reloadDhcp: async () => {
-        try {
-            const result = await serviceReloadDHCP();
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'DHCP reload successfully';
-            showToast(msg, true);
-        } catch (err) {
-            showToast(err?.message || "Error reloading DHCP", false);
-        }
+    reloadDhcp: async (e, el) => {
+        await handleReload(
+            el,
+            serviceReloadDHCP,
+            "DHCP reload successfully",
+            "Error reloading DHCP",
+            "Reloading DHCP..."
+        );
     },
     // Check API status
     apiCheck: async () => {
