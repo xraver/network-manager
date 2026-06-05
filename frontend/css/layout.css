@@ -43,6 +43,24 @@ body {
     align-items: center;
 }
 
+.topbar .navbar {
+    padding: 0;
+    background: transparent !important;
+}
+
+.topbar .navbar-collapse {
+    justify-content: flex-end;
+    transition: height 0.2s ease;
+}
+
+.topbar .navbar-toggler {
+    border: none;
+}
+
+.topbar .navbar-toggler:focus {
+    box-shadow: none;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -136,7 +154,9 @@ body {
     font-style: italic;
 }
 
-/* Griglia tile */
+/* ================================
+   Griglia tile
+   ================================ */
 .tiles {
     display: grid;
     gap: 16px;
@@ -152,13 +172,16 @@ body {
     padding: 14px;
     box-shadow: 0 3px 6px var(--shadow-soft);
     transition: transform 0.1s ease, box-shadow 0.1s ease;
+    will-change: transform;
     color: var(--text-dark);
+    --icon-color: var(--accent);
 }
 
 .tile:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 10px var(--shadow-strong);
     border-color: var(--accent-hover);
+    --icon-color: var(--accent-hover);
 }
 
 .tile h3 {
@@ -175,8 +198,12 @@ body {
 /* Icone tile */
 .tile-icon {
     font-size: 28px;
-    color: var(--accent);
     margin-bottom: 4px;
+    color: var(--icon-color);
+}
+
+.tile-icon i {
+    color: inherit;
 }
 
 /* ================================
@@ -190,6 +217,9 @@ body {
     padding: 6px 14px;
     font-size: 0.95rem;
     line-height: 1;
+    vertical-align: middle;
+    --icon-color: currentColor;
+    transition: all 0.2s ease;
 }
 
 .btn-primary {
@@ -213,18 +243,6 @@ body {
     filter: brightness(0.9);
 }
 
-.btn-outline-primary {
-    color: var(--accent);
-    border-color: var(--accent);
-    background-color: transparent;
-}
-
-.btn-outline-primary:hover,
-.btn-outline-primary:focus {
-    color: #fff;
-    background-color: var(--accent);
-    border-color: var(--accent);
-}
 
 .btn-primary.btn-login {
     width: 100%;
@@ -244,12 +262,24 @@ body {
     filter: none;
 }
 
-.btn .icon {
-    color: currentColor;
+.btn-outline-primary {
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: transparent;
 }
 
-.btn .icon:hover {
-    color: inherit;
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #fff;
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+    color: #ffe5e8;
+    background-color: #dc3545;
+    border-color: #dc3545;
 }
 
 /* ================================
@@ -302,23 +332,25 @@ select.form-select:focus,
 /* ================================
    Icons
    ================================ */
-.icon {
+.icon,
+i.bi {
     color: var(--icon-color);
     display: inline-flex;
     align-items: center;
 }
 
-.icon:hover {
-    color: var(--icon-color);
-}
-
 .icon-static {
     --icon-color-hover: var(--icon-color);
+    pointer-events: none;
     margin-right: 6px;
 }
 
 .icon-action {
     cursor: pointer;
+}
+
+.icon-action:hover {
+    color: var(--icon-color-hover);
 }
 
 .icon-placeholder {
@@ -395,7 +427,7 @@ select.form-select:focus,
    Backup Table
 ================================ */
 
-.table tbody#backupList tr {
+.table tbody#backupList tr > td {
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
@@ -451,6 +483,7 @@ td.actions {
 
 .toast.show {
     opacity: 1;
+    pointer-events: auto;
 }
 
 /* ================================
@@ -517,6 +550,10 @@ td.actions {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 18px;
+}
+
+.modal-backdrop {
+    z-index: 1990;
 }
 
 /* ================================
@@ -602,4 +639,13 @@ td.actions {
     .btn .icon {
         margin-right: 0;
     }
+}
+
+/* ======================================
+   Bootstrap compatibility
+   ====================================== */
+a.tile,
+a.tile:hover {
+    text-decoration: none;
+    color: inherit;
 }

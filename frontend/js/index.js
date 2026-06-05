@@ -1,7 +1,7 @@
 // -------------------------------------------------------
 // IMPORT
 // -------------------------------------------------------
-import { loadModals, showToast, showConfirmModal } from './common.js';
+import { loadModals, showToast, showConfirmModal, handleReload } from './common.js';
 import { serviceIsAlive, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDeleteBackup, serviceDownloadBackup, serviceUploadBackup } from './services.js';
 
 // -------------------------------------------------------
@@ -120,7 +120,7 @@ function renderBackupList(data) {
         const downloadBtn = document.createElement("button");
         downloadBtn.className = "btn btn-sm btn-outline-primary me-2";
         downloadBtn.title = "Download backup";
-        downloadBtn.innerHTML = `<i class="bi bi-download text-primary"></i>`;
+        downloadBtn.innerHTML = `<i class="bi bi-download"></i>`;
         downloadBtn.setAttribute("data-action", "downloadBackup");
         downloadBtn.setAttribute("data-id", b.name);
         tdActions.appendChild(downloadBtn);
@@ -128,7 +128,7 @@ function renderBackupList(data) {
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "btn btn-sm btn-outline-danger";
         deleteBtn.title = "Delete backup";
-        deleteBtn.innerHTML = `<i class="bi bi-trash-fill text-danger"></i>`;
+        deleteBtn.innerHTML = `<i class="bi bi-trash-fill"></i>`;
         deleteBtn.setAttribute("data-action", "deleteBackup");
         deleteBtn.setAttribute("data-id", b.name);
         tdActions.appendChild(deleteBtn);
