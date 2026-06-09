@@ -36,22 +36,43 @@
                 <span>Network Manager</span>
             </a>
 
-            <!-- Spacer -->
-            <div class="col d-none d-md-block"></div>
-
-            <nav class="navbar navbar-expand-md px-3">
-                <!-- Bottone hamburger -->
-                <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#menuNav">
-                    <span class="navbar-toggler-icon"></span>
+            <nav class="navbar">
+                <!-- Hamburger -->
+                <button
+                    class="btn btn-primary d-md-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#mobileMenu">
+                    <i class="bi bi-list fs-4"></i>
                 </button>
-                <!-- Menu -->
-                <div class="collapse navbar-collapse" id="menuNav">
-                    <div class="navbar-nav ms-auto gap-2">
-                        <button id="api-pill" class="btn btn-outline-primary" title="API Status" aria-label="API Status" data-action="apiCheck">API Status</button>
-                        <button id="logoutBtn" class="btn btn-primary">Logout</button>
-                    </div>
+
+                <!-- Desktop nav -->
+                <div class="d-none d-md-flex gap-2 ms-auto">
+                        <button class="btn btn-outline-primary btn-api" title="API Status" aria-label="API Status" data-action="apiCheck">API Status</button>
+                        <button class="btn btn-primary btn-logout">Logout</button>
                 </div>
             </nav>
+
+            <!-- Mobile offcanvas -->
+            <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="mobileMenu">
+
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Network Manager</h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="offcanvas">
+                    </button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-api" title="API Status" aria-label="API Status" data-action="apiCheck">API Status</button>
+                        <button class="btn btn-primary btn-logout">Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -62,6 +83,7 @@
     <section class="page-frame">
         <div class="container-fluid p-0">
             <div class="row g-2 align-items-center">
+
                 <!-- Title -->
                 <div class="col-12 col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">

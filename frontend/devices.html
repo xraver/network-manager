@@ -36,26 +36,51 @@
                 <span>Network Manager</span>
             </a>
 
-            <!-- Spacer -->
-            <div class="col d-none d-md-block"></div>
-
-            <nav class="navbar navbar-expand-md px-3">
-                <!-- Bottone hamburger -->
-                <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#menuNav">
-                    <span class="navbar-toggler-icon"></span>
+            <nav class="navbar">
+                <!-- Hamburger -->
+                <button
+                    class="btn btn-primary d-md-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#mobileMenu">
+                    <i class="bi bi-list fs-4"></i>
                 </button>
-                <!-- Menu -->
-                <div class="collapse navbar-collapse" id="menuNav">
-                    <div class="navbar-nav ms-auto gap-2">
-                        <a href="/hosts"   id="hostsBtn"     class="btn btn-primary"        aria-current="page">Hostname</a>
-                        <a href="/aliases" id="aliasesBtn"   class="btn btn-primary"        aria-current="page">Alias</a>
-                        <a href="/leases"  id="leasesBtn"    class="btn btn-primary"        aria-current="page">DHCP Leases</a>
-                        <a href="/devices" id="devicesBtn"   class="btn btn-primary active" aria-current="page">Devices</a>
-                        <a href="/settings" id="settingsBtn" class="btn btn-primary"        aria-current="page">Settings</a>
-                        <button id="logoutBtn" class="btn btn-primary">Logout</button>
-                    </div>
+
+                <!-- Desktop nav -->
+                <div class="d-none d-md-flex gap-2 ms-auto">
+                        <a href="/hosts"    class="btn btn-primary">       Hosts</a>
+                        <a href="/aliases"  class="btn btn-primary">       Alias</a>
+                        <a href="/leases"   class="btn btn-primary">       DHCP Leases</a>
+                        <a href="/devices"  class="btn btn-primary active">Devices</a>
+                        <a href="/settings" class="btn btn-primary">       Settings</a>
+                        <button class="btn btn-primary btn-logout">Logout</button>
                 </div>
             </nav>
+
+            <!-- Mobile offcanvas -->
+            <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="mobileMenu">
+
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Network Manager</h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="offcanvas">
+                    </button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <div class="d-grid gap-2">
+                        <a href="/hosts"    class="btn btn-primary">       Hosts</a>
+                        <a href="/aliases"  class="btn btn-primary">       Alias</a>
+                        <a href="/leases"   class="btn btn-primary">       DHCP Leases</a>
+                        <a href="/devices"  class="btn btn-primary active">Devices</a>
+                        <a href="/settings" class="btn btn-primary">       Settings</a>
+                        <button class="btn btn-primary btn-logout">Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -104,7 +129,7 @@
                     </div>
 
                     <!-- Separator -->
-                    <div class="vr mx-2"></div>
+                    <div class="vr mx-2 d-none d-md-block"></div>
 
                     <!-- Add host -->
                     <button
@@ -113,11 +138,11 @@
                             aria-label="Add Host"
                             data-bs-toggle="modal" data-bs-target="#addHostModal">
                         <i class="bi bi-plus-lg"></i>
-                        <span class="label"> Add Host</span>
+                        <span class="label d-none d-md-block"> Add Host</span>
                     </button>
 
                     <!-- Separator -->
-                    <div class="vr mx-2"></div>
+                    <div class="vr mx-2 d-none d-md-block"></div>
 
                     <!-- Reload DNS -->
                     <button
@@ -126,7 +151,7 @@
                             aria-label="Reload DNS"
                             data-action="reloadDns">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label"> Reload DNS</span>
+                        <span class="label d-none d-md-block"> Reload DNS</span>
                     </button>
 
                     <!-- Reload DNS -->
@@ -135,7 +160,7 @@
                             aria-label="Reload DHCP"
                             data-action="reloadDhcp">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label"> Reload DHCP</span>
+                        <span class="label d-none d-md-block"> Reload DHCP</span>
                     </button>
                 </div>
             </div>

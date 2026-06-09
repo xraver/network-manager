@@ -35,8 +35,10 @@ async function fetchAliases () {
         allAliases = [];
         viewAliases = [];
         // hide loader and show table
-        loader.style.display = "none";
         tableWrapper.classList.remove("d-none");
+    }
+    finally {
+        loader.style.display = "none";
     }
 }
 
@@ -61,7 +63,7 @@ function updateTable () {
     if (!viewAliases.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
-        tdEmpty.colSpan = 7;
+        tdEmpty.colSpan = 5;
         tdEmpty.textContent = "No alias available.";
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
@@ -234,7 +236,7 @@ function updateTable () {
     const term =
         document.getElementById('searchInput')?.value ||
         document.getElementById('searchInputMobile')?.value;
-    if (term) {
+    if (term?.trim()) {
         handleSearch(term);
     }
 }
@@ -533,7 +535,7 @@ function initModalLifecycle() {
                 showToast(err?.message || "Error loading alias", false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
-                    closeAddAliasModal(lastTriggerEl);
+                    closeAddAliasModal();
                 }, { once: true });
             }
         } else {

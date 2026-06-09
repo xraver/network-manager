@@ -42,18 +42,23 @@ function closeBackupModal() {
 // Manage Backup List Rendering (usa fetchData() con apiMap.backups)
 // -------------------------------------------------------
 export async function serviceCheckAbout() {
-    const pill = document.getElementById('api-pill');
-    if (!pill) return;
+    const pills = document.querySelectorAll('.btn-api');
+
+    if (!pills.length) return;
 
     const ok = await serviceIsAlive();
 
-    if (ok) {
-        pill.textContent = 'API OK';
-        pill.classList.remove('btn-outline-primary');
-        pill.classList.add('btn-primary');
-    } else {
-        pill.textContent = 'API OFFLINE';
-    }
+    pills.forEach(pill => {
+
+        if (ok) {
+            pill.textContent = 'API OK';
+            pill.classList.remove('btn-outline-primary');
+            pill.classList.add('btn-primary');
+
+        } else {
+            pill.textContent = 'API OFFLINE';
+        }
+    });
 
     return ok;
 }

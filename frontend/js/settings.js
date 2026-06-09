@@ -76,8 +76,10 @@ async function fetchConfigs () {
         allConfigs = [];
         viewConfigs = [];
         // hide loader and show table
-        loader.style.display = "none";
         tableWrapper.classList.remove("d-none");
+    }
+    finally {
+        loader.style.display = "none";
     }
 }
 
@@ -245,7 +247,7 @@ function updateTable (filter = null) {
     if (!viewConfigs.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
-        tdEmpty.colSpan = 7;
+        tdEmpty.colSpan = 4;
         tdEmpty.textContent = "No configs available.";
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
@@ -786,7 +788,7 @@ function initModalLifecycle() {
                 showToast(err?.message || "Error loading config", false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
-                    closeEditConfigModal(lastTriggerEl);
+                    closeEditConfigModal();
                 }, { once: true });
             }
         } else {

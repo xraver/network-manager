@@ -35,8 +35,10 @@ async function fetchHosts () {
         allHosts = [];
         viewHosts = [];
         // hide loader and show table
-        loader.style.display = "none";
         tableWrapper.classList.remove("d-none");
+    }
+    finally {
+        loader.style.display = "none";
     }
 }
 
@@ -61,7 +63,7 @@ function updateTable () {
     if (!viewHosts.length) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
-        tdEmpty.colSpan = 7;
+        tdEmpty.colSpan = 6;
         tdEmpty.textContent = "No hosts available.";
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
@@ -244,7 +246,7 @@ function updateTable () {
     const term =
         document.getElementById('searchInput')?.value ||
         document.getElementById('searchInputMobile')?.value;
-    if (term) {
+    if (term?.trim()) {
         handleSearch(term, filterTable);
     }
 }
@@ -558,7 +560,7 @@ function initModalLifecycle() {
                 showToast(err?.message || "Error loading host", false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
-                    closeAddHostModal(lastTriggerEl);
+                    closeAddHostModal();
                 }, { once: true });
             }
         } else {

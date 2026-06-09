@@ -14,8 +14,7 @@ async function handleLogout() {
 // DOMContentLoaded: initialize everything
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", handleLogout);
-    }
+    document.querySelectorAll(".btn-logout").forEach(btn => {
+        btn.addEventListener("click", handleLogout);
+    });
 });

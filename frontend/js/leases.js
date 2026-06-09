@@ -34,8 +34,10 @@ async function fetchLeases () {
         allLeases = [];
         viewLeases = [];
         // hide loader and show table
-        loader.style.display = "none";
         tableWrapper.classList.remove("d-none");
+    }
+    finally {
+        loader.style.display = "none";
     }
 }
 
@@ -259,7 +261,7 @@ function updateTable () {
     const term =
         document.getElementById('searchInput')?.value ||
         document.getElementById('searchInputMobile')?.value;
-    if (term) {
+    if (term?.trim()) {
         handleSearch(term, filterTable);
     }
 }
@@ -557,7 +559,7 @@ function initModalLifecycle() {
                 showToast(err?.message || "Error loading host", false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
-                    closeAddHostModal(lastTriggerEl);
+                    closeAddHostModal();
                 }, { once: true });
             }
         }
