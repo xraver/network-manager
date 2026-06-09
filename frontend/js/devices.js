@@ -1,5 +1,5 @@
 // Import common js
-import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, filterTable, clearSearch, handleReload } from './common.js';
+import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, handleSearch, filterTable, clearSearch, handleReload } from './common.js';
 // Import services
 import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLeases, serviceGetDHCPLease, serviceDeleteDHCPLease, serviceGetDevices, serviceGetHost, serviceCreateHost, serviceUpdateHost, serviceDeleteHost } from './services.js';
 
@@ -292,12 +292,11 @@ function updateTable () {
     tableWrapper.classList.remove("d-none");
 
     // apply current search filter
-    const searchInput = document.getElementById("searchInput");
-    if (searchInput) {
-        const term = searchInput.value.trim().toLowerCase();
-        if (term) {
-            filterTable(term);
-        }
+    const term =
+        document.getElementById('searchInput')?.value ||
+        document.getElementById('searchInputMobile')?.value;
+    if (term) {
+        handleSearch(term, filterTable);
     }
 }
 
@@ -619,16 +618,20 @@ function initUI() {
 // SEARCH
 // -----------------------------
 function initSearch() {
-    // search bar
-    const input = document.getElementById("searchInput");
-    if (!input) return;
 
-    // clean input on load
-    input.value = "";
-    // live filter for each keystroke
-    input.addEventListener("input", (e) => {
-        const term = e.target.value.trim().toLowerCase();
-        filterTable(term);
+    ["searchInput", "searchInputMobile"].forEach(id => {
+
+        const input = document.getElementById(id);
+
+        if (!input) return;
+
+        // clean input on load
+        input.value = "";
+
+        // live filter
+        input.addEventListener("input", (e) => {
+            handleSearch(e.target.value, filterTable);
+        });
     });
 }
 
@@ -737,7 +740,8 @@ function handleKeyboard(e) {
         const tag = (e.target.tagName || "").toLowerCase();
         const isTypingField =
             tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
-        const isSearchInput = e.target.id === "searchInput";
+        const isSearchInput =
+            e.target.id === "searchInput" || e.target.id === "searchInputMobile";
 
         // ESC should clear search and reset sorting only if not focused on a typing field, or if focused on the search input (to allow quick clearing of search)
         if (!isTypingField || isSearchInput) {

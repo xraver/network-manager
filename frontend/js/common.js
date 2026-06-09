@@ -330,6 +330,21 @@ export function initSortableTable() {
 }
 
 /**
+  * search handler
+ */
+export function handleSearch(value, callback) {
+    const desktopSearch = document.getElementById('searchInput');
+    const mobileSearch  = document.getElementById('searchInputMobile');
+
+    // sync valori
+    desktopSearch.value = value;
+    mobileSearch.value = value;
+
+    const term = value.trim().toLowerCase();
+    callback(term);
+}
+
+/**
   * Live filter: mostra solo le righe che contengono il testo di ricerca (case-insensitive)
  */
 export function filterTable(term) {
@@ -345,10 +360,15 @@ export function filterTable(term) {
  * Clear search input and reset table filter
  */
 export function clearSearch() {
-    const input = document.getElementById("searchInput");
-    if (input) {
-        input.value = "";
-        input.blur();
+    const desktopSearch = document.getElementById("searchInput");
+    if (desktopSearch) {
+        desktopSearch.value = "";
+        desktopSearch.blur();
+    }
+    const mobileSearch = document.getElementById("searchInputMobile");
+    if (mobileSearch) {
+        mobileSearch.value = "";
+        mobileSearch.blur();
     }
 }
 

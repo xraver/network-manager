@@ -1,5 +1,5 @@
 // Import common js
-import { loadModals, showToast, clearSearch, showConfirmModal, handleReload } from './common.js';
+import { loadModals, showToast, handleSearch, clearSearch, showConfirmModal, handleReload } from './common.js';
 // Import services
 import { serviceGetConfigs, serviceGetConfig, serviceUpdateConfig, serviceResetConfig, serviceRestartApp, serviceIsAlive } from './services.js';
 
@@ -214,12 +214,10 @@ async function restartApp(button) {
 // -----------------------------
 // Update table with current configs
 // -----------------------------
-function updateTable () {
+function updateTable (filter = null) {
     const loader = document.getElementById("loader");
     const tableWrapper = document.getElementById("tableWrapper");
-    const searchInput = document.getElementById("searchInput");
-    const term = searchInput?.value?.trim().toLowerCase();
-    const hasSearch = !!term;
+    const hasSearch = !!filter;
     const expandBtn = document.getElementById("expandAllBtn");
     const collapseBtn = document.getElementById("collapseAllBtn");
 
@@ -280,24 +278,24 @@ function updateTable () {
 
         let rows = grouped[group];
 
-        if (term) {
+        if (filter) {
             rows = rows.filter(c => {
                 return (
-                    (c.key ?? "").toString().toLowerCase().includes(term) ||
-                    (c.value ?? "").toString().toLowerCase().includes(term) ||
-                    (c.description ?? "").toString().toLowerCase().includes(term)
+                    (c.key ?? "").toString().toLowerCase().includes(filter) ||
+                    (c.value ?? "").toString().toLowerCase().includes(filter) ||
+                    (c.description ?? "").toString().toLowerCase().includes(filter)
                 );
             });
         }
 
         // skip group if no result
-        if (term && rows.length === 0) return;
+        if (filter && rows.length === 0) return;
 
         // GROUP HEADER
         tdGroup.colSpan = 7;
         trGroup.className = "table-group-header";
         trGroup.setAttribute("data-group", groupKey);
-        tdGroup.innerHTML = term
+        tdGroup.innerHTML = filter
             ? '<i class="bi bi-folder2-open"></i>'
             : '<i class="bi bi-folder"></i>';
         tdGroup.appendChild(
@@ -315,7 +313,7 @@ function updateTable () {
             tr.setAttribute("data-parent-group", groupKey);
 
             // show only filtered keys
-            if (!term) {
+            if (!filter) {
                 tr.classList.add("d-none");
             }
 
@@ -744,16 +742,20 @@ function initUI() {
 // SEARCH
 // -----------------------------
 function initSearch() {
-    // search bar
-    const input = document.getElementById("searchInput");
-    if (!input) return;
 
-    // clean input on load
-    input.value = "";
-    // live filter for each keystroke
-    input.addEventListener("input", (e) => {
-        const term = e.target.value.trim().toLowerCase();
-        updateTable();
+    ["searchInput", "searchInputMobile"].forEach(id => {
+
+        const input = document.getElementById(id);
+
+        if (!input) return;
+
+        // clean input on load
+        input.value = "";
+
+        // live filter
+        input.addEventListener("input", (e) => {
+            handleSearch(e.target.value, updateTable);
+        });
     });
 }
 
@@ -869,7 +871,8 @@ function handleKeyboard(e) {
         const tag = (e.target.tagName || "").toLowerCase();
         const isTypingField =
             tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
-        const isSearchInput = e.target.id === "searchInput";
+        const isSearchInput =
+            e.target.id === "searchInput" || e.target.id === "searchInputMobile";
 
         // ESC should clear search only if not focused on a typing field, or if focused on the search input (to allow quick clearing of search)
         if (!isTypingField || isSearchInput) {

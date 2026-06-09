@@ -66,6 +66,7 @@
     <section class="page-frame">
         <div class="container-fluid p-0">
             <div class="row g-2 align-items-center">
+
                 <!-- Title -->
                 <div class="col-12 col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
@@ -77,21 +78,33 @@
                 <!-- Spacer -->
                 <div class="col d-none d-md-block"></div>
 
-                <!-- Search -->
-                <div class="col-12 col-md-auto">
+                <!-- Search Desktop -->
+                <div class="col-12 col-md-auto d-none d-md-block">
                     <div class="search-wrapper">
                         <input
                             type="text"
                             id="searchInput"
                             placeholder="Search..."
                             class="form-control form-control-sm placeholder-italic"
-                            aria-label="Search alias"
-                        >
+                            aria-label="Search alias">
                     </div>
                 </div>
 
                 <!-- Bottoni -->
                 <div class="col-12 col-md-auto d-flex align-items-center gap-2 flex-wrap">
+
+                    <!-- Search Mobile -->
+                    <div class="col-auto d-md-none">
+                        <button
+                                class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                                data-bs-toggle="collapse" data-bs-target="#mobileSearch"
+                                aria-expanded="false" aria-controls="mobileSearch">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
+                    <!-- Separator -->
+                    <div class="vr mx-2"></div>
 
                     <!-- Add alias -->
                     <button
@@ -126,6 +139,16 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Search collapsabile -->
+            <div class="collapse mt-2 d-md-none" id="mobileSearch">
+                <input
+                    type="text"
+                    id="searchInputMobile"
+                    placeholder="Search..."
+                    class="form-control form-control-sm placeholder-italic"
+                    aria-label="Search alias">
+            </div>
         </div>
     </section>
 
@@ -134,11 +157,25 @@
         <table id="dataTable" class="table table-bordered table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th data-type="string" data-sortable="true"  data-sort="0">Alias      <span class="sort-arrow" aria-hidden="true"></span></th>
-                    <th data-type="string" data-sortable="true"  data-sort="1">Target     <span class="sort-arrow" aria-hidden="true"></span></th>
-                    <th data-type="string" data-sortable="true"  data-sort="2">Description<span class="sort-arrow" aria-hidden="true"></span></th>
-                    <th data-type="string" data-sortable="true"  data-sort="3">Options    <span class="sort-arrow" aria-hidden="true"></span></th>
-                    <th data-type="string" data-sortable="false" data-sort="4">Actions    <span class="sort-arrow" aria-hidden="true"></span></th>
+                    <th data-type="string" data-sortable="true" data-sort="0">
+                        Alias <span class="sort-arrow" aria-hidden="true"></span>
+                    </th>
+
+                    <th data-type="string" data-sortable="true" data-sort="1">
+                        Target <span class="sort-arrow" aria-hidden="true"></span>
+                    </th>
+
+                    <th data-type="string" data-sortable="true" data-sort="2">
+                        Description <span class="sort-arrow" aria-hidden="true"></span>
+                    </th>
+
+                    <th data-type="string" data-sortable="true" data-sort="3" class="text-center text-nowrap">
+                        Options <span class="sort-arrow" aria-hidden="true"></span>
+                    </th>
+
+                    <th data-type="string" data-sortable="false" class="text-center text-nowrap">
+                        Actions <span class="sort-arrow invisible" aria-hidden="true"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody></tbody>
