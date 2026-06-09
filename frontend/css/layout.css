@@ -372,6 +372,8 @@ i.bi {
     background-color: #fff;
     -webkit-overflow-scrolling: touch;
     border: 1px solid var(--border-light);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
 }
 
 .table {
@@ -682,16 +684,14 @@ td.actions {
     }
 
     .btn {
-        padding-left: 0.6rem;
-        padding-right: 0.6rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-    }
-
-    /* Toolbar: su schermi molto stretti mostra solo le icone dei bottoni */
-    .btn .label {
-        display: none;
+        min-width: 34px;
+        min-height: 32px;
+        padding: 0.30rem 0.55rem;
+        font-size: 0.95rem;
+        line-height: 1;
     }
 
     .btn .icon,
