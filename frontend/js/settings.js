@@ -57,10 +57,10 @@ function getConfigValueFromForm() {
 // -----------------------------
 async function fetchConfigs () {
     const loader = document.getElementById("loader");
-    const dataTable = document.getElementById("dataTable");
+    const tableWrapper = document.getElementById("tableWrapper");
 
     // hide table during loading to avoid flickering and show loader
-    dataTable.classList.add("d-none");
+    tableWrapper.classList.add("d-none");
 
     try {
         // Show loader
@@ -77,7 +77,7 @@ async function fetchConfigs () {
         viewConfigs = [];
         // hide loader and show table
         loader.style.display = "none";
-        dataTable.classList.remove("d-none");
+        tableWrapper.classList.remove("d-none");
     }
 }
 
@@ -216,7 +216,7 @@ async function restartApp(button) {
 // -----------------------------
 function updateTable () {
     const loader = document.getElementById("loader");
-    const dataTable = document.getElementById("dataTable");
+    const tableWrapper = document.getElementById("tableWrapper");
     const searchInput = document.getElementById("searchInput");
     const term = searchInput?.value?.trim().toLowerCase();
     const hasSearch = !!term;
@@ -254,7 +254,7 @@ function updateTable () {
         tbody.appendChild(trEmpty);
         // hide loader and show table
         loader.style.display = "none";
-        dataTable.classList.remove("d-none");
+        tableWrapper.classList.remove("d-none");
         return;
     }
 
@@ -401,7 +401,7 @@ function updateTable () {
 
     // hide loader and show table
     loader.style.display = "none";
-    dataTable.classList.remove("d-none");
+    tableWrapper.classList.remove("d-none");
 }
 
 // -----------------------------

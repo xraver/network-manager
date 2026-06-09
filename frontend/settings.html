@@ -127,18 +127,20 @@
         </div>
     </section>
 
-    <!-- Tabella -->
-    <table id="dataTable" class="table table-bordered table-hover align-middle d-none">
-        <thead class="table-light">
-            <tr>
-                <th data-type="string" data-sortable="false">Parameter  <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="false">Value      <span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="false">Description<span class="sort-arrow" aria-hidden="true"></span></th>
-                <th data-type="string" data-sortable="false">Actions   <span class="sort-arrow" aria-hidden="true"></span></th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <!-- Tabella responsive -->
+    <div id="tableWrapper" class="table-responsive mobile-scroll d-none">
+        <table id="dataTable" class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th data-type="string" data-sortable="false">Parameter  <span class="sort-arrow" aria-hidden="true"></span></th>
+                    <th data-type="string" data-sortable="false">Value      <span class="sort-arrow" aria-hidden="true"></span></th>
+                    <th data-type="string" data-sortable="false">Description<span class="sort-arrow" aria-hidden="true"></span></th>
+                    <th data-type="string" data-sortable="false">Actions    <span class="sort-arrow" aria-hidden="true"></span></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <!-- Loader -->
     <div id="loader" class="text-center my-3" style="display: none;">

@@ -16,10 +16,10 @@ const sortState = { sortDirection: {}, lastSort: null };
 // -----------------------------
 async function fetchHosts () {
     const loader = document.getElementById("loader");
-    const dataTable = document.getElementById("dataTable");
+    const tableWrapper = document.getElementById("tableWrapper");
 
     // hide table during loading to avoid flickering and show loader
-    dataTable.classList.add("d-none");
+    tableWrapper.classList.add("d-none");
 
     try {
         // Show loader
@@ -36,7 +36,7 @@ async function fetchHosts () {
         viewHosts = [];
         // hide loader and show table
         loader.style.display = "none";
-        dataTable.classList.remove("d-none");
+        tableWrapper.classList.remove("d-none");
     }
 }
 
@@ -45,7 +45,7 @@ async function fetchHosts () {
 // -----------------------------
 function updateTable () {
     const loader = document.getElementById("loader");
-    const dataTable = document.getElementById("dataTable");
+    const tableWrapper = document.getElementById("tableWrapper");
 
     // DOM Reference
     const tbody = document.querySelector("#dataTable tbody");
@@ -68,7 +68,7 @@ function updateTable () {
         tbody.appendChild(trEmpty);
         // hide loader and show table
         loader.style.display = "none";
-        dataTable.classList.remove("d-none");
+        tableWrapper.classList.remove("d-none");
         return;
     }
 
@@ -238,7 +238,7 @@ function updateTable () {
 
     // hide loader and show table
     loader.style.display = "none";
-    dataTable.classList.remove("d-none");
+    tableWrapper.classList.remove("d-none");
 
     // apply current search filter
     const searchInput = document.getElementById("searchInput");

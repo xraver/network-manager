@@ -9,8 +9,7 @@
 
 body {
     font-family: sans-serif;
-    margin: 20px;
-    padding-top: 60px; /* space for fixed topbar */
+    margin: 0;
     background-color: var(--bg-light);
     color: var(--text-dark);
 }
@@ -28,9 +27,8 @@ body {
     width: 100%;
     background: var(--bg-dark);
     border-bottom: 3px solid var(--accent);
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
     z-index: 1000;
 }
 
@@ -41,6 +39,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .topbar .navbar {
@@ -85,8 +85,8 @@ body {
     background-color: var(--bg-frame);
     border-left: 4px solid var(--accent);
     padding: 6px 14px;
-    margin-bottom: 25px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+    margin: 20px 20px 25px 20px;
 }
 
 .page-frame h2 {
@@ -216,7 +216,7 @@ body {
     border: none;
     padding: 6px 14px;
     font-size: 0.95rem;
-    line-height: 1;
+    line-height: 1.2;
     vertical-align: middle;
     --icon-color: currentColor;
     transition: all 0.2s ease;
@@ -334,9 +334,8 @@ select.form-select:focus,
    ================================ */
 .icon,
 i.bi {
-    color: var(--icon-color);
-    display: inline-flex;
-    align-items: center;
+    color: var(--icon-color, currentColor);
+    vertical-align: middle;
 }
 
 .icon-static {
@@ -361,24 +360,45 @@ i.bi {
 /* ================================
    Table
    ================================ */
-.table {
-    background-color: #fff;
+.table-responsive {
+    position: relative;
+    margin: 20px;
+    width: calc(100% - 40px);
+    max-height: calc(100vh - 185px);
+    overflow-x: auto;
+    overflow-y: auto;
+    border-radius: 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+    background-color: #fff;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border-light);
+}
+
+.table {
+    width: 100%;             /* desktop full width */
+    min-width: max-content;  /* mobile -> scroll */
+    margin: 0;
+    table-layout: auto;
     border-color: var(--border-light);
+    border-style: hidden;
 }
 
 .table th,
 .table td {
     vertical-align: middle;
     border-color: var(--border-light);
+    white-space: nowrap;   /* niente wrap */
 }
 
 .table thead th {
     background-color: #eee;
+    background-clip: padding-box;
     font-weight: 700;
     cursor: default;
     user-select: none;
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .table thead th:hover::after {
@@ -627,8 +647,46 @@ td.actions {
    Responsive
    ================================ */
 @media (max-width: 640px) {
-    body {
-        padding-top: 48px; /* topbar più compatta su mobile */
+
+    .topbar-inner {
+        flex-wrap: nowrap;
+    }
+
+    .topbar .navbar {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .logo span {
+        font-size: 1.1rem;
+        white-space: nowrap;
+    }
+
+    .page-frame {
+        margin: 10px 10px 15px 10px;
+    }
+
+    .table-responsive {
+        margin: 10px;
+        width: calc(100% - 20px);
+        max-height: calc(100dvh - 11.5rem);
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.45rem;
+    }
+
+    .btn {
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* Toolbar: su schermi molto stretti mostra solo le icone dei bottoni */
@@ -636,7 +694,8 @@ td.actions {
         display: none;
     }
 
-    .btn .icon {
+    .btn .icon,
+    .btn .bi {
         margin-right: 0;
     }
 }
