@@ -93,7 +93,7 @@
             <div class="row g-2 align-items-center">
 
                 <!-- Title -->
-                <div class="col-12 col-md-auto">
+                <div class="col-auto col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon"><i class="bi bi-diagram-2"></i></span>
                         <span class="section-title">Aliases List</span>
@@ -101,10 +101,10 @@
                 </div>
 
                 <!-- Spacer -->
-                <div class="col d-none d-md-block"></div>
+                <div class="col"></div>
 
                 <!-- Search Desktop -->
-                <div class="col-12 col-md-auto d-none d-md-block">
+                <div class="col-auto col-md-auto d-none d-md-block">
                     <div class="search-wrapper">
                         <input
                             type="text"
@@ -116,14 +116,14 @@
                 </div>
 
                 <!-- Bottoni -->
-                <div class="col-12 col-md-auto d-flex align-items-center gap-2 flex-wrap">
+                <div class="col-auto col-md-auto d-flex align-items-center gap-2 flex-nowrap">
 
                     <!-- Search Mobile -->
                     <div class="col-auto d-md-none">
                         <button
-                                class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                                data-bs-toggle="collapse" data-bs-target="#mobileSearch"
-                                aria-expanded="false" aria-controls="mobileSearch">
+                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                            data-bs-toggle="collapse" data-bs-target="#mobileSearch"
+                            aria-expanded="false" aria-controls="mobileSearch">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -133,12 +133,12 @@
 
                     <!-- Add alias -->
                     <button
-                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Add Alias"
-                            aria-label="Add Alias"
-                            data-bs-toggle="modal" data-bs-target="#addAliasModal">
+                        class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                        title="Add Alias"
+                        aria-label="Add Alias"
+                        data-bs-toggle="modal" data-bs-target="#addAliasModal">
                         <i class="bi bi-plus-lg"></i>
-                        <span class="label d-none d-md-block"> Add Alias</span>
+                        <span class="label d-none d-md-block">Add Alias</span>
                     </button>
 
                     <!-- Separator -->
@@ -146,21 +146,22 @@
 
                     <!-- Reload DNS -->
                     <button
-                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Reload DNS (BIND)"
-                            aria-label="Reload DNS"
-                            data-action="reloadDns">
+                        class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                        title="Reload DNS (BIND)"
+                        aria-label="Reload DNS"
+                        data-action="reloadDns">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label d-none d-md-block"> Reload DNS</span>
+                        <span class="label d-none d-md-block">Reload DNS</span>
                     </button>
 
                     <!-- Reload DNS -->
-                    <button class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Reload DHCP (Kea)"
-                            aria-label="Reload DHCP"
-                            data-action="reloadDhcp">
+                    <button
+                        class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                        title="Reload DHCP (Kea)"
+                        aria-label="Reload DHCP"
+                        data-action="reloadDhcp">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label d-none d-md-block"> Reload DHCP</span>
+                        <span class="label d-none d-md-block">Reload DHCP</span>
                     </button>
                 </div>
             </div>

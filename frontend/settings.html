@@ -93,18 +93,18 @@
             <div class="row g-2 align-items-center">
 
                 <!-- Title -->
-                <div class="col-12 col-md-auto">
+                <div class="col-auto col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon"><i class="bi bi-gear"></i></span>
-                        <span class="section-title">Configuration Parameter List</span>
+                        <span class="section-title">Settings</span>
                     </h2>
                 </div>
 
                 <!-- Spacer -->
-                <div class="col d-none d-md-block"></div>
+                <div class="col"></div>
 
                 <!-- Search Desktop -->
-                <div class="col-12 col-md-auto d-none d-md-block">
+                <div class="col-auto col-md-auto d-none d-md-block">
                     <div class="search-wrapper">
                         <input
                             type="text"
@@ -116,14 +116,14 @@
                 </div>
 
                 <!-- Bottoni -->
-                <div class="col-12 col-md-auto d-flex align-items-center gap-2 flex-wrap">
+                <div class="col-auto col-md-auto d-flex align-items-center gap-2 flex-nowrap">
 
                     <!-- Search Mobile -->
                     <div class="col-auto d-md-none">
                         <button
-                                class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                                data-bs-toggle="collapse" data-bs-target="#mobileSearch"
-                                aria-expanded="false" aria-controls="mobileSearch">
+                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                            data-bs-toggle="collapse" data-bs-target="#mobileSearch"
+                            aria-expanded="false" aria-controls="mobileSearch">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -132,19 +132,21 @@
                     <div class="vr mx-2 d-none d-md-block"></div>
 
                     <!-- Expand -->
-                    <button id="expandAllBtn"
-                            class="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Expand all groups"
-                            aria-label="Expand all groups">
+                    <button
+                        id="expandAllBtn"
+                        class="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
+                        title="Expand all groups"
+                        aria-label="Expand all groups">
                         <i class="bi bi-arrows-expand"></i>
                         <span class="label d-none d-md-block">Expand</span>
                     </button>
 
                     <!-- Collapse -->
-                    <button id="collapseAllBtn"
-                            class="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Collapse all groups"
-                            aria-label="Collapse all groups">
+                    <button 
+                        id="collapseAllBtn"
+                        class="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
+                        title="Collapse all groups"
+                        aria-label="Collapse all groups">
                         <i class="bi bi-arrows-collapse"></i>
                         <span class="label d-none d-md-block">Collapse</span>
                     </button>
@@ -153,10 +155,11 @@
                     <div class="vr mx-2 d-none d-md-block"></div>
 
                     <!-- Restart -->
-                    <button class="btn btn-danger d-flex align-items-center gap-2 px-3"
-                            title="Restart system"
-                            aria-label="Restart system"
-                            data-action="restartApp">
+                    <button
+                        class="btn btn-danger d-flex align-items-center gap-2 px-3"
+                        title="Restart system"
+                        aria-label="Restart system"
+                        data-action="restartApp">
                         <i class="bi bi-arrow-repeat"></i>
                         <span class="label d-none d-md-block">Restart</span>
                     </button>
