@@ -133,22 +133,22 @@
 
                     <!-- Expand -->
                     <button
-                        id="expandAllBtn"
-                        class="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
+                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
                         title="Expand all groups"
-                        aria-label="Expand all groups">
+                        aria-label="Expand all groups"
+                        id="expandAllBtn">
                         <i class="bi bi-arrows-expand"></i>
-                        <span class="label d-none d-md-block">Expand</span>
+                        <span class="label">Expand</span>
                     </button>
 
                     <!-- Collapse -->
-                    <button 
-                        id="collapseAllBtn"
-                        class="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
+                    <button
+                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
                         title="Collapse all groups"
-                        aria-label="Collapse all groups">
+                        aria-label="Collapse all groups"
+                        id="collapseAllBtn">
                         <i class="bi bi-arrows-collapse"></i>
-                        <span class="label d-none d-md-block">Collapse</span>
+                        <span class="label">Collapse</span>
                     </button>
 
                     <!-- Separator -->
@@ -156,13 +156,63 @@
 
                     <!-- Restart -->
                     <button
-                        class="btn btn-danger d-flex align-items-center gap-2 px-3"
+                        class="btn btn-danger d-none d-md-flex align-items-center gap-2 px-3"
                         title="Restart system"
                         aria-label="Restart system"
                         data-action="restartApp">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label d-none d-md-block">Restart</span>
+                        <span class="label">Restart</span>
                     </button>
+
+                    <!-- Mobile Dropdown -->
+                    <div class="dropdown d-md-none">
+                        <button
+                            class="btn btn-primary d-flex align-items-center px-3"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                            <!-- Expand Mobile -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    title="Expand all groups"
+                                    aria-label="Expand all groups"
+                                    id="expandAllBtn">
+                                    <i class="bi bi-arrows-expand"></i>
+                                    <span class="label">Expand</span>
+                                </button>
+                            </li>
+
+                            <!-- Collapse Mobile -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    title="Collapse all groups"
+                                    aria-label="Collapse all groups"
+                                    id="collapseAllBtn">
+                                    <i class="bi bi-arrows-collapse"></i>
+                                    <span class="label">Collapse</span>
+                                </button>
+                            </li>
+
+                            <!-- Restart Mobile -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-danger w-100 d-flex align-items-center gap-2"
+                                    title="Restart system"
+                                    aria-label="Restart system"
+                                    data-action="restartApp">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span class="label">Restart</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -196,7 +246,7 @@
                     </th>
 
                     <th data-type="string" data-sortable="false" class="text-center text-nowrap">
-                        Actions <span class="sort-arrow invisible" aria-hidden="true"></span>
+                        Actions
                     </th>
                 </tr>
             </thead>

@@ -121,9 +121,9 @@
                     <!-- Search Mobile -->
                     <div class="col-auto d-md-none">
                         <button
-                                class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                                data-bs-toggle="collapse" data-bs-target="#mobileSearch"
-                                aria-expanded="false" aria-controls="mobileSearch">
+                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
+                            data-bs-toggle="collapse" data-bs-target="#mobileSearch"
+                            aria-expanded="false" aria-controls="mobileSearch">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -131,37 +131,88 @@
                     <!-- Separator -->
                     <div class="vr mx-2 d-none d-md-block"></div>
 
-                    <!-- Add host -->
+                    <!-- Add host Desktop -->
                     <button
-                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Add Host"
-                            aria-label="Add Host"
-                            data-bs-toggle="modal" data-bs-target="#addHostModal">
+                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
+                        title="Add Host"
+                        aria-label="Add Host"
+                        data-bs-toggle="modal" data-bs-target="#addHostModal">
                         <i class="bi bi-plus-lg"></i>
-                        <span class="label d-none d-md-block"> Add Host</span>
+                        <span class="label">Add Host</span>
                     </button>
 
                     <!-- Separator -->
                     <div class="vr mx-2 d-none d-md-block"></div>
 
-                    <!-- Reload DNS -->
+                    <!-- Reload DNS Desktop -->
                     <button
-                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Reload DNS (BIND)"
-                            aria-label="Reload DNS"
-                            data-action="reloadDns">
+                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
+                        title="Reload DNS (BIND)"
+                        aria-label="Reload DNS"
+                        data-action="reloadDns">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label d-none d-md-block"> Reload DNS</span>
+                        <span class="label">Reload DNS</span>
                     </button>
 
-                    <!-- Reload DNS -->
-                    <button class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            title="Reload DHCP (Kea)"
-                            aria-label="Reload DHCP"
-                            data-action="reloadDhcp">
+                    <!-- Reload DHCP Desktop -->
+                    <button
+                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
+                        title="Reload DHCP (Kea)"
+                        aria-label="Reload DHCP"
+                        data-action="reloadDhcp">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label d-none d-md-block"> Reload DHCP</span>
+                        <span class="label">Reload DHCP</span>
                     </button>
+
+                    <!-- Mobile Dropdown -->
+                    <div class="dropdown d-md-none">
+                        <button
+                            class="btn btn-primary d-flex align-items-center px-3"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                            <!-- Add Host Mobile -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    title="Add Host"
+                                    aria-label="Add Host"
+                                    data-bs-toggle="modal" data-bs-target="#addHostModal">
+                                    <i class="bi bi-plus-lg"></i>
+                                    <span>Add Host</span>
+                                </button>
+                            </li>
+
+                            <!-- Reload DNS Mobile -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    title="Reload DNS (BIND)"
+                                    aria-label="Reload DNS"
+                                    data-action="reloadDns">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span>Reload DNS</span>
+                                </button>
+                            </li>
+
+                            <!-- Reload DHCP Mobile -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    title="Reload DHCP (Kea)"
+                                    aria-label="Reload DHCP"
+                                    data-action="reloadDhcp">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span>Reload DHCP</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -207,7 +258,7 @@
                     </th>
 
                     <th data-type="string" data-sortable="false" class="text-center text-nowrap">
-                        Actions <span class="sort-arrow invisible" aria-hidden="true"></span>
+                        Actions
                     </th>
                 </tr>
             </thead>

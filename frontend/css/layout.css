@@ -648,7 +648,7 @@ td.actions {
 /* ================================
    Responsive
    ================================ */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
 
     .topbar-inner {
         flex-wrap: nowrap;
@@ -660,7 +660,7 @@ td.actions {
     }
 
     .logo span {
-        font-size: 1.1rem;
+        font-size: 1.3rem;
         white-space: nowrap;
     }
 
@@ -668,10 +668,14 @@ td.actions {
         margin: 10px 10px 15px 10px;
     }
 
+    .section-title {
+        font-size: 1.1rem;
+    }
+
     .table-responsive {
         margin: 10px;
         width: calc(100% - 20px);
-        max-height: calc(100dvh - 11.5rem);
+        max-height: calc(100dvh - 9rem);
     }
 
     .table {
