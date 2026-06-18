@@ -193,7 +193,7 @@ function startReconnectPolling(button, originalHtmlButton) {
 // -----------------------------
 // Restart application
 // -----------------------------
-async function restartApp(button) {
+async function handleRestartApp(button) {
     const confirmed = await showConfirmModal("Restart the application?");
     if (!confirmed) return;
 
@@ -693,9 +693,9 @@ const actionHandlers = {
     edit: () => {
         // handled by bootstrap modal show event
     },
-    // Reload DHCP
+    // Reload App
     restartApp: async (e, el) => {
-        await restartApp(el)
+        await handleRestartApp(el)
     },
 }
 

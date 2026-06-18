@@ -382,3 +382,16 @@ export async function serviceRestartApp(key) {
 
     return data?.message ? { message: data.message } : true;
 }
+
+// -----------------------------
+// Get Logs
+// -----------------------------
+export async function serviceGetLogs(type) {
+    const res = await fetch(`/api/logs?type=${type}`);
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.text();
+}

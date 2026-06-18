@@ -10,15 +10,16 @@ from typing import Callable
 
 # Import Routers
 from backend.routes.system import router as system_router
-from backend.routes.devices import router as devices_router
-from backend.routes.backup import router as backup_router
-from backend.routes.certificates import router as certificates_router
 from backend.routes.health import router as health_router
 from backend.routes.login import router as login_router
-from backend.routes.hosts import router as hosts_router
-from backend.routes.aliases import router as aliases_router
 from backend.routes.dns import router as dns_router
 from backend.routes.dhcp import router as dhcp_router
+from backend.routes.hosts import router as hosts_router
+from backend.routes.aliases import router as aliases_router
+from backend.routes.devices import router as devices_router
+from backend.routes.certificates import router as certificates_router
+from backend.routes.backup import router as backup_router
+from backend.routes.logs import router as logs_router
 from backend.routes.settings import router as settings_router
 
 # Import Security
@@ -214,15 +215,16 @@ def create_app() -> FastAPI:
 
     # Routers
     app.include_router(system_router)
-    app.include_router(backup_router)
-    app.include_router(devices_router)
-    app.include_router(certificates_router)
     app.include_router(health_router)
     app.include_router(login_router)
-    app.include_router(hosts_router)
-    app.include_router(aliases_router)
     app.include_router(dns_router)
     app.include_router(dhcp_router)
+    app.include_router(hosts_router)
+    app.include_router(aliases_router)
+    app.include_router(devices_router)
+    app.include_router(certificates_router)
+    app.include_router(backup_router)
+    app.include_router(logs_router)
     app.include_router(settings_router)
 
     # CORS

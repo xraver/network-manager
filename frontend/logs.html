@@ -52,7 +52,8 @@
                         <a href="/aliases"  class="btn btn-primary">       Alias</a>
                         <a href="/leases"   class="btn btn-primary">       DHCP Leases</a>
                         <a href="/devices"  class="btn btn-primary">       Devices</a>
-                        <a href="/settings" class="btn btn-primary active">Settings</a>
+                        <a href="/logs"     class="btn btn-primary active">Logs</a>
+                        <a href="/settings" class="btn btn-primary">       Settings</a>
                         <button class="btn btn-primary btn-logout">Logout</button>
                 </div>
             </nav>
@@ -76,7 +77,8 @@
                         <a href="/aliases"  class="btn btn-primary">       Alias</a>
                         <a href="/leases"   class="btn btn-primary">       DHCP Leases</a>
                         <a href="/devices"  class="btn btn-primary">       Devices</a>
-                        <a href="/settings" class="btn btn-primary active">Settings</a>
+                        <a href="/logs"     class="btn btn-primary active">Logs</a>
+                        <a href="/settings" class="btn btn-primary">       Settings</a>
                         <button class="btn btn-primary btn-logout">Logout</button>
                     </div>
                 </div>
@@ -95,60 +97,70 @@
                 <!-- Title -->
                 <div class="col-auto col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
-                        <span class="title-icon"><i class="bi bi-gear"></i></span>
-                        <span class="section-title">Settings</span>
+                        <span class="title-icon"><i class="bi bi-hdd-network"></i></span>
+                        <span class="section-title">System Logs</span>
                     </h2>
                 </div>
 
                 <!-- Spacer -->
                 <div class="col"></div>
 
-                <!-- Search Desktop -->
-                <div class="col-auto col-md-auto d-none d-md-block">
-                    <div class="search-wrapper">
-                        <input
-                            type="text"
-                            id="searchInput"
-                            placeholder="Search..."
-                            class="form-control form-control-sm placeholder-italic"
-                            aria-label="Search config">
-                    </div>
-                </div>
-
                 <!-- Bottoni -->
                 <div class="col-auto col-md-auto d-flex align-items-center gap-2 flex-nowrap">
 
-                    <!-- Search Mobile -->
-                    <div class="col-auto d-md-none">
-                        <button
-                            class="btn btn-primary d-flex align-items-center gap-2 px-3"
-                            data-bs-toggle="collapse" data-bs-target="#mobileSearch"
-                            aria-expanded="false" aria-controls="mobileSearch">
-                            <i class="bi bi-search"></i>
-                        </button>
+                    <!-- Live Flag -->
+                    <div class="gap-2">
+                        <input type="checkbox" id="liveToggle" checked> Live
                     </div>
+
+                    <!-- LOG TYPE -->
+                    <div id="logTypeDropdown" class="dropdown gap-2">
+                        <button
+                            id="logTypeBtn"
+                            class="btn btn-primary dropdown-toggle"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-file-text me-1"></i>
+                            App
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item active" data-value="app" href="#">App</a></li>
+                            <li><a class="dropdown-item" data-value="access" href="#">Access</a></li>
+                            <li><a class="dropdown-item" data-value="dhcp" href="#">DHCP</a></li>
+                            <li><a class="dropdown-item" data-value="dns" href="#">DNS</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Refresh -->
+                    <button
+                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
+                        title="Refresh"
+                        aria-label="Refresh"
+                        data-action="refreshLogs">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span class="label">Refresh</span>
+                    </button>
 
                     <!-- Separator -->
                     <div class="vr mx-2 d-none d-md-block"></div>
 
-                    <!-- Expand -->
+                    <!-- Reload DNS Desktop -->
                     <button
                         class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Expand all groups"
-                        aria-label="Expand all groups"
-                        id="expandAllBtn">
-                        <i class="bi bi-arrows-expand"></i>
-                        <span class="label">Expand</span>
+                        title="Reload DNS (BIND)"
+                        aria-label="Reload DNS"
+                        data-action="reloadDns">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span class="label">Reload DNS</span>
                     </button>
 
-                    <!-- Collapse -->
+                    <!-- Reload DHCP Desktop -->
                     <button
                         class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Collapse all groups"
-                        aria-label="Collapse all groups"
-                        id="collapseAllBtn">
-                        <i class="bi bi-arrows-collapse"></i>
-                        <span class="label">Collapse</span>
+                        title="Reload DHCP (Kea)"
+                        aria-label="Reload DHCP"
+                        data-action="reloadDhcp">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span class="label">Reload DHCP</span>
                     </button>
 
                     <!-- Separator -->
@@ -176,27 +188,27 @@
 
                         <ul class="dropdown-menu dropdown-menu-end shadow">
 
-                            <!-- Expand Mobile -->
+                            <!-- Reload DNS Mobile -->
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2"
-                                    title="Expand all groups"
-                                    aria-label="Expand all groups"
-                                    id="expandAllBtn">
-                                    <i class="bi bi-arrows-expand"></i>
-                                    <span class="label">Expand</span>
+                                    title="Reload DNS (BIND)"
+                                    aria-label="Reload DNS"
+                                    data-action="reloadDns">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span>Reload DNS</span>
                                 </button>
                             </li>
 
-                            <!-- Collapse Mobile -->
+                            <!-- Reload DHCP Mobile -->
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2"
-                                    title="Collapse all groups"
-                                    aria-label="Collapse all groups"
-                                    id="collapseAllBtn">
-                                    <i class="bi bi-arrows-collapse"></i>
-                                    <span class="label">Collapse</span>
+                                    title="Reload DHCP (Kea)"
+                                    aria-label="Reload DHCP"
+                                    data-action="reloadDhcp">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span>Reload DHCP</span>
                                 </button>
                             </li>
 
@@ -215,44 +227,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Search collapsabile -->
-            <div class="collapse mt-2 d-md-none" id="mobileSearch">
-                <input
-                    type="text"
-                    id="searchInputMobile"
-                    placeholder="Search..."
-                    class="form-control form-control-sm placeholder-italic"
-                    aria-label="Search config">
-            </div>
         </div>
     </section>
 
-    <!-- Tabella responsive -->
-    <div id="tableWrapper" class="table-responsive mobile-scroll d-none">
-        <table id="dataTable" class="table table-bordered table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th data-type="string" data-sortable="false">
-                        Parameter <span class="sort-arrow" aria-hidden="true"></span>
-                    </th>
-
-                    <th data-type="string" data-sortable="false">
-                        Value <span class="sort-arrow" aria-hidden="true"></span>
-                    </th>
-
-                    <th data-type="string" data-sortable="false">
-                        Description <span class="sort-arrow" aria-hidden="true"></span>
-                    </th>
-
-                    <th data-type="string" data-sortable="false" class="text-center text-nowrap">
-                        Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+    <!-- Logs viewer -->
+    <div id="logViewer" class="log-viewer mobile-scroll mb-0"></div>
 
     <!-- Loader -->
     <div id="loader" class="text-center my-3" style="display: none;">
@@ -266,7 +245,7 @@
     <div id="modals-container"></div>
 
     <!-- Scripts -->
-    <script type="module" src="js/settings.js"></script>
+    <script type="module" src="js/logs.js"></script>
     <script type="module" src="js/session.js"></script>
 
     <!-- Bootstrap JS -->

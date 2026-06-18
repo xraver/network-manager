@@ -363,10 +363,8 @@ i.bi {
 .table-responsive {
     position: relative;
     margin: 20px;
-    width: calc(100% - 40px);
     max-height: calc(100vh - 174px);
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: auto;
     border-radius: 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.18);
     background-color: #fff;
@@ -646,6 +644,62 @@ td.actions {
 }
 
 /* ================================
+   Log Viewer
+   ================================ */
+.log-viewer {
+    position: relative;
+    margin: 20px;
+    height: calc(100vh - 174px);
+    overflow: auto;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+    border: 1px solid var(--border-light);
+    border-radius: .375rem;
+    background: #111;
+    color: #ddd;
+    font-family: monospace;
+    font-size: 0.85rem;
+    scrollbar-width: thin;
+    scrollbar-color: #9cdcfe transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.log-row {
+    display: grid;
+    grid-template-columns: 180px 50px 150px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    cursor: pointer;
+    transition: background-color .15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.log-row:hover {
+    background-color: rgba(255,255,255,.05);
+}
+
+.log-row.selected {
+    background-color: rgba(156, 220, 254, 0.15);
+    border-left: 3px solid #9cdcfe;
+}
+
+.log-date,
+.log-level,
+.log-source {
+    white-space: nowrap;
+}
+
+.log-message {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* log levels */
+.log-info  { color: #9cdcfe; }
+.log-warn  { color: #f9e79f; }
+.log-error { color: #ff6b6b; }
+
+/* ================================
    Responsive
    ================================ */
 @media (max-width: 768px) {
@@ -674,7 +728,6 @@ td.actions {
 
     .table-responsive {
         margin: 10px;
-        width: calc(100% - 20px);
         max-height: calc(100dvh - 9rem);
     }
 
@@ -701,6 +754,21 @@ td.actions {
     .btn .icon,
     .btn .bi {
         margin-right: 0;
+    }
+
+    .log-viewer {
+        margin: 10px;
+        height: calc(100dvh - 9rem);
+        font-size: 0.65rem;
+    }
+
+    .log-row {
+        grid-template-columns: 150px 1fr;
+    }
+
+    .log-level,
+    .log-source {
+        display: none;
     }
 }
 
