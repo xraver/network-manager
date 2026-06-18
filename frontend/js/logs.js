@@ -144,9 +144,26 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
                 lastSelectedRowId = rowId;
             });
 
-            // double click to copy
-            div.addEventListener("dblclick", async () => {
-                await navigator.clipboard.writeText(line);
+
+            // right click to copy logs
+            div.addEventListener("contextmenu", async (e) => {
+
+                e.preventDefault();
+
+                // se la riga non è selezionata la seleziono
+                if (!selectedRows.has(rowId)) {
+
+                    selectedRows.clear();
+
+                    document
+                        .querySelectorAll(".log-row.selected")
+                        .forEach(r => r.classList.remove("selected"));
+
+                    selectedRows.add(rowId);
+                    div.classList.add("selected");
+                }
+
+                await copySelectedLogs();
             });
 
             div.innerHTML =
@@ -182,6 +199,42 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
             const diff = newHeight - previousHeight;
             logViewer.scrollTop = previousScroll + diff;
         }
+    }
+}
+
+// -----------------------------
+// copy logs
+// -----------------------------
+async function copySelectedLogs() {
+
+    const rows = Array.from(document.querySelectorAll(".log-row"));
+
+    const selectedTexts = rows
+        .filter(row => selectedRows.has(row.dataset.rowId))
+        .map(row => row.textContent.trim());
+
+    if (!selectedTexts.length) {
+        showToast("No rows selected", false);
+        return;
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(
+            selectedTexts.join("\n")
+        );
+
+        showToast(
+            `${selectedTexts.length} log(s) copied`,
+            true
+        );
+
+    } catch (err) {
+
+        showToast(
+            "Error copying logs",
+            false
+        );
     }
 }
 

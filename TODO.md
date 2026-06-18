@@ -51,6 +51,23 @@
 
 ---
 
+## 📝 Logs
+
+- [x] Log Generation
+- [x] Application Log Visualization
+- [x] Access Log Visualization
+- [ ] DNS Log Visualization
+- [ ] DHCP Log Visualization
+- [X] Live Log Streaming
+- [ ] Log Filtering by Level
+- [ ] Time Range Filtering
+- [X] Multi-Row Selection
+- [ ] Export Logs (CSV/TXT)
+- [X] Copy Selected Logs (right click on selected)
+- [X] Auto Scroll (tail -f)
+
+---
+
 ## 🧩 Configuration Generation
 
 ### 🧪 BIND (DNS)
