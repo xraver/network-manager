@@ -254,7 +254,8 @@ function updateDropdownUI(value) {
 
             if (active) {
                 button.innerHTML =
-                    `<i class="bi bi-file-text me-1"></i> ${item.textContent}`;
+                    `<i class="bi bi-file-text"></i>
+                    <span class="label d-none d-md-inline">${item.textContent}</span>`;
             }
         });
 }
