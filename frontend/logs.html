@@ -108,12 +108,45 @@
                 <!-- Bottoni -->
                 <div class="col-auto col-md-auto d-flex align-items-center gap-2 flex-nowrap">
 
-                    <!-- Live Flag -->
-                    <div class="gap-2">
-                        <input type="checkbox" id="liveToggle" checked> Live
+                    <!-- View Panel -->
+                    <div id="viewDropdown" class="dropdown">
+                        <button
+                            id="viewBtn"
+                            class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-eye"></i>
+                            <span class="label d-none d-md-inline">View</span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                            <!-- Live Flag -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-success w-100 d-flex align-items-center gap-2"
+                                    title="Live Stream On"
+                                    aria-label="Live Stream On"
+                                    data-action="liveToggle">
+                                    <i class="bi bi-broadcast"></i>
+                                    <span class="label d-md-inline">Live</span>
+                                </button>
+                            </li>
+
+                            <!-- Refresh -->
+                            <li class="px-2 py-1">
+                                <button
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    title="Refresh"
+                                    aria-label="Refresh"
+                                    data-action="refreshLogs">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span class="label d-md-inline">Refresh</span>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
 
-                    <!-- LOG TYPE -->
+                    <!-- Log Type -->
                     <div id="logTypeDropdown" class="dropdown">
                         <button
                             id="logTypeBtn"
@@ -122,7 +155,7 @@
                             <i class="bi bi-file-text"></i>
                             <span class="label d-none d-md-inline">App</span>
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
                             <li><a class="dropdown-item active" data-value="app" href="#">App</a></li>
                             <li><a class="dropdown-item" data-value="access" href="#">Access</a></li>
                             <li><a class="dropdown-item" data-value="dhcp" href="#">DHCP</a></li>
@@ -130,97 +163,110 @@
                         </ul>
                     </div>
 
-                    <!-- Refresh -->
-                    <button
-                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Refresh"
-                        aria-label="Refresh"
-                        data-action="refreshLogs">
-                        <i class="bi bi-arrow-repeat"></i>
-                        <span class="label">Refresh</span>
-                    </button>
-
-                    <!-- Separator -->
-                    <div class="vr mx-2 d-none d-md-block"></div>
-
-                    <!-- Reload DNS Desktop -->
-                    <button
-                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Reload DNS (BIND)"
-                        aria-label="Reload DNS"
-                        data-action="reloadDns">
-                        <i class="bi bi-arrow-repeat"></i>
-                        <span class="label">Reload DNS</span>
-                    </button>
-
-                    <!-- Reload DHCP Desktop -->
-                    <button
-                        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Reload DHCP (Kea)"
-                        aria-label="Reload DHCP"
-                        data-action="reloadDhcp">
-                        <i class="bi bi-arrow-repeat"></i>
-                        <span class="label">Reload DHCP</span>
-                    </button>
-
-                    <!-- Separator -->
-                    <div class="vr mx-2 d-none d-md-block"></div>
-
-                    <!-- Restart Desktop -->
-                    <button
-                        class="btn btn-danger d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Restart system"
-                        aria-label="Restart system"
-                        data-action="restartApp">
-                        <i class="bi bi-arrow-repeat"></i>
-                        <span class="label">Restart</span>
-                    </button>
-
-                    <!-- Mobile Dropdown -->
-                    <div class="dropdown d-md-none">
+                    <!-- Filter -->
+                    <div class="dropdown">
                         <button
-                            class="btn btn-primary d-flex align-items-center px-3"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
+                            id="filterBtn"
+                            class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2 px-3"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-sliders"></i>
+                            <span class="label d-none d-md-inline">Filter</span>
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-end shadow p-3" id="filterDropdown">
+                            <!-- Search Bar -->
+                            <div class="mb-2">
+                                <label class="form-label small">Search</label>
+                                <input
+                                    type="text"
+                                    id="logSearch"
+                                    class="form-control mb-2"
+                                    placeholder="Search logs">
+                            </div>
+
+                            <!-- Separator -->
+                            <hr class="dropdown-divider">
+
+                            <div class="mb-2">
+                                <!-- Log Level -->
+                                <div class="form-check">
+                                    <input class="form-check-input level-filter"
+                                        type="checkbox"
+                                        value="INFO"
+                                        id="filterInfo">
+                                    <label class="form-check-label" for="filterInfo">INFO</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input level-filter"
+                                        type="checkbox"
+                                        value="WARN"
+                                        id="filterWarn">
+                                    <label class="form-check-label" for="filterWarn">WARN</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input level-filter"
+                                        type="checkbox"
+                                        value="ERROR"
+                                        id="filterError">
+                                    <label class="form-check-label" for="filterError">ERROR</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Separator -->
+                    <div class="vr mx-2 d-none d-md-block"></div>
+
+                    <!-- Admin Panel -->
+                    <div id="adminDropdown" class="dropdown">
+                        <button
+                            id="adminBtn"
+                            class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2 px-3"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-gear"></i>
+                            <span class="label d-none d-md-inline">Admin</span>
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow">
 
-                            <!-- Reload DNS Mobile -->
+                            <!-- Reload DNS -->
                             <li class="px-2 py-1">
                                 <button
-                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2 text-nowrap"
                                     title="Reload DNS (BIND)"
                                     aria-label="Reload DNS"
                                     data-action="reloadDns">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                    <span>Reload DNS</span>
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    <span class="label d-md-inline">Reload DNS</span>
                                 </button>
                             </li>
 
-                            <!-- Reload DHCP Mobile -->
+                            <!-- Reload DHCP -->
                             <li class="px-2 py-1">
                                 <button
-                                    class="btn btn-primary w-100 d-flex align-items-center gap-2"
+                                    class="btn btn-primary w-100 d-flex align-items-center gap-2 text-nowrap"
                                     title="Reload DHCP (Kea)"
                                     aria-label="Reload DHCP"
                                     data-action="reloadDhcp">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                    <span>Reload DHCP</span>
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    <span class="label d-md-inline">Reload DHCP</span>
                                 </button>
                             </li>
 
-                            <!-- Restart Mobile -->
+                            <!-- Separator -->
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- Restart -->
                             <li class="px-2 py-1">
                                 <button
-                                    class="btn btn-danger w-100 d-flex align-items-center gap-2"
+                                    class="btn btn-danger w-100 d-flex align-items-center gap-2 text-nowrap"
                                     title="Restart system"
                                     aria-label="Restart system"
                                     data-action="restartApp">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                    <span class="label">Restart</span>
+                                    <i class="bi bi-power"></i>
+                                    <span class="label d-md-inline">Restart</span>
                                 </button>
                             </li>
                         </ul>

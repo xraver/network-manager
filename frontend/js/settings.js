@@ -1,7 +1,7 @@
 // Import common js
 import { loadModals, showToast, handleSearch, clearSearch, showConfirmModal, handleReload } from './common.js';
 // Import services
-import { serviceGetConfigs, serviceGetConfig, serviceUpdateConfig, serviceResetConfig, serviceRestartApp, serviceIsAlive } from './services.js';
+import { serviceGetConfigs, serviceGetConfig, serviceUpdateConfig, serviceResetConfig, serviceReloadDNS, serviceReloadDHCP, serviceRestartApp, serviceIsAlive } from './services.js';
 
 // -----------------------------
 // State variables
@@ -693,11 +693,32 @@ const actionHandlers = {
     edit: () => {
         // handled by bootstrap modal show event
     },
+    reloadDns: async (e, el) => {
+        showToast("DNS is reloading...", true);
+        await handleReload(
+            el,
+            serviceReloadDNS,
+            "DNS reload successfully",
+            "Error reloading DNS",
+            "Reloading DNS..."
+        );
+    },
+    // Reload DHCP
+    reloadDhcp: async (e, el) => {
+        showToast("DHCP is reloading...", true);
+        await handleReload(
+            el,
+            serviceReloadDHCP,
+            "DHCP reload successfully",
+            "Error reloading DHCP",
+            "Reloading DHCP..."
+        );
+    },
     // Reload App
     restartApp: async (e, el) => {
         await handleRestartApp(el)
     },
-}
+};
 
 // -----------------------------
 // DOMContentLoaded: bootstrap app

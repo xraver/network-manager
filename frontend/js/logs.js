@@ -10,10 +10,106 @@ const logViewer = document.getElementById("logViewer");
 const loader = document.getElementById("loader");
 let selectedLogType = "app";
 let live = true;
+// concurrent requests
 let requestId = 0;
 let loading = false;
+// selection
 let selectedRows = new Set();
 let lastSelectedRowId = null;
+// search
+let searchText = "";
+let levelFilters = new Set();
+// scroll
+let savedScrollPosition = null;
+
+// -----------------------------
+// manage the live stream
+// -----------------------------
+function handleLiveToggle() {
+    const btn = document.querySelector('[data-action="liveToggle"]');
+    const icon = btn.querySelector('i');
+
+    live = !live;
+
+    btn.classList.toggle('btn-success', live);
+    btn.classList.toggle('btn-outline-secondary', !live);
+
+    icon.className = live
+        ? 'bi bi-broadcast'
+        : 'bi bi-pause-circle';
+}
+
+// -----------------------------
+// apply filter
+// -----------------------------
+function applyLogFilters() {
+
+    const rows = document.querySelectorAll(".log-row");
+
+    rows.forEach(row => {
+
+        const text = row.textContent.toLowerCase();
+
+        const level = row.dataset.level;
+
+        const matchesText =
+            !searchText ||
+            text.includes(searchText);
+
+        const matchesLevel =
+            levelFilters.size === 0 ||
+            levelFilters.has(level);
+
+        row.style.display =
+            matchesText && matchesLevel
+                ? ""
+                : "none";
+    });
+}
+
+// -----------------------------
+// update filter button
+// -----------------------------
+function updateFilterButton() {
+    const btn = document.getElementById("filterBtn");
+    if (!btn) return;
+
+    const icon = btn.querySelector("i");
+
+    const active =
+        searchText.length > 0 ||
+        levelFilters.size > 0;
+
+    icon.className = active
+        ? "bi bi-funnel-fill"
+        : "bi bi-sliders";
+}
+
+// -----------------------------
+// clear filter
+// -----------------------------
+function clearFilters() {
+    searchText = "";
+    levelFilters.clear();
+
+    const searchInput =
+        document.getElementById("logSearch");
+
+    if (searchInput) {
+        searchInput.value = "";
+    }
+
+    document
+        .querySelectorAll(".level-filter")
+        .forEach(cb => cb.checked = false);
+
+    applyLogFilters();
+    updateFilterButton();
+
+    requestAnimationFrame(() => {
+        logViewer.scrollTop = savedScrollPosition;
+    });
+}
 
 // -----------------------------
 // load logs from backend
@@ -54,7 +150,6 @@ async function loadLogs() {
 // shows logs in the table
 // -----------------------------
 function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
-
     const lines = text.split("\n");
     const fragment = document.createDocumentFragment();
 
@@ -77,8 +172,11 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
             // define rowID as combination of the log
             const rowId = `${date}|${level}|${source}|${msg}`;
 
+            // add field for selection and search
             div.dataset.index = index;
             div.dataset.rowId = rowId;
+            div.dataset.level = level;
+            div.dataset.source = source;
 
             div.classList.add("log-row");
 
@@ -90,9 +188,9 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
 
                     const rows = Array.from(
                         document.querySelectorAll(".log-row")
+                    ).filter(
+                        row => row.style.display !== "none"
                     );
-
-                    const currentIndex = Number(div.dataset.index);
 
                     const lastRow = rows.find(
                         r => r.dataset.rowId === lastSelectedRowId
@@ -100,7 +198,8 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
 
                     if (lastRow) {
 
-                        const lastIndex = Number(lastRow.dataset.index);
+                        const currentIndex = rows.indexOf(div);
+                        const lastIndex    = rows.indexOf(lastRow);
 
                         const start = Math.min(lastIndex, currentIndex);
                         const end   = Math.max(lastIndex, currentIndex);
@@ -185,6 +284,8 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
     logViewer.innerHTML = "";
     logViewer.appendChild(fragment);
 
+    // apply current filter
+    applyLogFilters();
 
     if (isNearBottom) {
         // "tail -f"
@@ -194,7 +295,7 @@ function renderLogs(text, isNearBottom, previousScroll, previousHeight) {
         const newHeight = logViewer.scrollHeight;
         if (newHeight < previousHeight) {
             // log rotation o reset
-            logViewer.scrollTop = 0;
+            logViewer.scrollTop = Math.min(previousScroll, newHeight);
         } else {
             const diff = newHeight - previousHeight;
             logViewer.scrollTop = previousScroll + diff;
@@ -328,6 +429,10 @@ async function handleRestartApp(button) {
 // Action Handlers
 // -----------------------------
 const actionHandlers = {
+    // Live Stream
+    liveToggle: (e, el) => {
+        handleLiveToggle();
+    },
     // Refresh Logs
     refreshLogs: (e, el) => {
         loadLogs();
@@ -338,6 +443,7 @@ const actionHandlers = {
     //},
     // Reload DNS
     reloadDns: async (e, el) => {
+        showToast("DNS is reloading...", true);
         await handleReload(
             el,
             serviceReloadDNS,
@@ -348,6 +454,7 @@ const actionHandlers = {
     },
     // Reload DHCP
     reloadDhcp: async (e, el) => {
+        showToast("DHCP is reloading...", true);
         await handleReload(
             el,
             serviceReloadDHCP,
@@ -356,7 +463,7 @@ const actionHandlers = {
             "Reloading DHCP..."
         );
     },
-    // Reload DHCP
+    // Reload App
     restartApp: async (e, el) => {
         await handleRestartApp(el)
     },
@@ -385,6 +492,7 @@ async function initApp() {
 
     initEvents();
     initDropdown();
+    initFilters();
 
     // auto refresh (tipo tail -f)
     setInterval(() => {
@@ -396,15 +504,15 @@ async function initApp() {
 // GLOBAL EVENTS INIT
 // -----------------------------
 function initEvents() {
-
+    // Click
     document.addEventListener('click', handleActionClick);
 
-    const liveToggle = document.getElementById("liveToggle");
-    if (liveToggle) {
-        liveToggle.addEventListener("change", (e) => {
-            live = e.target.checked;
-        });
-    }
+    // Esc button
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            clearFilters();
+        }
+    });
 }
 
 // -----------------------------
@@ -458,4 +566,42 @@ function initDropdown() {
             });
 
         });
+}
+
+// -----------------------------
+// Init filters
+// -----------------------------
+function initFilters() {
+
+    const searchInput =
+        document.getElementById("logSearch");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", e => {
+            if (!searchText) {
+                savedScrollPosition = logViewer.scrollTop;
+            }
+            searchText = e.target.value.trim().toLowerCase();
+            applyLogFilters();
+            updateFilterButton();
+        });
+    }
+
+    document
+        .querySelectorAll(".level-filter")
+        .forEach(cb => {
+            cb.addEventListener("change", () => {
+                if (levelFilters.size === 0 && searchText.length === 0 ) {
+                    savedScrollPosition = logViewer.scrollTop;
+                }
+                levelFilters.clear();
+                document
+                    .querySelectorAll(".level-filter:checked")
+                    .forEach(x => levelFilters.add(x.value));
+                applyLogFilters();
+                updateFilterButton();
+            });
+        });
+
+    updateFilterButton();
 }
