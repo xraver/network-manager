@@ -451,6 +451,7 @@ def store_metadata(
                 "generated_at": timestamp,
                 "backup_version": settings.BACKUP_VERSION,
                 "db_structure_version": settings.BACKUP_DB_STRUCTURE_VERSION,
+                "app_version": settings.APP_VERSION,
                 "file_count": 2,
                 "files": [
                     {

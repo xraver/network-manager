@@ -25,6 +25,7 @@
     - [X] alias configuration
     - [X] reverse configuration
     - [ ] IPv6 configuration
+    - [ ] Show DNS zone generated
   - [X] **Kea (DHCP)** configuration
     - [X] IPv4 configuration
     - [X] Convert dynamic lease into a static host
@@ -138,6 +139,7 @@
 - [X] Backup generation
 - [X] Backup restore
 - [X] Backup/Restore from web
+- [ ] Show Backup information (metadata, integrity, statistics) in Backup Management
 - [ ] Periodic backup of SQLite DB
 - [ ] Remote Git repository backup
 - [ ] Backup of generated configurations

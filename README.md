@@ -10,15 +10,22 @@
 
 ## 🌐 Network management web app
 
-A **unified web app for complete control of your network infrastructure**, designed as an integrated frontend for **BIND** (DNS), **Kea DHCP**, and with automatic support for **Let’s Encrypt** certificates.
+![Network Manager Dashboard](dashboard.png)
+
+A **unified web application for complete control of your network infrastructure**, designed as an integrated frontend for **BIND** (DNS), **Kea DHCP**, and **Let's Encrypt** certificate management.
+
+Network Manager provides a centralized interface to manage hosts, aliases, DNS records, DHCP reservations, certificates, backups, and system settings, eliminating the need to manually edit configuration files.
 
 The application includes:
 
-- **Integrated frontend**
-- **Administrator authentication**
-- Simple and lightweight **SQLite database**
-- **Automatic generation** of DNS and DHCP configurations from a defined domain
-- **Local versioning** of configurations, with change history and rollback capability
+- DNS host and alias management
+- DHCP lease and reservation management
+- Device inventory and monitoring
+- Let's Encrypt certificate management
+- Backup and restore with integrity verification
+- Health monitoring and logging
+- Automatic DNS and DHCP configuration generation
+- Docker-native deployment
 
 This solution allows you to manage hosts, DNS zones, DHCP leases, and certificates from a single centralized interface, reducing manual errors and greatly simplifying operations.
 
