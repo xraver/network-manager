@@ -24,26 +24,22 @@ export async function serviceCheckHealth() {
 // Reload DNS
 // -----------------------------
 export async function serviceReloadDNS() {
-    const data = await apiPost(
+    return await apiPost(
         "/api/dns/reload",
         null,
         "Error reloading DNS"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Reload DHCP action
 // -----------------------------
 export async function serviceReloadDHCP() {
-    const data = await apiPost(
+    return await apiPost(
         "/api/dhcp/reload",
         null,
         "Error reloading DHCP"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
@@ -68,13 +64,11 @@ export async function serviceGetDHCPLease(id) {
 // Delete DHCP Lease
 // -----------------------------
 export async function serviceDeleteDHCPLease(id) {
-    const data = await apiRequest(
+    return await apiRequest(
         `/api/dhcp/leases/${id}`,
         { method: "DELETE" },
         "Error deleting host"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
@@ -99,7 +93,7 @@ export async function serviceGetHost(id) {
 // Create a new host
 // -----------------------------
 export async function serviceCreateHost(hostData) {
-    const data = await apiRequest(
+    return await apiRequest(
         "/api/hosts",
         {
             method: "POST",
@@ -108,15 +102,13 @@ export async function serviceCreateHost(hostData) {
         },
         "Error creating host"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Update an host
 // -----------------------------
 export async function serviceUpdateHost(id, hostData) {
-    const data = await apiRequest(
+    return await apiRequest(
         `/api/hosts/${id}`,
         {
             method: "PUT",
@@ -125,21 +117,17 @@ export async function serviceUpdateHost(id, hostData) {
         },
         "Error updating host"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Delete Hosts
 // -----------------------------
 export async function serviceDeleteHost(id) {
-    const data = await apiRequest(
+    return await apiRequest(
         `/api/hosts/${id}`,
         { method: "DELETE" },
         "Error deleting host"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
@@ -164,7 +152,7 @@ export async function serviceGetAlias(id) {
 // Create a new alias
 // -----------------------------
 export async function serviceCreateAlias(aliasData) {
-    const data = await apiRequest(
+    return await apiRequest(
         "/api/aliases",
         {
             method: "POST",
@@ -173,15 +161,13 @@ export async function serviceCreateAlias(aliasData) {
         },
         "Error creating alias"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Update an alias
 // -----------------------------
 export async function serviceUpdateAlias(id, aliasData) {
-    const data = await apiRequest(
+    return await apiRequest(
         `/api/aliases/${id}`,
         {
             method: "PUT",
@@ -190,21 +176,17 @@ export async function serviceUpdateAlias(id, aliasData) {
         },
         "Error updating alias"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Delete Alias
 // -----------------------------
 export async function serviceDeleteAlias(id) {
-    const data = await apiRequest(
+    return await apiRequest(
         `/api/aliases/${id}`,
         { method: "DELETE" },
         "Error deleting alias"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
@@ -218,23 +200,12 @@ export async function serviceGetDevices() {
 // Create a Backup
 // -------------------------------------------------------
 export async function serviceBackupCreate() {
-    const data = await apiPost(
+    return await apiPost(
         "/api/backup/create",
         null,
         "Error performing backup"
     );
 
-    if (data.status === 'success') {
-        return data?.message ? { message: data.message } : true;
-    }
-
-    if (data.status === 'partial') {
-        return data?.message
-            ? { message: data.message, partial: true }
-            : { partial: true };
-    }
-
-    return false;
 }
 
 // -------------------------------------------------------
@@ -248,36 +219,22 @@ export async function serviceBackupList() {
 // Restore a Backup
 // -------------------------------------------------------
 export async function serviceBackupRestore(id) {
-    const data = await apiPost(
+    return await apiPost(
         "/api/backup/restore",
         { backup_id: id },
         "Error performing restore"
     );
-
-    if (data.status === 'success') {
-        return data?.message ? { message: data.message } : true;
-    }
-
-    if (data.status === 'partial') {
-        return data?.message
-            ? { message: data.message, partial: true }
-            : { partial: true };
-    }
-
-    return false;
 }
 
 // -------------------------------------------------------
 // Delete a Backup
 // -------------------------------------------------------
 export async function serviceDeleteBackup(id) {
-    const data = await apiPost(
+    return await apiPost(
         "/api/backup/delete",
         { backup_id: id },
         "Error performing delete"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -------------------------------------------------------
@@ -344,7 +301,7 @@ export async function serviceGetConfig(key) {
 // Update a configuration parameter
 // -----------------------------
 export async function serviceUpdateConfig(key, configData) {
-    const data = await apiRequest(
+    return await apiRequest(
         `/api/settings/${key}`,
         {
             method: "PUT",
@@ -353,34 +310,28 @@ export async function serviceUpdateConfig(key, configData) {
         },
         "Error updating configuration parameter"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Reset a configuration parameter to its default value
 // -----------------------------
 export async function serviceResetConfig(key) {
-    const data = await apiPost(
+    return await apiPost(
         `/api/settings/${key}/reset`,
         null,
         "Error restoring default value"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------
 // Reset a configuration parameter to its default value
 // -----------------------------
 export async function serviceRestartApp(key) {
-    const data = await apiPost(
+    return await apiPost(
         "/api/restart",
         null,
         "Error restarting application"
     );
-
-    return data?.message ? { message: data.message } : true;
 }
 
 // -----------------------------

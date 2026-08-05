@@ -38,6 +38,13 @@ TYPE_CASTERS = {
 # Default Values
 # ---------------------------------------------------------
 CONFIG_DEFAULTS = {
+    "LANGUAGE": {
+        "value": settings.LANGUAGE,
+        "description": "Language for the application",
+        "group_name": "localization",
+        "type": "string",
+        "allowed": ["en", "es", "it", "fr", "de"],
+    },
     "LOG_LEVEL": {
         "value": settings.LOG_LEVEL,
         "description": "Logging verbosity level",

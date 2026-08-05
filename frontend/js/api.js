@@ -53,17 +53,17 @@ export async function apiRequest(
 
     // Handle HTTP error
     if (!res.ok) {
-        const serverMsg =
-            data?.detail?.message?.trim()
-            || (typeof data?.detail === 'string' ? data.detail.trim() : '')
-            || data?.message?.trim()
-            || data?.error?.message?.trim()
-            || (typeof data?.error === 'string' ? data.error.trim() : '');
+
+        const detail = data?.detail ?? data;
 
         const err = new Error(
-            `${errorPrefix}${serverMsg ? `: ${serverMsg}` : ''}`
+            detail?.message || errorPrefix
         );
+
         err.status = res.status;
+        err.code = detail?.code;
+        err.details = detail?.details;
+
         throw err;
     }
 

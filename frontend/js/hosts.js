@@ -1,7 +1,10 @@
-// Import common js
+// -------------------------------------------------------
+// IMPORT
+// -------------------------------------------------------
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, handleSearch, filterTable, clearSearch, handleReload } from './common.js';
-// Import services
 import { serviceReloadDNS, serviceReloadDHCP, serviceGetHosts, serviceGetHost, serviceCreateHost, serviceUpdateHost, serviceDeleteHost } from './services.js';
+import { loadLanguage, translatePage, t } from "./i18n.js";
+import { getBackendMessage } from "./backendMessages.js";
 
 // -----------------------------
 // State variables
@@ -30,8 +33,8 @@ async function fetchHosts () {
         viewHosts = [...allHosts];
 
     } catch (err) {
-        console.error(err?.message || "Error loading hosts");
-        showToast(err?.message || "Error loading hosts", false);
+        console.error(err?.message || t("hosts.list.error"));
+        showToast(err?.message || t("hosts.list.error"), false);
         allHosts = [];
         viewHosts = [];
         // hide loader and show table
@@ -64,7 +67,7 @@ function updateTable () {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 6;
-        tdEmpty.textContent = "No hosts available.";
+        tdEmpty.textContent = t("hosts.empty");
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
@@ -129,52 +132,55 @@ function updateTable () {
             // SSL icon
             //
             const sslEnabled = !!h.ssl_enabled;
-            td.setAttribute("data-value", sslEnabled ? "true" : "false");
-            td.setAttribute("aria-label", sslEnabled ? "SSL attivo" : "SSL non attivo");
-            const icon = document.createElement("i");
+            const wrapperSslIcon = document.createElement("span");
+            const sslIcon = document.createElement("i");
+            let description = "";
             if (sslEnabled) {
-                icon.className = "bi bi-shield-lock-fill icon icon-static";
-                icon.setAttribute("aria-hidden", "true");
-                icon.setAttribute("title", "SSL certificate enabled");
+                sslIcon.className = "bi bi-shield-lock-fill icon icon-static";
+                description = t("hosts.ssl.enabled");
+                wrapperSslIcon.setAttribute("title", description);
+                wrapperSslIcon.setAttribute("aria-label", description);
             } else {
-                icon.className = "bi bi-shield-lock-fill icon icon-static icon-placeholder";
-                icon.setAttribute("aria-hidden", "true");
+                sslIcon.className = "bi bi-shield-lock-fill icon icon-static icon-placeholder";
+                sslIcon.setAttribute("aria-hidden", "true");
             }
-            td.appendChild(icon);
+            wrapperSslIcon.appendChild(sslIcon);
+            td.appendChild(wrapperSslIcon);
 
             //
             // visibility icon
             //
             const ext = (h.visibility ?? "").toString();
-            let aria = "";
+            const wrapperVisibilityIcon = document.createElement("span");
+            const visibilityIcon = document.createElement("i");
             let iconClass = "";
             switch (ext) {
                 case "0":
                     // Only local (A record internally resolved)
-                    aria = "Only local (A record internally resolved)";
+                    description = t("hosts.visibility.local.description");
                     iconClass = "bi bi-hdd-network";
                     break;
 
                 case "1":
                     // Local and external (A record internally resolved, A externally)
-                    aria = "Internal and external are identical";
+                    description = t("hosts.visibility.global.description");
                     iconClass = "bi bi-globe2";
                     break;
 
                 case "2":
                     // CNAME -> DDNS / external_name
-                    aria = "External is a CNAME to external_name";
+                    description = t("hosts.visibility.alias.description");
                     iconClass = "bi bi-link-45deg";
                     break;
             }
             if (iconClass) {
-                const icon = document.createElement("i");
-                icon.className = iconClass + " icon icon-static";
-                icon.setAttribute("aria-hidden", "true");
-                icon.setAttribute("title", aria);
-                td.appendChild(icon);
+                visibilityIcon.className = iconClass + " icon icon-static";
+                wrapperVisibilityIcon.setAttribute("title", description);
+                wrapperVisibilityIcon.setAttribute("aria-label", description);
+                wrapperVisibilityIcon.appendChild(visibilityIcon);
+                td.appendChild(wrapperVisibilityIcon);
             }
-
+            if (ext) td.setAttribute("data-value", ext);
             tr.appendChild(td);
         }
 
@@ -187,11 +193,12 @@ function updateTable () {
 
             // Edit Button
             const editSpan = document.createElement("span");
+            const editText = t("hosts.edit");
             editSpan.className = "action-icon";
             editSpan.setAttribute("role", "button");
             editSpan.tabIndex = 0;
-            editSpan.title = "Edit host";
-            editSpan.setAttribute("aria-label", "Edit host");
+            editSpan.title = editText;
+            editSpan.setAttribute("aria-label", editText);
             editSpan.setAttribute("data-bs-toggle", "modal");
             editSpan.setAttribute("data-bs-target", "#addHostModal");
             editSpan.setAttribute("data-action", "edit");
@@ -205,11 +212,12 @@ function updateTable () {
 
             // Delete Button
             const delSpan = document.createElement("span");
+            const deleteText = t("hosts.delete");
             delSpan.className = "action-icon";
             delSpan.setAttribute("role", "button");
             delSpan.tabIndex = 0;
-            delSpan.title = "Delete host";
-            delSpan.setAttribute("aria-label", "Delete host");
+            delSpan.title = deleteText;
+            delSpan.setAttribute("aria-label", deleteText);
             delSpan.setAttribute("data-action", "delete");
             delSpan.setAttribute("data-host-id", String(id));
             {
@@ -278,10 +286,9 @@ async function editHost(id) {
         } else {
             document.getElementById("hostVisibilityLocal").checked = true;
         }
-
     } catch (err) {
-        console.error(err?.message || "Error loading host");
-        showToast(err?.message || "Error loading host", false);
+        console.error(err?.message || t("hosts.loaded.error"));
+        showToast(err?.message || t("hosts.loaded.error"), false);
     }
 }
 
@@ -291,22 +298,22 @@ async function editHost(id) {
 async function saveHost(hostData) {
     // Validate hostname
     if (!hostData.name.trim()) {
-        showToast("Hostname is required", false);
+        showToast(t("validation.name.required"), false);
         return false;
     }
     // Validate IPv4 format
     if (!isValidIPv4(hostData.ipv4)) {
-        showToast("Invalid IPv4 format", false);
+        showToast(t("validation.ipv4.invalid"), false);
         return false;
     }
     // Validate IPv6 format
     if (!isValidIPv6(hostData.ipv6)) {
-        showToast("Invalid IPv6 format", false);
+        showToast(t("validation.ipv6.invalid"), false);
         return false;
     }
     // Validate MAC format
     if (!isValidMAC(hostData.mac)) {
-        showToast("Invalid MAC format", false);
+        showToast(t("validation.mac.invalid"), false);
         return false;
     }
 
@@ -321,19 +328,27 @@ async function saveHost(hostData) {
             result = await serviceCreateHost(hostData);
         }
 
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : editingHostId !== null
-                ? 'Host updated successfully'
-                : 'Host created successfully';
+        const msg = getBackendMessage(
+            result,
+            editingHostId !== null
+                ? "hosts.updated.ok"
+                : "hosts.created.ok"
+        );
 
         showToast(msg, true);
 
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+
+        const msg = getBackendMessage(
+            err,
+            editingHostId !== null
+                ? "hosts.updated.error"
+                : "hosts.created.error"
+        );
+
+        showToast(msg, false);
     }
 
     return false;
@@ -391,8 +406,20 @@ async function handleAddHostSubmit(e) {
         }
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+        console.error(
+            err?.message ||
+            (editingHostId !== null
+                ? t("hosts.updated.error")
+                : t("hosts.created.error"))
+        );
+
+        showToast(
+            err?.message ||
+            (editingHostId !== null
+                ? t("hosts.updated.error")
+                : t("hosts.created.error")),
+            false
+        );
     }
 
     return false;
@@ -408,17 +435,13 @@ async function handleDeleteHost(e, el) {
     // Get host ID
     const id = Number(el.dataset.hostId);
     if (!Number.isFinite(id)) {
-        showToast('Host id not valid for delete', false);
+        showToast(t("hosts.delete.invalid_id"), false);
         return;
     }
 
     try {
         const result = await serviceDeleteHost(id);
-
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : 'Host deleted successfully';
-
+        const msg = getBackendMessage(result, "hosts.deleted.ok");
         showToast(msg, true);
 
         // Reload hosts
@@ -428,8 +451,8 @@ async function handleDeleteHost(e, el) {
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error deleting host");
-        showToast(err?.message || "Error deleting host", false);
+        console.error(err?.message || t("hosts.deleted.error"));
+        showToast(err?.message || t("hosts.deleted.error"), false);
     }
 
     return false;
@@ -452,9 +475,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDNS,
-            "DNS reload successfully",
-            "Error reloading DNS",
-            "Reloading DNS..."
+            t("dns.reload.ok"),
+            t("dns.reload.error"),
+            t("dns.reload.progress")
         );
     },
     // Reload DHCP
@@ -462,9 +485,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDHCP,
-            "DHCP reload successfully",
-            "Error reloading DHCP",
-            "Reloading DHCP..."
+            t("dhcp.reload.ok"),
+            t("dhcp.reload.error"),
+            t("dhcp.reload.progress")
         );
     },
 };
@@ -481,21 +504,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 // -----------------------------
 async function initApp() {
 
+    // Loading translation
+    try {
+        await loadLanguage();
+    } catch (err) {
+        console.error(err?.message || t("app.translation.error"));
+        showToast(t("app.translation.error"), false);
+    }
+
     // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
     try {
         await loadModals();
     } catch (err) {
-        console.error(err?.message || "Error loading modals");
-        showToast(err?.message || "Error loading modals", false);
+        console.error(err?.message || t("app.modals.error"));
+        showToast(t("app.modals.error"), false);
     }
+
+    // Translate page
+    translatePage();
 
     // Load data (hosts)
     try {
         await fetchHosts();
         updateTable();
     } catch (err) {
-        console.error(err?.message || "Error loading hosts");
-        showToast(err?.message || "Error loading hosts", false);
+        console.error(err?.message || t("hosts.list.error"));
+        showToast(err?.message || t("hosts.list.error"), false);
     }
 
     initUI();
@@ -557,7 +591,7 @@ function initModalLifecycle() {
             try {
                 await editHost(id);
             } catch (err) {
-                showToast(err?.message || "Error loading host", false);
+                showToast(err?.message || t("hosts.loaded.error"), false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
                     closeAddHostModal();
@@ -615,8 +649,8 @@ async function handleActionClick(e) {
     try {
         await handler(e, el);
     } catch (err) {
-        console.error(err?.message || 'Action error');
-        showToast(err?.message || 'Action error', false);
+        console.error(err?.message || t("app.action.error"));
+        showToast(err?.message || t("app.action.error"), false);
     }
 }
 

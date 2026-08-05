@@ -82,7 +82,7 @@ def get_alias(alias_id: int) -> Optional[Dict[str, Any]]:
 # -----------------------------
 # ADD ALIAS
 # -----------------------------
-def add_alias(data: Dict[str, Any]) -> int:
+def add_alias(data: Dict[str, Any]):
 
     # Validate input
     cleaned = validate_data(data)
@@ -103,7 +103,6 @@ def add_alias(data: Dict[str, Any]) -> int:
             ),
         )
         conn.commit()
-        return cur.lastrowid
 
     except sqlite3.IntegrityError:
         conn.rollback()

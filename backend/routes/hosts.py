@@ -1,9 +1,8 @@
 # backend/routes/hosts.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
-import ipaddress
 import time
 
 # Import local modules
@@ -31,7 +30,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Hosts page
 @router.get("/hosts")
-def hosts_page(request: Request):
+def hosts_page():
     return FileResponse(settings.FRONTEND_PATH / "hosts.html")
 
 # Serve hosts.js
@@ -46,14 +45,11 @@ def hosts_js():
     200: {"description": "Hosts found"},
     500: {"description": "Internal server error"},
 })
-def api_get_hosts(request: Request):
+def api_get_hosts():
 
     try:
         hosts = get_hosts()
         return hosts or []
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error getting list hosts %s", str(err).strip())
@@ -62,7 +58,7 @@ def api_get_hosts(request: Request):
             detail={
                 "code": "HOSTS_GET_ERROR",
                 "status": "failure",
-                "message": "Internal error getting host",
+                "message": "Internal error getting hosts",
             },
         )
 
@@ -74,31 +70,13 @@ def api_get_hosts(request: Request):
     404: {"description": "Host not found"},
     500: {"description": "Internal server error"},
 })
-def api_get_host(request: Request, host_id: int):
+def api_get_host(host_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
         host = get_host(host_id)
-        if not host:  # None or empty dict
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "HOST_NOT_FOUND",
-                    "status": "failure",
-                    "message": "Host not found",
-                    "details": {
-                        "host_id": host_id,
-                        "took_ms": took_ms,
-                    },
-                },
-            )
-        return host
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error getting host %s: %s", host_id, str(err).strip())
@@ -116,34 +94,52 @@ def api_get_host(request: Request, host_id: int):
             },
         )
 
+    if not host:  # None or empty dict
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "HOST_NOT_FOUND",
+                "status": "failure",
+                "message": "Host not found",
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
+            },
+        )
+
+    return host
+
 # ---------------------------------------------------------
 # Add Hosts
 # ---------------------------------------------------------
-@router.post("/api/hosts", status_code=status.HTTP_200_OK, responses={
-    200: {"description": "Host added"},
+@router.post("/api/hosts", status_code=status.HTTP_201_CREATED, responses={
+    201: {"description": "Host added"},
     409: {"description": "Host already present"},
     500: {"description": "Internal server error"},
 })
-def api_add_host(request: Request, data: dict):
+def api_add_host(data: dict):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
+    host_id = None
 
     try:
         host_id = add_host(data)
-        if(host_id > 0):
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return {
-                    "code": "HOST_ADDED",
-                    "status": "success",
-                    "message": "Host added successfully",
-                    "details": {
-                        "host_id": host_id,
-                        "took_ms": took_ms,
-                    },
-                }
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return {
+                "code": "HOST_ADDED",
+                "status": "success",
+                "message": "Host added successfully",
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
+            }
 
-        # Already present
+    # Not Found
+    except ValueError:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -157,9 +153,6 @@ def api_add_host(request: Request, data: dict):
                 },
             },
         )
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error adding host: %s", str(err).strip())
@@ -185,26 +178,26 @@ def api_add_host(request: Request, data: dict):
     404: {"description": "Host not found"},
     500: {"description": "Internal server error"},
 })
-def api_update_host(request: Request, data: dict, host_id: int):
+def api_update_host(data: dict, host_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
-        updated = update_host(host_id, data)
-        if updated:
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return {
-                    "code": "HOST_UPDATED",
-                    "status": "success",
-                    "message": "Host updated successfully",
-                    "details": {
-                        "host_id": host_id,
-                        "took_ms": took_ms,
-                    },
-                }
+        update_host(host_id, data)
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return {
+                "code": "HOST_UPDATED",
+                "status": "success",
+                "message": "Host updated successfully",
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
+            }
 
-        # Not Found
+    # Not Found
+    except ValueError:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -218,9 +211,6 @@ def api_update_host(request: Request, data: dict, host_id: int):
                 },
             },
         )
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error updating host %s: %s", host_id, str(err).strip())
@@ -246,26 +236,26 @@ def api_update_host(request: Request, data: dict, host_id: int):
     404: {"description": "Host not found"},
     500: {"description": "Internal server error"},
 })
-def api_delete_host(request: Request, host_id: int):
+def api_delete_host(host_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
-        deleted = delete_host(host_id)
-        if deleted:
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return {
-                    "code": "HOST_DELETED",
-                    "status": "success",
-                    "message": "Host deleted successfully",
-                    "details": {
-                        "host_id": host_id,
-                        "took_ms": took_ms,
-                    },
-                }
+        delete_host(host_id)
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return {
+                "code": "HOST_DELETED",
+                "status": "success",
+                "message": "Host deleted successfully",
+                "details": {
+                    "host_id": host_id,
+                    "took_ms": took_ms,
+                },
+            }
 
-        # Not Found
+    # Not Found
+    except ValueError:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -279,9 +269,6 @@ def api_delete_host(request: Request, host_id: int):
                 },
             },
         )
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error deleting host %s: %s", host_id, str(err).strip())

@@ -1,7 +1,7 @@
 # backend/routes/dhcp.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 import json
 from pathlib import Path
@@ -28,7 +28,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Leases page
 @router.get("/leases")
-def leases_page(request: Request):
+def leases_page():
     return FileResponse(settings.FRONTEND_PATH / "leases.html")
 
 # Serve leases.js
@@ -43,7 +43,7 @@ def leases_js():
     200: {"description": "DHCP configuration reload successfully"},
     500: {"description": "Internal server error"},
 })
-async def api_dhcp_reload(request: Request):
+async def api_dhcp_reload():
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
@@ -121,7 +121,7 @@ async def api_dhcp_reload(request: Request):
     404: {"description": "Leases not found"},
     500: {"description": "Internal server error"},
 })
-def api_dhcp_leases(request: Request):
+def api_dhcp_leases():
 
     try:
         leases = get_leases()
@@ -131,7 +131,7 @@ def api_dhcp_leases(request: Request):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
-                "code": "DHCP_LEASES_NOT_FOUND",
+                "code": "DHCP_LEASE_NOT_FOUND",
                 "status": "failure",
                 "message": str(err),
             },
@@ -159,7 +159,7 @@ def api_dhcp_leases(request: Request):
     404: {"description": "Lease not found"},
     500: {"description": "Internal server error"},
 })
-def api_get_lease(request: Request, lease_id: int):
+def api_get_lease(lease_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
@@ -224,7 +224,7 @@ def api_get_lease(request: Request, lease_id: int):
     404: {"description": "Lease not found"},
     500: {"description": "Internal server error"},
 })
-def api_delete_lease(request: Request, lease_id: int):
+def api_delete_lease(lease_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
@@ -248,7 +248,7 @@ def api_delete_lease(request: Request, lease_id: int):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
-                "code": "DHCP_LEASES_NOT_FOUND",
+                "code": "DHCP_LEASE_NOT_FOUND",
                 "status": "failure",
                 "message": str(err),
                 "details": {
@@ -263,7 +263,7 @@ def api_delete_lease(request: Request, lease_id: int):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
-                "code": "DHCP_LEASES_NOT_FOUND",
+                "code": "DHCP_LEASE_NOT_FOUND",
                 "status": "failure",
                 "message": str(err),
                 "details": {

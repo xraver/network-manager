@@ -1,3 +1,8 @@
+// -------------------------------------------------------
+// IMPORT
+// -------------------------------------------------------
+import { getBackendMessage } from "./backendMessages.js";
+
 // -----------------------------
 // Configuration parameters
 // -----------------------------
@@ -8,23 +13,20 @@ const stringCollator = new Intl.Collator(undefined, { numeric: true, sensitivity
 // Load modals HTML and initialize them
 // -----------------------------
 export async function loadModals() {
-    try {
-        const r = await fetch("/modals.html");
-        if (!r.ok) throw new Error("Error loading modals");
+    const r = await fetch("/modals.html");
 
-        const html = await r.text();
-
-        const container = document.getElementById("modals-container");
-        if (!container) {
-            console.warn("modals-container not found");
-            return;
-        }
-
-        container.innerHTML = html;
-
-    } catch (err) {
-        console.error("Modals load error:", err);
+    if (!r.ok) {
+        throw new Error("Error loading modals");
     }
+
+    const html = await r.text();
+
+    const container = document.getElementById("modals-container");
+    if (!container) {
+        throw new Error("modals-container not found");
+    }
+
+    container.innerHTML = html;
 }
 
 // -----------------------------
@@ -440,7 +442,6 @@ export async function handleReload(
 
     const originalHTML = button.innerHTML;
 
-    // spinner + testo
     button.innerHTML = `
         <i class="bi bi-arrow-repeat spin"></i>
         <span>${workingText}</span>
@@ -448,16 +449,18 @@ export async function handleReload(
 
     try {
         const result = await serviceFn();
-
-        const msg =
-            (result && typeof result === "object" && result.message)
-                ? result.message
-                : defaultSuccessMsg;
-
+        const msg = getBackendMessage(
+            result,
+            defaultSuccessMsg
+        );
         showToast(msg, true);
 
     } catch (err) {
-        showToast(err?.message || defaultErrorMsg, false);
+        const msg = getBackendMessage(
+            err,
+            defaultErrorMsg
+        );
+        showToast(msg, false);
 
     } finally {
         if (!keepDisabled) {

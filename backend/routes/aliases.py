@@ -1,9 +1,8 @@
 # backend/routes/aliases.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
-import ipaddress
 import time
 
 # Import local modules
@@ -31,7 +30,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Aliass page
 @router.get("/aliases")
-def aliases_page(request: Request):
+def aliases_page():
     return FileResponse(settings.FRONTEND_PATH / "aliases.html")
 
 # Serve aliases.js
@@ -46,13 +45,11 @@ def aliases_js():
     200: {"description": "Aliass found"},
     500: {"description": "Internal server error"},
 })
-def api_get_aliases(request: Request):
+def api_get_aliases():
+
     try:
         aliases = get_aliases()
         return aliases or []
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error getting list aliases %s", str(err).strip())
@@ -73,31 +70,13 @@ def api_get_aliases(request: Request):
     404: {"description": "Alias not found"},
     500: {"description": "Internal server error"},
 })
-def api_get_alias(request: Request, alias_id: int):
+def api_get_alias(alias_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
         alias = get_alias(alias_id)
-        if not alias:  # None or empty dict
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "ALIAS_NOT_FOUND",
-                    "status": "failure",
-                    "message": "Alias not found",
-                    "details": {
-                        "alias_id": alias_id,
-                        "took_ms": took_ms,
-                    },
-                },
-            )
-        return alias
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error getting alias %s: %s", alias_id, str(err).strip())
@@ -115,34 +94,52 @@ def api_get_alias(request: Request, alias_id: int):
             },
         )
 
+    if not alias:  # None or empty dict
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "ALIAS_NOT_FOUND",
+                "status": "failure",
+                "message": "Alias not found",
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
+            },
+        )
+
+    return alias
+
 # ---------------------------------------------------------
 # Add Aliass
 # ---------------------------------------------------------
-@router.post("/api/aliases", status_code=status.HTTP_200_OK, responses={
-    200: {"description": "Alias added"},
+@router.post("/api/aliases", status_code=status.HTTP_201_CREATED, responses={
+    201: {"description": "Alias added"},
     409: {"description": "Alias already present"},
     500: {"description": "Internal server error"},
 })
-def api_add_alias(request: Request, data: dict):
+def api_add_alias(data: dict):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
+    alias_id = None
 
     try:
         alias_id = add_alias(data)
-        if(alias_id > 0):
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return {
-                    "code": "ALIAS_ADDED",
-                    "status": "success",
-                    "message": "Alias added successfully",
-                    "details": {
-                        "alias_id": alias_id,
-                        "took_ms": took_ms,
-                    },
-                }
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return {
+                "code": "ALIAS_ADDED",
+                "status": "success",
+                "message": "Alias added successfully",
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
+            }
 
-        # Already present
+    # Not Found
+    except ValueError:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -156,9 +153,6 @@ def api_add_alias(request: Request, data: dict):
                 },
             },
         )
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error adding alias: %s", str(err).strip())
@@ -184,26 +178,26 @@ def api_add_alias(request: Request, data: dict):
     404: {"description": "Alias not found"},
     500: {"description": "Internal server error"},
 })
-def api_update_alias(request: Request, data: dict, alias_id: int):
+def api_update_alias(data: dict, alias_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
-        updated = update_alias(alias_id, data)
-        if updated:
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return {
-                    "code": "ALIAS_UPDATED",
-                    "status": "success",
-                    "message": "Alias updated successfully",
-                    "details": {
-                        "alias_id": alias_id,
-                        "took_ms": took_ms,
-                    },
-                }
+        update_alias(alias_id, data)
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return {
+               "code": "ALIAS_UPDATED",
+                "status": "success",
+                "message": "Alias updated successfully",
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
+            }
 
-        # Not Found
+    # Not Found
+    except ValueError:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -217,9 +211,6 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
                 },
             },
         )
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error updating alias %s: %s", alias_id, str(err).strip())
@@ -245,26 +236,26 @@ def api_update_alias(request: Request, data: dict, alias_id: int):
     404: {"description": "Alias not found"},
     500: {"description": "Internal server error"},
 })
-def api_delete_alias(request: Request, alias_id: int):
+def api_delete_alias(alias_id: int):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
-        deleted = delete_alias(alias_id)
-        if deleted:
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            return {
-                    "code": "ALIAS_DELETED",
-                    "status": "success",
-                    "message": "Alias deleted successfully",
-                    "details": {
-                        "alias_id": alias_id,
-                        "took_ms": took_ms,
-                    },
-                }
+        delete_alias(alias_id)
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        return {
+                "code": "ALIAS_DELETED",
+                "status": "success",
+                "message": "Alias deleted successfully",
+                "details": {
+                    "alias_id": alias_id,
+                    "took_ms": took_ms,
+                },
+            }
 
-        # Not Found
+    # Not Found
+    except ValueError:
         took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -278,9 +269,6 @@ def api_delete_alias(request: Request, alias_id: int):
                 },
             },
         )
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error deleting alias %s: %s", alias_id, str(err).strip())

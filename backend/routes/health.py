@@ -24,7 +24,7 @@ router = APIRouter()
 def health():
     start = time.time()
 
-    db_status = "ok"
+    db_status = "healthy"
     db_version = None
     db_tables = None
     db_size = None
@@ -51,7 +51,7 @@ def health():
     latency = round((time.time() - start) * 1000, 2)
 
     return {
-        "status": "ok" if db_status == "ok" else "degraded",
+        "status": "healthy" if db_status == "healthy" else "degraded",
         "latency_ms": latency,
         "database": {
             "status": db_status,

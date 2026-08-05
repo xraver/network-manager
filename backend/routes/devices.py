@@ -2,10 +2,8 @@
 
 # import standard modules
 from concurrent.futures import ThreadPoolExecutor
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
-import ipaddress
-import time
 
 # Import local modules
 from backend.db.hosts import get_hosts
@@ -30,7 +28,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Devices page
 @router.get("/devices")
-def devices_page(request: Request):
+def devices_page():
     return FileResponse(settings.FRONTEND_PATH / "devices.html")
 
 # Serve devices.js
@@ -45,27 +43,31 @@ def devices_js():
     200: {"description": "Devices found"},
     500: {"description": "Internal server error"},
 })
-def api_get_devices(request: Request):
+def api_get_devices():
 
     try:
+        workers = get_config("PING_WORKERS")
         hosts = get_hosts(filter_devices=True)
-        with ThreadPoolExecutor(max_workers=get_config("PING_WORKERS")) as executor:
-            futures = [executor.submit(is_host_active, host["ipv4"]) for host in hosts]
-            for i, future in enumerate(futures):
-                hosts[i]["dhcp_state"] = "static"
-                hosts[i]["active"] = future.result()
-
         leases = get_leases(filter_devices=True)
-        with ThreadPoolExecutor(max_workers=get_config("PING_WORKERS")) as executor:
-            futures = [executor.submit(is_host_active, lease["ipv4"]) for lease in leases]
+
+        for host in hosts:
+            host["dhcp_state"] = "static"
+
+        for lease in leases:
+            lease["description"] = None
+
+        devices = hosts + leases
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [
+                executor.submit(is_host_active, device["ipv4"])
+                for device in devices
+            ]
+
             for i, future in enumerate(futures):
-                leases[i]["description"] = None
-                leases[i]["active"] = future.result()
+                devices[i]["active"] = future.result()
 
-        return hosts+leases or []
-
-    except HTTPException:
-        raise
+        return devices
 
     except Exception as err:
         logger.exception("Error getting list devices %s", str(err).strip())

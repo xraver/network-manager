@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="css/layout.css">
 </head>
 
-<body>
+<body data-page-title="dashboard.title">
     <!-- Topbar -->
     <header class="topbar">
         <div class="topbar-inner">
@@ -33,7 +33,7 @@
                     <line x1="12" y1="6" x2="12" y2="18" stroke="var(--accent)" stroke-width="2"></line>
                     <line x1="6" y1="12" x2="18" y2="12" stroke="var(--accent)" stroke-width="2"></line>
                 </svg>
-                <span>Network Manager</span>
+                <span data-i18n="app.name">Network Manager</span>
             </a>
 
             <nav class="navbar">
@@ -48,8 +48,8 @@
 
                 <!-- Desktop nav -->
                 <div class="d-none d-md-flex gap-2 ms-auto">
-                        <button class="btn btn-outline-primary btn-api" title="API Status" aria-label="API Status" data-action="apiCheck">API Status</button>
-                        <button class="btn btn-primary btn-logout">Logout</button>
+                        <button class="btn btn-outline-primary btn-api" data-i18n-title="header.api_status" data-i18n-aria-label="header.api_status" data-action="apiCheck" data-i18n="header.api_status">API Status</button>
+                        <button class="btn btn-primary btn-logout" data-i18n="auth.logout">Logout</button>
                 </div>
             </nav>
 
@@ -57,19 +57,21 @@
             <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="mobileMenu">
 
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Network Manager</h5>
+                    <h5 class="offcanvas-title" data-i18n="app.name">Network Manager</h5>
 
                     <button
                         type="button"
                         class="btn-close"
+                        data-i18n-title="common.close"
+                        data-i18n-aria-label="common.close"
                         data-bs-dismiss="offcanvas">
                     </button>
                 </div>
 
                 <div class="offcanvas-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary btn-api" title="API Status" aria-label="API Status" data-action="apiCheck">API Status</button>
-                        <button class="btn btn-primary btn-logout">Logout</button>
+                        <button class="btn btn-outline-primary btn-api" data-i18n-title="header.api_status" data-i18n-aria-label="header.api_status" data-action="apiCheck" data-i18n="header.api_status">API Status</button>
+                        <button class="btn btn-primary btn-logout" data-i18n="auth.logout">Logout</button>
                     </div>
                 </div>
             </div>
@@ -88,7 +90,7 @@
                 <div class="col-auto col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon"><i class="bi bi-grid me-2"></i></span>
-                        <span class="section-title">Dashboard</span>
+                        <span class="section-title" data-i18n="dashboard.title">Dashboard</span>
                     </h2>
                 </div>
             </div>
@@ -105,14 +107,14 @@
             <!-- DNS -->
             <div class="tile">
                 <div class="tile-icon"><i class="bi bi-diagram-3"></i></div>
-                <h3>DNS (BIND)</h3>
-                <p>Zone, record e configurazioni.</p>
+                <h3 data-i18n="dns.card.title">DNS (BIND)</h3>
+                <p data-i18n="dns.card.description">Zones, records and configuration.</p>
                 <div class="mt-2 d-flex gap-2 flex-wrap">
-                    <a href="/dns-config" class="btn btn-primary btn-sm" title="DNS Configuration" aria-label="DNS Configuration">
-                        <i class="bi bi-list-ul me-1"></i><span class="label">DNS Configuration</span>
+                    <a href="/dns-config" class="btn btn-primary btn-sm" data-i18n-title="dns.config" data-i18n-aria-label="dns.config">
+                        <i class="bi bi-list-ul me-1"></i><span class="label" data-i18n="dns.config">DNS Configuration</span>
                     </a>
-                    <button class="btn btn-primary btn-sm" title="Reload DNS (BIND)" aria-label="Reload DNS" data-action="reloadDns">
-                        <i class="bi bi-arrow-repeat me-1"></i><span class="label">Reload DNS</span>
+                    <button class="btn btn-primary btn-sm" data-i18n-title="dns.reload" data-i18n-aria-label="dns.reload" data-action="reloadDns">
+                        <i class="bi bi-arrow-repeat me-1"></i><span class="label" data-i18n="dns.reload">Reload DNS</span>
                     </button>
                 </div>
             </div>
@@ -120,14 +122,14 @@
             <!-- DHCP -->
             <div class="tile">
                 <div class="tile-icon"><i class="bi bi-broadcast"></i></div>
-                <h3>DHCP (Kea)</h3>
-                <p>Pools, leases, reservations.</p>
+                <h3 data-i18n="dhcp.card.title">DHCP (Kea)</h3>
+                <p data-i18n="dhcp.card.description">Pools, leases, reservations.</p>
                 <div class="mt-2 d-flex gap-2 flex-wrap">
-                    <a href="/leases" class="btn btn-primary btn-sm" title="DHCP Leases (Kea)" aria-label="DHCP Leases">
-                        <i class="bi bi-list-ul me-1"></i><span class="label">DHCP Leases</span>
+                    <a href="/leases" class="btn btn-primary btn-sm" data-i18n-title="dhcp.leases" data-i18n-aria-label="dhcp.leases">
+                        <i class="bi bi-list-ul me-1"></i><span class="label" data-i18n="dhcp.leases">DHCP Leases</span>
                     </a>
-                    <button class="btn btn-primary btn-sm" title="Reload DHCP (Kea)" aria-label="Reload DHCP" data-action="reloadDhcp">
-                        <i class="bi bi-arrow-repeat me-1"></i><span class="label">Reload DHCP</span>
+                    <button class="btn btn-primary btn-sm" data-i18n-title="dns.reload" data-i18n-aria-label="dhcp.reload" data-action="reloadDhcp">
+                        <i class="bi bi-arrow-repeat me-1"></i><span class="label" data-i18n="dhcp.reload">Reload DHCP</span>
                     </button>
                 </div>
             </div>
@@ -135,43 +137,43 @@
             <!-- Hosts -->
             <a href="/hosts" class="tile text-decoration-none">
                 <div class="tile-icon"><i class="bi bi-hdd-network"></i></div>
-                <h3>Hosts</h3>
-                <p>Inventario IP/MAC.</p>
+                <h3 data-i18n="hosts.card.title">Hosts</h3>
+                <p data-i18n="hosts.card.description">IP/MAC inventory.</p>
             </a>
 
             <!-- Aliases -->
             <a href="/aliases" class="tile text-decoration-none">
                 <div class="tile-icon"><i class="bi bi-diagram-2"></i></div>
-                <h3>Aliases</h3>
-                <p>Inventario alias DNS.</p>
+                <h3 data-i18n="aliases.card.title">Aliases</h3>
+                <p data-i18n="aliases.card.description">DNS alias inventory.</p>
             </a>
 
             <!-- Devices Status -->
             <a href="/devices" class="tile text-decoration-none">
                 <div class="tile-icon"><i class="bi bi-diagram-3-fill"></i></div>
-                <h3>Devices</h3>
-                <p>Device status (Host + DHCP).</p>
+                <h3 data-i18n="devices.card.title">Devices</h3>
+                <p data-i18n="devices.card.description">Device status (Host + DHCP).</p>
             </a>
 
             <!-- Certificati -->
             <a href="/api/certificates" class="tile text-decoration-none">
                 <div class="tile-icon"><i class="bi bi-shield-lock"></i></div>
-                <h3>Certificati</h3>
-                <p>Let’s Encrypt e rinnovi.</p>
+                <h3 data-i18n="certificates.card.title">Certificates</h3>
+                <p data-i18n="certificates.card.description">Let's Encrypt certificates and renewals.</p>
             </a>
 
             <!-- Backup & Restore -->
             <div class="tile" data-action="openBackupModal" role="button">
                 <div class="tile-icon"><i class="bi bi-arrow-counterclockwise"></i></div>
-                <h3>Backup &amp; Restore</h3>
-                <p>Esecuzione backup e gestione archivi.</p>
+                <h3 data-i18n="backup.card.title">Backup &amp; Restore</h3>
+                <p data-i18n="backup.card.description">Backup execution and archive management.</p>
 
                 <div class="mt-2 d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary btn-sm" title="Start Backup" aria-label="Start Backup" data-action="startBackup">
-                        <i class="bi bi-cloud-upload me-1"></i><span class="label">Create Backup</span>
+                    <button class="btn btn-primary btn-sm" data-i18n-title="backup.create" data-i18n-aria-label="backup.create" data-action="startBackup">
+                        <i class="bi bi-cloud-upload me-1"></i><span class="label" data-i18n="backup.create">Create Backup</span>
                     </button>
-                    <button class="btn btn-primary btn-sm" title="Backup Management" aria-label="Backup Management" data-action="openBackupModal">
-                        <i class="bi bi-cloud-download me-1"></i><span class="label">Backup Management</span>
+                    <button class="btn btn-primary btn-sm" data-i18n-title="backup.manage" data-i18n-aria-label="backup.manage" data-action="openBackupModal">
+                        <i class="bi bi-cloud-download me-1"></i><span class="label" data-i18n="backup.manage">Backup Management</span>
                     </button>
                 </div>
             </div>
@@ -179,22 +181,22 @@
             <!-- Logs -->
             <a href="/logs" class="tile text-decoration-none">
                 <div class="tile-icon"><i class="bi bi-file-earmark-text"></i></div>
-                <h3>Logs</h3>
-                <p>Eventi e access log.</p>
+                <h3 data-i18n="logs.card.title">Logs</h3>
+                <p data-i18n="logs.card.description">Events and access logs.</p>
             </a>
 
             <!-- Settings -->
             <a href="/settings" class="tile text-decoration-none">
                 <div class="tile-icon"><i class="bi bi-gear"></i></div>
-                <h3>Impostazioni</h3>
-                <p>Configurazione sistema e variabili.</p>
+                <h3 data-i18n="settings.card.title">Settings</h3>
+                <p data-i18n="settings.card.description">System configuration and variables.</p>
             </a>
 
             <!-- Health -->
             <a href="/api/health" id="healthBtn" class="tile text-decoration-none" data-action="openHealthModal" aria-controls="healthModal" role="button">
                 <div class="tile-icon"><i class="bi bi-heart-pulse"></i></div>
-                <h3>Health</h3>
-                <p>Stato servizi e risorse.</p>
+                <h3 data-i18n="health.card.title">Health</h3>
+                <p data-i18n="health.card.description">Service and resource status.</p>
             </a>
 
         </div>
@@ -204,7 +206,7 @@
     <div id="modals-container"></div>
 
     <!-- Scripts -->
-    <script type=module src="js/index.js"></script>
+    <script type="module" src="js/index.js"></script>
     <script type="module" src="js/session.js"></script>
 
     <!-- Bootstrap JS -->

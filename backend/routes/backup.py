@@ -13,8 +13,7 @@ import zipfile
 # Import local modules
 from backend.backup import backup_create, backup_list, backup_restore, backup_delete
 
-# Import Settings & Config
-from backend.settings.settings import settings
+# Import Config
 from backend.db.settings import get_config
 # Import Logging
 from backend.log.log import get_logger
@@ -45,8 +44,10 @@ def to_partial_code(code_ok: str) -> str:
 def build_operation_response(
     *,
     code_ok: str,
+    code_not_found: str,
     code_error: str,
     message_ok: str,
+    message_not_found: str,
     message_partial: str,
     message_error: str,
     result: dict,
@@ -56,9 +57,24 @@ def build_operation_response(
     total = summary.get("total", 0)
     success = summary.get("success", 0)
     failed = summary.get("failed", 0)
+    not_found = summary.get("not_found", 0)
 
     took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
+    # Handle not found case
+    if not_found > 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": code_not_found,
+                "status": "not_found",
+                "message": message_not_found,
+                "took_ms": took_ms,
+                "results": result,
+            },
+        )
+
+    # Handle partial success case
     is_partial = failed > 0 or success != total
     if is_partial:
         if success > 0:
@@ -106,10 +122,12 @@ async def api_backup_create():
         result = backup_create()
 
         return build_operation_response(
-            code_ok="BACKUP_CREATE_OK",
+            code_ok="BACKUP_CREATED",
+            code_not_found="BACKUP_NOT_FOUND",
             code_error="BACKUP_CREATE_ERROR",
             message_ok="Backup executed successfully",
             message_partial="Backup completed with some failed operations",
+            message_not_found="Backup not found",
             message_error="Some operations failed",
             result=result,
             start_ns=start_ns,
@@ -144,9 +162,6 @@ async def api_backup_list():
             "backups": backups
         }
 
-    except HTTPException:
-        raise
-
     except Exception as err:
         logger.exception("Error listing backups: %s", str(err))
         raise HTTPException(
@@ -168,10 +183,12 @@ async def api_backup_restore(payload: BackupRestoreRequest):
         result = backup_restore(backup_id=payload.backup_id)
 
         return build_operation_response(
-            code_ok="BACKUP_RESTORE_OK",
+            code_ok="BACKUP_RESTORED",
+            code_not_found="BACKUP_NOT_FOUND",
             code_error="BACKUP_RESTORE_ERROR",
             message_ok="Restore executed successfully",
             message_partial="Restore completed with some failed operations",
+            message_not_found="Backup not found",
             message_error="Some operations failed",
             result=result,
             start_ns=start_ns,
@@ -199,27 +216,18 @@ async def api_backup_delete(payload: BackupDeleteRequest):
     try:
         # Delete Backup
         result = backup_delete(backup_id=payload.backup_id)
-        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
-        if result.get("status") != "success":
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "BACKUP_NOT_FOUND",
-                    "status": "failure",
-                    "message": "Backup not found",
-                    "took_ms": took_ms,
-                    "results": result,
-                },
-            )
-
-        return {
-            "code": "BACKUP_DELETED",
-            "status": "success",
-            "message": "Backup deleted successfully",
-            "took_ms": took_ms,
-            "results": result,
-        }
+        return build_operation_response(
+            code_ok="BACKUP_DELETED",
+            code_not_found="BACKUP_NOT_FOUND",
+            code_error="BACKUP_DELETE_ERROR",
+            message_ok="Backup deleted successfully",
+            message_partial="Backup deletion completed with some failed operations",
+            message_not_found="Backup not found",
+            message_error="Some operations failed",
+            result=result,
+            start_ns=start_ns,
+        )
 
     except HTTPException:
         raise
@@ -238,17 +246,17 @@ async def api_backup_delete(payload: BackupDeleteRequest):
 def download_backup(backup_id: str):
     backup_dir = Path(get_config("BACKUP_PATH"))
 
-    zip_path = backup_dir / f"{backup_id}"
+    zip_path = backup_dir / backup_id
 
     if not zip_path.exists():
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "BACKUP_NOT_FOUND",
-                    "status": "failure",
-                    "message": "Backup not found",
-                },
-            )
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "BACKUP_NOT_FOUND",
+                "status": "not_found",
+                "message": "Backup not found",
+            },
+        )
 
     return FileResponse(
         path=zip_path,
@@ -298,7 +306,6 @@ def upload_backup(file: UploadFile = File(...)):
             )
 
     # validate ZIP
-    import zipfile
     try:
         with zipfile.ZipFile(file.file) as z:
             if z.testzip() is not None:

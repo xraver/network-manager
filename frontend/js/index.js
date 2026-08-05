@@ -3,6 +3,29 @@
 // -------------------------------------------------------
 import { loadModals, showToast, showConfirmModal, handleReload } from './common.js';
 import { serviceIsAlive, serviceCheckHealth , serviceReloadDNS, serviceReloadDHCP, serviceBackupCreate, serviceBackupList, serviceBackupRestore, serviceDeleteBackup, serviceDownloadBackup, serviceUploadBackup } from './services.js';
+import { loadLanguage, translatePage, t } from "./i18n.js";
+import { getBackendMessage } from "./backendMessages.js";
+
+// -------------------------------------------------------
+// Localize health status for display in the UI
+// -------------------------------------------------------
+function localizeHealthStatus(status) {
+    const norm = String(status || "").toLowerCase();
+
+    switch (norm) {
+        case "healthy":
+            return t("health.status.healthy");
+
+        case "degraded":
+            return t("health.status.degraded");
+
+        case "unhealthy":
+            return t("health.status.unhealthy");
+
+        default:
+            return t("health.status.unknown");
+    }
+}
 
 // -------------------------------------------------------
 // BACKUP MODAL OPEN/CLOSE
@@ -14,22 +37,25 @@ async function openBackupModal() {
     modal.style.display = 'flex';
 
     const tbody = document.getElementById("backupList");
-    if (tbody) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center text-muted">
-                    Loading backups...
-                </td>
-            </tr>
-        `;
-    }
+    if (!tbody) return;
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                ${t("backup.loading")}
+            </td>
+        </tr>
+    `;
 
     // Refresh backup list
     try {
         const result = await serviceBackupList();
         renderBackupList(result);
     } catch (err) {
-        showToast(err?.message || "Error refreshing backup list", false);
+        const msg = getBackendMessage(
+            err,
+            "backup.refresh_error"
+        );
+        showToast(msg, false);
     }
 }
 
@@ -44,19 +70,19 @@ function closeBackupModal() {
 export async function serviceCheckAbout() {
     const pills = document.querySelectorAll('.btn-api');
 
-    if (!pills.length) return;
+    if (!pills.length) return false;
 
     const ok = await serviceIsAlive();
 
     pills.forEach(pill => {
 
         if (ok) {
-            pill.textContent = 'API OK';
+            pill.textContent = t("header.api_status_online");
             pill.classList.remove('btn-outline-primary');
             pill.classList.add('btn-primary');
 
         } else {
-            pill.textContent = 'API OFFLINE';
+            pill.textContent = t("header.api_status_offline");
         }
     });
 
@@ -68,13 +94,14 @@ export async function serviceCheckAbout() {
 // -------------------------------------------------------
 function renderBackupList(data) {
     const tbody = document.getElementById("backupList");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     if (!data?.backups || !Array.isArray(data.backups) || data.backups.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" class="text-center text-muted">
-                    No backups available
+                    ${t("backup.empty")}
                 </td>
             </tr>
         `;
@@ -123,17 +150,21 @@ function renderBackupList(data) {
         tdActions.classList.add("text-end");
         // download button
         const downloadBtn = document.createElement("button");
+        const downloadText = t("backup.download.file");
         downloadBtn.className = "btn btn-sm btn-outline-primary me-2";
-        downloadBtn.title = "Download backup";
+        downloadBtn.title = downloadText;
         downloadBtn.innerHTML = `<i class="bi bi-download"></i>`;
+        downloadBtn.setAttribute("aria-label", downloadText);
         downloadBtn.setAttribute("data-action", "downloadBackup");
         downloadBtn.setAttribute("data-id", b.name);
         tdActions.appendChild(downloadBtn);
         // delete button
         const deleteBtn = document.createElement("button");
+        const deleteText = t("backup.delete.file");
         deleteBtn.className = "btn btn-sm btn-outline-danger";
-        deleteBtn.title = "Delete backup";
+        deleteBtn.title = deleteText;
         deleteBtn.innerHTML = `<i class="bi bi-trash-fill"></i>`;
+        deleteBtn.setAttribute("aria-label", deleteText);
         deleteBtn.setAttribute("data-action", "deleteBackup");
         deleteBtn.setAttribute("data-id", b.name);
         tdActions.appendChild(deleteBtn);
@@ -198,13 +229,13 @@ function openHealthModal() {
     Promise.resolve()
       .then(() => serviceCheckHealth())
       .then((data) => {
-          // Se serviceCheckHealth ritorna true o {message}, non abbiamo i dettagli: mostra un messaggio
+          // Verify that the response contains health details
           const isDetailed =
               data && typeof data === 'object' &&
               ('status' in data || 'latency_ms' in data || 'database' in data);
 
           if (!isDetailed) {
-              throw new Error('Health details not available');
+              throw new Error(t("health.details_unavailable"));
           }
 
           renderHealth(data);
@@ -214,7 +245,7 @@ function openHealthModal() {
       .catch((err) => {
           loadingEl?.classList?.add('d-none');
           errorEl?.classList?.remove('d-none');
-          showToast(err?.message || 'Error while fetching health status', false);
+          showToast(err?.message || t("health.error"), false);
           console.error(err);
       });
 }
@@ -229,13 +260,19 @@ function setHealthBadge(status) {
     if (!badgeEl) return;
 
     const norm = String(status || '').toLowerCase();
+
     let cls = 'bg-secondary';
-    if (norm === 'ok' || norm === 'healthy' || norm === 'up') cls = 'bg-success';
-    if (norm === 'warn' || norm === 'warning' || norm === 'degraded') cls = 'bg-warning text-dark';
-    if (norm === 'down' || norm === 'error' || norm === 'fail' || norm === 'critical') cls = 'bg-danger';
+
+    if (norm === 'healthy') {
+        cls = 'bg-success';
+    } else if (norm === 'degraded') {
+        cls = 'bg-warning text-dark';
+    } else if (norm === 'unhealthy') {
+        cls = 'bg-danger';
+    }
 
     badgeEl.className = `badge rounded-pill ${cls}`;
-    badgeEl.textContent = norm || 'unknown';
+    badgeEl.textContent = localizeHealthStatus(norm);
 }
 
 function renderHealth(data) {
@@ -254,16 +291,16 @@ function renderHealth(data) {
     setHealthBadge(status);
     if (updatedAtEl) {
         const now = new Date();
-        updatedAtEl.textContent = `Updated at ${now.toLocaleTimeString()}`;
+        updatedAtEl.textContent = `${t("health.updated_at")} ${now.toLocaleTimeString()}`;
     }
 
     const rows = [
-        { label: 'Status', value: status },
-        { label: 'Latency', value: (typeof latency === 'number') ? `${latency} ms` : '—' },
-        { label: 'DB Status', value: dbStatus },
-        { label: 'DB Version', value: dbVersion },
-        { label: 'DB Tables', value: dbTables },
-        { label: 'DB Size', value: dbSize },
+        { label: t("health.status"), value: localizeHealthStatus(status) },
+        { label: t("health.latency"), value: (typeof latency === "number") ? `${latency} ms` : "—" },
+        { label: t("health.db_status"), value: localizeHealthStatus(dbStatus) },
+        { label: t("health.db_version"), value: dbVersion },
+        { label: t("health.db_tables"), value: dbTables },
+        { label: t("health.db_size"), value: dbSize },
     ];
 
     if (summaryEl) {
@@ -290,7 +327,6 @@ const actionHandlers = {
     // Create Backup
     startBackup: async (e, el) => {
         const btn = el;
-        const modal = document.getElementById('backupModal');
 
         if (!btn) return;
 
@@ -298,16 +334,24 @@ const actionHandlers = {
         const originalLabel = label?.textContent ?? '';
 
         btn.disabled = true;
-        label.textContent = ' Exporting…';
+        label.textContent = t("backup.create.progress");
 
         try {
             const result = await serviceBackupCreate();
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'Backup completed successfully';
-            showToast(msg, !result?.partial);
+            const success = result?.status !== 'partial';
+            const msg = getBackendMessage(
+                        result,
+                        success
+                            ? "backup.create_ok"
+                            : "backup.create_partial"
+                    );
+            showToast(msg, success);
         } catch (err) {
-            showToast(err?.message || "Error performing backup", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.create_error"
+            );
+            showToast(msg, false);
         } finally {
             label.textContent = originalLabel;
             btn.disabled = false;
@@ -317,17 +361,21 @@ const actionHandlers = {
             const result = await serviceBackupList();
             renderBackupList(result);
         } catch (err) {
-            showToast(err?.message || "Error refreshing backup list", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.refresh_error"
+            );
+            showToast(msg, false);
         }
     },
     // Restore Backup
     startRestore: async (e, el) => {
         const btn = el;
-        const modal = document.getElementById('backupModal');
+        //const modal = document.getElementById('backupModal');
 
         const id = getSelectedBackup();
         if (!id) {
-            showToast('Select a backup', false);
+            showToast(t("backup.select"), false);
             return;
         }
 
@@ -335,18 +383,26 @@ const actionHandlers = {
         const originalLabel = label?.textContent ?? '';
 
         btn.disabled = true;
-        label.textContent = ' Restoring…';
+        label.textContent = t("backup.restore.progress");
 
         try {
             const result = await serviceBackupRestore(id);
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'Restore completed successfully';
-            showToast(msg, !result?.partial);
+            const success = result?.status !== 'partial';
+            const msg = getBackendMessage(
+                        result,
+                        success
+                            ? "backup.restore_ok"
+                            : "backup.restore_partial"
+                    );
+            showToast(msg, success);
             // Close modal
             //if (modal) modal.style.display = 'none';
         } catch (err) {
-            showToast(err?.message || "Error performing restore", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.restore_error"
+            );
+            showToast(msg, false);
         } finally {
             label.textContent = originalLabel;
             btn.disabled = false;
@@ -360,39 +416,50 @@ const actionHandlers = {
         const id = el.dataset.id;
         if (!id) return;
 
-        const confirmed = await showConfirmModal(`Delete backup "${id}" ?`);
+        const confirmed = await showConfirmModal(t("backup.delete_confirm").replace("{id}", id));
         if (!confirmed) return;
 
         try {
             const result = await serviceDeleteBackup(id);
-
-            const msg = (typeof result === 'object' && result?.message)
-                ? result.message
-                : 'Backup deleted successfully';
-
+            const msg = getBackendMessage(
+                        result,
+                        "backup.delete_ok"
+                    );
             showToast(msg, true);
         } catch (err) {
-            console.error(err);
-            showToast(err?.message || "Error deleting backup", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.delete_error"
+            );
+            showToast(msg, false);
         }
         // Refresh backup list
         try {
             const result = await serviceBackupList();
             renderBackupList(result);
         } catch (err) {
-            showToast(err?.message || "Error refreshing backup list", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.refresh_error"
+            );
+            showToast(msg, false);
         }
     },
     refreshBackupList: async () => {
         try {
             const result = await serviceBackupList();
-            const msg = (typeof result === 'object' && result?.message)
-                        ? result.message
-                        : 'Backup list refreshed successfully';
+            const msg = getBackendMessage(
+                result,
+                "backup.refresh_ok"
+            );
             showToast(msg, true);
             renderBackupList(result);
         } catch (err) {
-            showToast(err?.message || "Error refreshing backup list", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.refresh_error"
+            );
+            showToast(msg, false);
         }
     },
     // Download Backup
@@ -407,20 +474,20 @@ const actionHandlers = {
 
             const msg = (typeof result === 'object' && result?.message)
                 ? result.message
-                : 'Backup downloaded successfully';
+                : t("backup.download_ok");
 
             showToast(msg, true);
 
         } catch (err) {
             console.error(err);
-            showToast(err?.message || "Error downloading backup", false);
+            showToast(err?.message || t("backup.download_error"), false);
         }
     },
     // Upload Backup
     uploadBackup: async (e, el) => {
         const input = document.getElementById('backupUploadInput');
         if (!input?.files?.length) {
-            showToast("Select a file first", false);
+            showToast(t("backup.select_file"), false);
             return;
         }
 
@@ -439,15 +506,12 @@ const actionHandlers = {
 
             const msg = (result?.message)
                 ? result.message
-                : 'Backup uploaded successfully';
+                : t("backup.update_ok");
 
             showToast(msg, true);
-
-            console.log("Uploaded backup ID:", result?.backup_id);
-
             input.value = '';
         } catch (err) {
-            showToast(err?.message || "Error uploading backup", false);
+            showToast(err?.message || t("backup.update_error"), false);
         } finally {
             if (icon && originalClass) {
                 icon.className = originalClass;
@@ -459,7 +523,11 @@ const actionHandlers = {
             const result = await serviceBackupList();
             renderBackupList(result);
         } catch (err) {
-            showToast(err?.message || "Error refreshing backup list", false);
+            const msg = getBackendMessage(
+                err,
+                "backup.refresh_error"
+            );
+            showToast(msg, false);
         }
     },
     openBackupModal,       // managed by boostrap
@@ -469,9 +537,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDNS,
-            "DNS reload successfully",
-            "Error reloading DNS",
-            "Reloading DNS..."
+            t("dns.reload.ok"),
+            t("dns.reload.error"),
+            t("dns.reload.progress")
         );
     },
     // Reload DHCP
@@ -479,18 +547,18 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDHCP,
-            "DHCP reload successfully",
-            "Error reloading DHCP",
-            "Reloading DHCP..."
+            t("dhcp.reload.ok"),
+            t("dhcp.reload.error"),
+            t("dhcp.reload.progress")
         );
     },
     // Check API status
     apiCheck: async () => {
         const result = await serviceCheckAbout();
         if(result) {
-            showToast('API status updated succesfully', true);
+            showToast(t("health.update.ok"), true);
         } else {
-            showToast('Error updating API status', false);
+            showToast(t("health.update.error"), false);
         }
     },
     // Health
@@ -512,9 +580,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         await loadModals();
     } catch (err) {
-        console.error(err?.message || "Error loading modals");
-        showToast(err?.message || "Error loading modals", false);
+        console.error(err?.message || t("app.modals.error"));
+        showToast(t("app.modals.error"), false);
     }
+
+    // translate modals
+    translatePage();
 
     // Init Backup Modal (backdrop click to close)
     initBackupModal();
@@ -531,11 +602,12 @@ document.addEventListener('click', async (e) => {
     const handler = actionHandlers[action];
     if (!handler) return;
 
+    // Execute handler
     try {
         await handler(e, el);
     } catch (err) {
-        console.error(err?.message || 'Action error');
-        showToast(err?.message || 'Action error', false);
+        console.error(err?.message || t("app.action.error"));
+        showToast(err?.message || t("app.action.error"), false);
     }
 });
 
@@ -569,4 +641,16 @@ async function periodicTest() {
     setTimeout(periodicTest, 10000);
 }
 
+// Loading translation
+try {
+    await loadLanguage();
+} catch (err) {
+    console.error(err?.message || t("app.translation.error"));
+    showToast(t("app.translation.error"), false);
+}
+
+// Translate page
+translatePage();
+
+// Periodic Test
 periodicTest();

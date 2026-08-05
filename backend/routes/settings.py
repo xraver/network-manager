@@ -1,9 +1,8 @@
 # backend/routes/settings.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
-import ipaddress
 import time
 
 # Import local modules
@@ -29,7 +28,7 @@ router = APIRouter()
 # ---------------------------------------------------------
 # Settings page
 @router.get("/settings")
-def settings_page(request: Request):
+def settings_page():
     return FileResponse(settings.FRONTEND_PATH / "settings.html")
 
 # Serve settings.js
@@ -44,14 +43,11 @@ def settings_js():
     200: {"description": "Settings found"},
     500: {"description": "Internal server error"},
 })
-def api_get_configs(request: Request):
+def api_get_configs():
 
     try:
         configs = get_configs()
         return configs or []
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error getting list of the configuration parameters %s", str(err).strip())
@@ -72,31 +68,13 @@ def api_get_configs(request: Request):
     404: {"description": "Configuration parameter not found"},
     500: {"description": "Internal server error"},
 })
-def api_get_setting(request: Request, config_key: str):
+def api_get_setting(config_key: str):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
 
     try:
         config = get_config(config_key, json_format=True)
-        if not config:  # None or empty dict
-            took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "CONFIG_NOT_FOUND",
-                    "status": "failure",
-                    "message": "Configuration parameter not found",
-                    "details": {
-                        "config_key": config_key,
-                        "took_ms": took_ms,
-                    },
-                },
-            )
-        return config
-
-    except HTTPException:
-        raise
 
     except Exception as err:
         logger.exception("Error getting configuration parameter %s: %s", config_key, str(err).strip())
@@ -114,16 +92,32 @@ def api_get_setting(request: Request, config_key: str):
             },
         )
 
+    if not config:  # None or empty dict
+        took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "CONFIG_NOT_FOUND",
+                "status": "failure",
+                "message": "Configuration parameter not found",
+                "details": {
+                    "config_key": config_key,
+                    "took_ms": took_ms,
+                },
+            },
+        )
+    return config
+
 # ---------------------------------------------------------
 # Update config
 # ---------------------------------------------------------
-@router.put("/api/settings/{config_key}", status_code=status.HTTP_200_OK, responses={
-    200: {"description": "Configuration parameter updated"},
+@router.put("/api/settings/{config_key}", status_code=status.HTTP_201_CREATED, responses={
+    201: {"description": "Configuration parameter updated"},
     400: {"description": "Invalid request"},
     404: {"description": "Configuration parameter not found"},
     500: {"description": "Internal server error"},
 })
-def api_update_setting(request: Request, data: dict, config_key: str):
+def api_update_setting(data: dict, config_key: str):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
@@ -165,7 +159,7 @@ def api_update_setting(request: Request, data: dict, config_key: str):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail={
-                        "code": "CONFIG_RESET_ERROR",
+                        "code": "CONFIG_UPDATE_ERROR",
                         "status": "failure",
                         "message": (result.get("message") if result else None) or "Internal error updating configuration parameter",
                         "details": {
@@ -198,12 +192,12 @@ def api_update_setting(request: Request, data: dict, config_key: str):
 # Reset config to default
 # ---------------------------------------------------------
 @router.post("/api/settings/{config_key}/reset", status_code=status.HTTP_200_OK, responses={
-    200: {"description": "Configuration parameter reset to default"},
+    200: {"description": "Configuration parameter restored to default"},
     400: {"description": "Invalid request"},
     404: {"description": "Configuration parameter not found"},
     500: {"description": "Internal server error"},
 })
-def api_reset_config(request: Request, config_key: str):
+def api_reset_config(config_key: str):
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()
@@ -213,9 +207,9 @@ def api_reset_config(request: Request, config_key: str):
         if result["status"] == "success":
             took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
             return {
-                    "code": "CONFIG_RESET",
+                    "code": "CONFIG_RESTORED",
                     "status": "success",
-                    "message": "Configuration parameter reset to default successfully",
+                    "message": "Configuration parameter restored to default successfully",
                     "details": {
                         "config_key": config_key,
                         "took_ms": took_ms,
@@ -245,9 +239,9 @@ def api_reset_config(request: Request, config_key: str):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail={
-                        "code": "CONFIG_RESET_ERROR",
+                        "code": "CONFIG_RESTORED_ERROR",
                         "status": "failure",
-                        "message": (result.get("message") if result else None) or "Internal error resetting configuration parameter",
+                        "message": (result.get("message") if result else None) or "Internal error restoring configuration parameter",
                         "details": {
                             "config_key": config_key,
                             "took_ms": took_ms,
@@ -264,9 +258,9 @@ def api_reset_config(request: Request, config_key: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
-                "code": "CONFIG_RESET_ERROR",
+                "code": "CONFIG_RESTORED_ERROR",
                 "status": "failure",
-                "message": "Internal error resetting configuration parameter",
+                "message": "Internal error restoring configuration parameter",
                 "details": {
                     "config_key": config_key,
                     "took_ms": took_ms,

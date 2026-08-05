@@ -1,7 +1,7 @@
 # backend/routes/dns.py
 
 # import standard modules
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 import asyncio
 import json
@@ -32,7 +32,7 @@ router = APIRouter()
     200: {"description": "DNS configuration reload successfully"},
     500: {"description": "Internal server error"},
 })
-async def api_dns_reload(request: Request):
+async def api_dns_reload():
 
     # Inizializzazioni
     start_ns = time.monotonic_ns()

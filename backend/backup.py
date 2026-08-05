@@ -4,8 +4,8 @@
 from datetime import datetime, timezone
 import hashlib
 import json
-import os
 from pathlib import Path
+import shutil
 import time
 from typing import List, Dict, Any, Optional, Union
 import zipfile
@@ -34,6 +34,15 @@ backup_files = [
 remove_backup_files = True
 
 # ---------------------------------------------------------
+# Internal: Cleanup Extract Directory
+# ---------------------------------------------------------
+def cleanup_extract_dir(path: Path) -> None:
+    try:
+        shutil.rmtree(path, ignore_errors=True)
+    except Exception as e:
+        logger.warning("Failed removing temporary folder %s: %s", path, str(e))
+
+# ---------------------------------------------------------
 # Internal: Generate Filestamp
 # ---------------------------------------------------------
 def generate_timestamps() -> dict:
@@ -53,6 +62,7 @@ def build_result(operations: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         "total": len(operations),
         "success": sum(1 for op in operations.values() if op.get("status") == "success"),
         "failed": sum(1 for op in operations.values() if op.get("status") == "failure"),
+        "not_found": sum(1 for op in operations.values() if op.get("status") == "not_found"),
     }
 
     errors = sum(
@@ -281,7 +291,7 @@ def restore_hosts(
 
     except Exception as e:
         logger.exception("restore_hosts failed applying records: %s", str(e).strip())
-        errors.append(str(e));
+        errors.append(str(e))
 
     took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
@@ -293,12 +303,11 @@ def restore_hosts(
             "took_ms": took_ms,
         }
     else:
-        count_stored = count_loaded
         result: Dict[str, Any] = {
             "status": "success",
             "file": str(file),
             "count_loaded": count_loaded,
-            "count_stored": count_stored,
+            "count_restored": count_restored,
             "took_ms": took_ms,
         }
 
@@ -399,7 +408,7 @@ def restore_aliases(
 
     except Exception as e:
         logger.exception("restore_aliases failed applying records: %s", str(e).strip())
-        errors.append(str(e));
+        errors.append(str(e))
 
     took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
 
@@ -411,12 +420,11 @@ def restore_aliases(
             "took_ms": took_ms,
         }
     else:
-        count_stored = count_loaded
         result: Dict[str, Any] = {
             "status": "success",
             "file": str(file),
             "count_loaded": count_loaded,
-            "count_stored": count_stored,
+            "count_restored": count_restored,
             "took_ms": took_ms,
         }
 
@@ -574,6 +582,14 @@ def check_metadata(
 # ---------------------------------------------------------
 def backup_create() -> Dict[str, Any]:
 
+    # Initialization
+    operations = {
+        "metadata": {},
+        "hosts": {},
+        "aliases": {},
+        "archive": {},
+    }
+
     # Ensure backup directory exists
     base_dir = Path(get_config("BACKUP_PATH"))
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -581,20 +597,12 @@ def backup_create() -> Dict[str, Any]:
     # Timestamp used for backup file naming
     ts = generate_timestamps()
     timestamp = ts["iso"]           # per metadata/API
-    file_timestamp = ts["file"]      # per filename
+    file_timestamp = ts["file"]     # per filename
 
     # Create zip folder
     zip_name = f"backup_{file_timestamp}.zip"
     backup_path=base_dir / f"backup_{file_timestamp}"
     backup_path.mkdir(parents=True, exist_ok=True)
-
-    # Init struttura unica
-    operations = {
-        "metadata": {},
-        "hosts": {},
-        "aliases": {},
-        "archive": {},
-    }
 
     # --- STEP ---
     operations["hosts"] = store_hosts(timestamp=timestamp, filepath=backup_path)
@@ -632,7 +640,7 @@ def backup_list() -> List[Dict[str, Any]]:
 # ---------------------------------------------------------
 def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
 
-    # Init struttura unica
+    # Initialization
     operations = {
         "archive": {},
         "metadata": {},
@@ -647,7 +655,11 @@ def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
 
     if not backup_file.is_file():
         logger.error(f"Backup file not found: {backup_file}")
-        raise FileNotFoundError("Backup file not found")
+        operations["archive"] = {
+            "status": "not_found",
+            "errors": [f"Backup file not found: {backup_id}"]
+        }
+        return build_result(operations)
 
     # --- ARCHIVE ---
     operations["archive"] = unzip_backup_archive(zip_name=backup_id, extract_dir=extract_dir)
@@ -657,6 +669,7 @@ def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
     # --- METADATA ---
     operations["metadata"] = check_metadata(filepath=extract_dir, remove_file=remove_backup_files)
     if operations["metadata"].get("status") != "success":
+        cleanup_extract_dir(extract_dir)
         return build_result(operations)
 
     # --- CLEANUP ---
@@ -664,9 +677,17 @@ def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
         try:
             reset_hosts_db()
             reset_aliases_db()
+            operations["cleanup"] = {
+                "status": "success"
+            }
         except Exception as e:
             logger.exception("Cleanup failed %s", str(e).strip())
-            raise
+            operations["cleanup"] = {
+                "status": "failure",
+                "errors": [str(e)]
+            }
+            cleanup_extract_dir(extract_dir)
+            return build_result(operations)
 
     # --- RESTORE FILES ---
     for f in operations["metadata"]["files"]:
@@ -677,9 +698,7 @@ def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
             operations["aliases"] = restore_aliases(filepath=extract_dir, filename=f["file"], remove_file=remove_backup_files)
 
     if remove_backup_files:
-        p = Path(extract_dir)
-        if p.is_dir() and not any(p.iterdir()):
-            p.rmdir()
+        cleanup_extract_dir(extract_dir)
 
     return build_result(operations)
 
@@ -689,8 +708,10 @@ def backup_restore(backup_id: str, cleanup: bool = True) -> Dict[str, Any]:
 def backup_delete(backup_id: str) -> Dict[str, Any]:
 
     # Initialization
+    operations = {
+        "delete": {},
+    }
     start_ns = time.monotonic_ns()
-    errors: List[str] = []
 
     backup_dir = Path(get_config("BACKUP_PATH"))
     backup_file = backup_dir / backup_id
@@ -698,20 +719,29 @@ def backup_delete(backup_id: str) -> Dict[str, Any]:
     try:
         # Check if file exists
         if not backup_file.is_file():
-            raise FileNotFoundError(f"Backup file not found: {backup_id}")
+            logger.error(f"Backup file not found: {backup_file}")
+            operations["delete"] = {
+                "status": "not_found",
+                "errors": [f"Backup file not found: {backup_id}"]
+            }
+            operations["delete"]["took_ms"] = (time.monotonic_ns() - start_ns) / 1_000_000
+            return build_result(operations)
 
         # Remove file
         backup_file.unlink()
 
+        operations["delete"] = {
+            "status": "success",
+            "file": str(backup_file),
+        }
+
     except Exception as e:
         logger.exception("delete_backup failed: %s", str(e).strip())
-        errors.append(str(e))
+        operations["delete"] = {
+            "status": "failure",
+            "errors": [str(e)],
+        }
 
-    took_ms = (time.monotonic_ns() - start_ns) / 1_000_000
+    operations["delete"]["took_ms"] = (time.monotonic_ns() - start_ns) / 1_000_000
 
-    return {
-        "status": "failure" if errors else "success",
-        "file": str(backup_file) if not errors else None,
-        "errors": errors,
-        "took_ms": took_ms,
-    }
+    return build_result(operations)

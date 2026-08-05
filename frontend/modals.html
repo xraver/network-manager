@@ -1,4 +1,4 @@
-<!-- AddHost -->
+<!-- Modal hosts -->
 <div class="modal fade" id="addHostModal" tabindex="-1" aria-labelledby="addHostTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
         <div class="modal-content modal-content-sm addhost-modal">
@@ -7,73 +7,84 @@
                 <div class="d-flex align-items-center gap-2">
                     <!-- Emoji o icona -->
                     <span class="title-icon" aria-hidden="true"><i class="bi bi-hdd-network"></i></span>
-                    <h5 class="modal-title mb-0" id="addHostTitle">Aggiungi Host</h5>
+                    <h5 class="modal-title mb-0" id="addHostTitle" data-i18n="hosts.add">Add host</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"
+                    data-i18n-aria-label="common.close"></button>
             </div>
 
             <div class="modal-body">
                 <form id="addHostForm">
                     <div class="mb-2">
-                        <label for="hostName" class="form-label">Hostname</label>
+                        <label for="hostName" class="form-label" data-i18n="hosts.hostname">Hostname</label>
                         <input type="text" id="hostName" class="form-control" required>
                     </div>
 
                     <div class="mb-2">
-                        <label for="hostIPv4" class="form-label">IPv4</label>
-                        <input type="text" id="hostIPv4" class="form-control" inputmode="decimal" placeholder="es. 192.168.1.10">
+                        <label for="hostIPv4" class="form-label" data-i18n="hosts.ipv4">IPv4</label>
+                        <input type="text" id="hostIPv4" class="form-control" inputmode="decimal" data-i18n-placeholder="hosts.placeholder.ipv4">
                     </div>
 
                     <div class="mb-2">
-                        <label for="hostIPv6" class="form-label">IPv6</label>
-                        <input type="text" id="hostIPv6" class="form-control" placeholder="es. fe80::1">
+                        <label for="hostIPv6" class="form-label" data-i18n="hosts.ipv6">IPv6</label>
+                        <input type="text" id="hostIPv6" class="form-control" data-i18n-placeholder="hosts.placeholder.ipv6">
                     </div>
 
                     <div class="mb-2">
-                        <label for="hostMAC" class="form-label">MAC Address</label>
-                        <input type="text" id="hostMAC" class="form-control" placeholder="es. AA:BB:CC:DD:EE:FF">
+                        <label for="hostMAC" class="form-label" data-i18n="hosts.mac">MAC Address</label>
+                        <input type="text" id="hostMAC" class="form-control" data-i18n-placeholder="hosts.placeholder.mac">
                     </div>
 
                     <div class="mb-2">
-                        <label for="hostDescription" class="form-label">Description</label>
+                        <label for="hostDescription" class="form-label" data-i18n="common.description">Description</label>
                         <input type="text" id="hostDescription" class="form-control">
                     </div>
 
                     <div class="form-check my-2">
                         <input class="form-check-input" type="checkbox" id="hostSSL">
-                        <label class="form-check-label" for="hostSSL">SSL?</label>
+                        <label class="form-check-label" for="hostSSL" data-i18n="hosts.ssl">SSL?</label>
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label d-block">Visibility</label>
+                        <label class="form-label d-block" data-i18n="hosts.visibility">Visibility</label>
                         <div class="btn-group" role="group">
                             <!-- Local -->
                             <input type="radio" class="btn-check" id="hostVisibilityLocal" name="hostVisibility" value="0" checked>
-                            <label class="btn btn-outline-primary" for="hostVisibilityLocal">Local</label>
+                            <label class="btn btn-outline-primary" for="hostVisibilityLocal" data-i18n="hosts.visibility.local">Local</label>
                             <!-- Global -->
                             <input type="radio" class="btn-check" id="hostVisibilityGlobal" name="hostVisibility" value="1">
-                            <label class="btn btn-outline-primary" for="hostVisibilityGlobal">Global</label>
+                            <label class="btn btn-outline-primary" for="hostVisibilityGlobal" data-i18n="hosts.visibility.global">Global</label>
                             <!-- Alias -->
                             <input type="radio" class="btn-check" id="hostVisibilityAlias" name="hostVisibility" value="2">
-                            <label class="btn btn-outline-primary" for="hostVisibilityAlias">Alias</label>
+                            <label class="btn btn-outline-primary" for="hostVisibilityAlias" data-i18n="hosts.visibility.alias">Alias</label>
                         </div>
                     </div>
                 </form>
             </div>
 
             <div class="modal-footer">
-                <button type="submit" form="addHostForm" class="btn btn-primary">
-                    <i class="bi bi-check2"></i>
+                <button type="submit"
+                    form="addHostForm"
+                    class="btn btn-primary"
+                    data-i18n-title="common.confirm"
+                    data-i18n-aria-label="common.confirm">
+                        <i class="bi bi-check2"></i>
                 </button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i>
+                <button type="button"
+                    class="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    data-i18n-title="common.cancel"
+                    data-i18n-aria-label="common.cancel">
+                        <i class="bi bi-x"></i>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- AddAlias -->
+<!-- Modal aliases -->
 <div class="modal fade" id="addAliasModal" tabindex="-1" aria-labelledby="addAliasTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
         <div class="modal-content modal-content-sm addhost-modal">
@@ -82,56 +93,68 @@
                 <div class="d-flex align-items-center gap-2">
                     <!-- Emoji o icona -->
                     <span class="title-icon" aria-hidden="true"><i class="bi bi-diagram-2"></i></span>
-                    <h5 class="modal-title mb-0" id="addAliasTitle">Aggiungi Alias</h5>
+                    <h5 class="modal-title mb-0" id="addAliasTitle" data-i18n="aliases.add">Add alias</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"
+                    data-i18n-aria-label="common.close">
+                </button>
             </div>
 
             <div class="modal-body">
                 <form id="addAliasForm">
                     <div class="mb-2">
-                        <label for="aliasName" class="form-label">Alias</label>
+                        <label for="aliasName" class="form-label" data-i18n="aliases.name">Alias</label>
                         <input type="text" id="aliasName" class="form-control" required>
                     </div>
 
                     <div class="mb-2">
-                        <label for="aliasTarget" class="form-label">Target</label>
+                        <label for="aliasTarget" class="form-label" data-i18n="aliases.target">Target</label>
                         <input type="text" id="aliasTarget" class="form-control" required>
                     </div>
 
                     <div class="mb-2">
-                        <label for="aliasDescription" class="form-label">Description</label>
+                        <label for="aliasDescription" class="form-label" data-i18n="common.description">Description</label>
                         <input type="text" id="aliasDescription" class="form-control">
                     </div>
 
                     <div class="form-check my-2">
                         <input class="form-check-input" type="checkbox" id="aliasSSL">
-                        <label class="form-check-label" for="aliasSSL">SSL?</label>
+                        <label class="form-check-label" for="aliasSSL" data-i18n="aliases.ssl">SSL?</label>
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label d-block">Visibility</label>
+                        <label class="form-label d-block" data-i18n="aliases.visibility">Visibility</label>
                         <div class="btn-group" role="group">
                             <!-- Local -->
                             <input type="radio" class="btn-check" id="aliasVisibilityLocal" name="aliasVisibility" value="0" checked>
-                            <label class="btn btn-outline-primary" for="aliasVisibilityLocal">Local</label>
+                            <label class="btn btn-outline-primary" for="aliasVisibilityLocal" data-i18n="aliases.visibility.local">Local</label>
                             <!-- Global -->
                             <input type="radio" class="btn-check" id="aliasVisibilityGlobal" name="aliasVisibility" value="1">
-                            <label class="btn btn-outline-primary" for="aliasVisibilityGlobal">Global</label>
+                            <label class="btn btn-outline-primary" for="aliasVisibilityGlobal" data-i18n="aliases.visibility.global">Global</label>
                             <!-- Alias -->
                             <input type="radio" class="btn-check" id="aliasVisibilityAlias" name="aliasVisibility" value="2">
-                            <label class="btn btn-outline-primary" for="aliasVisibilityAlias">Alias</label>
+                            <label class="btn btn-outline-primary" for="aliasVisibilityAlias" data-i18n="aliases.visibility.alias">Alias</label>
                         </div>
                     </div>
                 </form>
             </div>
 
             <div class="modal-footer">
-                <button type="submit" form="addAliasForm" class="btn btn-primary">
-                    <i class="bi bi-check2"></i>
+                <button type="submit"
+                    form="addAliasForm"
+                    class="btn btn-primary"
+                    data-i18n-title="common.confirm"
+                    data-i18n-aria-label="common.confirm">
+                        <i class="bi bi-check2"></i>
                 </button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i>
+                <button type="button"
+                    class="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    data-i18n-title="common.cancel"
+                    data-i18n-aria-label="common.cancel">
+                        <i class="bi bi-x"></i>
                 </button>
             </div>
         </div>
@@ -144,23 +167,32 @@
         <div class="addhost-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <span class="title-icon"><i class="bi bi-arrow-counterclockwise"></i></span>
-                <span id="backupTitle" class="modal-title">Backup Management</span>
+                <span id="backupTitle" class="modal-title" data-i18n="backup.modal.title">Backup Management</span>
             </div>
-            <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeBackupModal"></button>
+            <button type="button"
+                class="btn-close"
+                data-i18n-title="common.close"
+                data-i18n-aria-label="common.close"
+                data-action="closeBackupModal">
+            </button>
         </div>
 
         <div class="modal-body">
-            <label class="form-label">Available backups</label>
+            <label class="form-label" data-i18n="backup.available">Available backups</label>
 
             <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
                 <table class="table table-hover table-sm align-middle">
                     <thead class="table-light sticky-top">
                         <tr>
                             <th style="width: 40px;"></th>
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Size</th>
-                            <th style="width: 130px;" class="text-center">Actions</th>
+                            <th data-i18n="backup.name">Name</th>
+                            <th data-i18n="backup.date">Date</th>
+                            <th data-i18n="backup.size">Size</th>
+                            <th style="width: 130px;"
+                                class="text-center"
+                                data-i18n="backup.actions">
+                                Actions
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="backupList">
@@ -172,54 +204,95 @@
             <!-- Hidden input opzionale -->
             <input type="hidden" id="restoreBackupId" />
 
-            <small class="text-muted">Select one backup to restore.</small>
+            <small class="text-muted" data-i18n="backup.restore.select">Select one backup to restore.</small>
         </div>
 
         <div class="modal-body">
-            <label class="form-label">Upload backup</label>
+            <label class="form-label" data-i18n="backup.upload">Upload backup</label>
             <div class="d-flex gap-2">
                 <input type="file" id="backupUploadInput" class="form-control" accept=".zip,.bak,.tar,.gz">
-                <button type="button" class="btn btn-primary" title="Upload backup file" aria-label="Upload backup file" data-action="uploadBackup">
-                    <i class="bi bi-upload icon"></i><span class="label"></span>
+                <button type="button"
+                    class="btn btn-primary"
+                    data-i18n-title="backup.upload.file"
+                    data-i18n-aria-label="backup.upload.file"
+                    data-action="uploadBackup">
+                        <i class="bi bi-upload icon"></i><span class="label"></span>
                 </button>
             </div>
-            <small class="text-muted">Select a backup file to upload.</small>
+            <small class="text-muted" data-i18n="backup.upload.select">Select a backup file to upload.</small>
         </div>
 
         <div class="modal-footer modal-buttons">
-            <button type="button" class="btn btn-primary" data-action="startBackup">
-                <i class="bi bi-cloud-upload me-1"></i><span class="label">Create Backup</span>
+            <button type="button"
+                class="btn btn-primary"
+                data-action="startBackup">
+                    <i class="bi bi-cloud-upload me-1"></i>
+                    <span class="label"
+                        data-i18n-title="backup.create"
+                        data-i18n-aria-label="backup.create"
+                        data-i18n="backup.create">
+                            Create Backup
+                        </span>
             </button>
-            <button type="button" class="btn btn-primary" data-action="startRestore">
-                <i class="bi bi-cloud-download me-1"></i><span class="label">Restore Restore</span>
+            <button type="button"
+                class="btn btn-primary"
+                data-action="startRestore">
+                    <i class="bi bi-cloud-download me-1"></i>
+                    <span class="label"
+                        data-i18n-title="backup.restore"
+                        data-i18n-aria-label="backup.restore"
+                        data-i18n="backup.restore">
+                        Restore Backup
+                    </span>
             </button>
-            <button type="button" class="btn btn-primary" data-action="refreshBackupList">
-                <i class="bi bi-arrow-clockwise me-1"></i><span class="label">Refresh List</span>
+            <button type="button"
+                class="btn btn-primary"
+                data-action="refreshBackupList">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    <span class="label"
+                        data-i18n-title="backup.refresh"
+                        data-i18n-aria-label="backup.refresh"
+                        data-i18n="backup.refresh">
+                        Refresh List
+                    </span>
             </button>
-            <button type="button" class="btn btn-outline-primary" data-action="closeBackupModal">
-                <i class="bi bi-x-circle me-1"></i><span class="label">Cancel</span>
+            <button type="button"
+                class="btn btn-outline-primary"
+                data-action="closeBackupModal">
+                    <i class="bi bi-x-circle me-1"></i>
+                    <span class="label"
+                        data-i18n-title="common.close"
+                        data-i18n-aria-label="common.close"
+                        data-i18n="common.close">
+                        Cancel
+                    </span>
             </button>
         </div>
     </div>
 </div>
 
-<!-- Modal Health -->
+<!-- Modal health -->
 <div id="healthModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-md addhost-modal">
             <div class="addhost-header d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
                     <span class="title-icon"><i class="bi bi-heart-pulse"></i></span>
-                    <span id="healthTitle" class="modal-title">Health Status</span>
+                    <span id="healthTitle" class="modal-title" data-i18n="health.modal.title">Health Status</span>
                 </div>
-                <button type="button" class="btn-close" title="Close" aria-label="Close" data-action="closeHealthModal"></button>
+                <button type="button"
+                    class="btn-close"
+                    data-i18n-title="common.close"
+                    data-i18n-aria-label="common.close"
+                    data-action="closeHealthModal">
+                </button>
             </div>
 
             <div class="modal-body">
                 <!-- Loading -->
                 <div id="healthLoading" class="d-flex align-items-center gap-2">
-                    <div class="spinner-border text-primary spinner-border-sm" role="status" aria-label="Loading"></div>
-                        <span class="text-muted">Loading status…</span>
+                    <div class="spinner-border text-primary spinner-border-sm" role="status" data-i18n-aria-label="health.loading"></div>
+                        <span class="text-muted" data-i18n="health.loading">Loading status…</span>
                     </div>
 
                     <!-- Content -->
@@ -240,84 +313,102 @@
                     </div>
 
                 <!-- Error -->
-                <div id="healthError" class="alert alert-danger d-none" role="alert" aria-live="assertive">
+                <div id="healthError" class="alert alert-danger d-none" role="alert" aria-live="assertive" data-i18n="health.error">
                     Error fetching health status. Please try again later.
                 </div>
             </div>
 
             <div class="modal-footer modal-buttons">
-                <button type="button" class="btn btn-outline-primary" data-action="closeHealthModal">
-                    <i class="bi bi-x-circle me-1"></i><span class="label">Close</span>
+                <button type="button"
+                    class="btn btn-outline-primary"
+                    data-i18n-title="common.close"
+                    data-i18n-aria-label="common.close"
+                    data-action="closeHealthModal">
+                        <i class="bi bi-x-circle me-1"></i><span class="label" data-i18n="common.close">Close</span>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- EditConfig -->
+<!-- Modal settings -->
 <div class="modal fade" id="editConfigModal" tabindex="-1" aria-labelledby="editConfigTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered"><!-- modal-sm|md|lg se vuoi cambiare -->
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-sm addhost-modal">
-            <!-- Header scuro con logo/brand -->
+            <!-- Dark Header with logo -->
             <div class="modal-header addhost-header">
                 <div class="d-flex align-items-center gap-2">
                     <!-- Emoji o icona -->
                     <span class="title-icon" aria-hidden="true"><i class="bi bi-diagram-2"></i></span>
-                    <h5 class="modal-title mb-0" id="editConfigTitle">Modifica Parametro</h5>
+                    <h5 class="modal-title mb-0" id="editConfigTitle" data-i18n="settings.edit.title">Edit Configuration</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"
+                    data-i18n-title="common.close"
+                    data-i18n-aria-label="common.close">
+                </button>
             </div>
 
             <div class="modal-body">
                 <form id="editConfigForm">
                     <div class="mb-2">
-                        <label for="configKey" class="form-label">Configuration Parameter</label>
+                        <label for="configKey" class="form-label" data-i18n="settings.modal.parameter">Configuration Parameter</label>
                         <input type="text" id="configKey" class="form-control" readonly>
                     </div>
 
                     <div class="mb-2">
-                        <label for="configDescription" class="form-label">Description</label>
+                        <label for="configDescription" class="form-label" data-i18n="common.description">Description</label>
                         <input type="text" id="configDescription" class="form-control" readonly>
                     </div>
 
                     <!-- Boolean Input -->
                     <div class="mb-2 d-none" id="configValueBoolGroup">
-                        <label class="form-label">Value</label>
+                        <label class="form-label" data-i18n="settings.value">Value</label>
                         <div class="form-check form-switch">
                             <input type="checkbox" id="configValueBool" class="form-check-input">
-                            <label class="form-check-label" for="configValueBool">Enabled</label>
+                            <label class="form-check-label" for="configValueBool" data-i18n="settings.enabled">Enabled</label>
                         </div>
                     </div>
 
                     <!-- Range Input -->
                     <div class="mb-2 d-none" id="configValueRangeGroup">
-                        <label for="configValueRange" class="form-label">Value</label>
+                        <label for="configValueRange" class="form-label" data-i18n="settings.value">Value</label>
                         <input type="range" id="configValueRange" class="form-range">
                         <div class="small text-muted">
-                            Current: <span id="configValueRangeDisplay"></span>
+                            <span data-i18n="settings.current">Current</span>:
+                            <span id="configValueRangeDisplay"></span>
                         </div>
                     </div>
 
                     <!-- Select Input -->
                     <div class="mb-2 d-none" id="configValueSelectGroup">
-                        <label for="configValueSelect" class="form-label">Value</label>
+                        <label for="configValueSelect" class="form-label" data-i18n="settings.value">Value</label>
                         <select id="configValueSelect" class="form-select"></select>
                     </div>
 
                     <!-- Text Input -->
                     <div class="mb-2 d-none" id="configValueGroup">
-                        <label for="configValue" class="form-label">Value</label>
+                        <label for="configValue" class="form-label" data-i18n="settings.value">Value</label>
                         <input type="text" id="configValue" class="form-control">
                     </div>
                 </form>
             </div>
 
             <div class="modal-footer">
-                <button type="submit" form="editConfigForm" class="btn btn-primary">
-                    <i class="bi bi-check2"></i>
+                <button type="submit"
+                    form="editConfigForm"
+                    class="btn btn-primary"
+                    data-i18n-title="common.confirm"
+                    data-i18n-aria-label="common.confirm">
+                        <i class="bi bi-check2"></i>
                 </button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i>
+                <button type="button"
+                    class="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    data-i18n-title="common.cancel"
+                    data-i18n-aria-label="common.cancel">
+                        <i class="bi bi-x"></i>
                 </button>
             </div>
         </div>
@@ -330,20 +421,35 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title">Confirmation</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" data-i18n="common.confirmation">Confirmation</h5>
+        <button type="button"
+            class="btn-close"
+            data-i18n-title="common.close"
+            data-i18n-aria-label="common.close"
+            data-bs-dismiss="modal">
+        </button>
       </div>
 
-      <div class="modal-body" id="confirmModalBody">
+      <div class="modal-body" id="confirmModalBody" data-i18n="common.are_you_sure">
         Are you sure?
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Cancel
+        <button type="button"
+            class="btn btn-secondary"
+            data-i18n-title="common.cancel"
+            data-i18n-aria-label="common.cancel"
+            data-bs-dismiss="modal"
+            data-i18n="common.cancel">
+                Cancel
         </button>
-        <button type="button" class="btn btn-danger" id="confirmModalOk">
-          Confirm
+        <button type="button"
+            class="btn btn-danger"
+            data-i18n-title="common.confirm"
+            data-i18n-aria-label="common.confirm"
+            id="confirmModalOk"
+            data-i18n="common.confirm">
+                Confirm
         </button>
       </div>
 

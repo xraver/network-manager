@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="css/layout.css">
 </head>
 
-<body>
+<body data-page-title="dashboard.title">
     <!-- Topbar -->
     <header class="topbar">
         <div class="topbar-inner">
@@ -33,7 +33,7 @@
                     <line x1="12" y1="6" x2="12" y2="18" stroke="var(--accent)" stroke-width="2"></line>
                     <line x1="6" y1="12" x2="18" y2="12" stroke="var(--accent)" stroke-width="2"></line>
                 </svg>
-                <span>Network Manager</span>
+                <span data-i18n="app.name">Network Manager</span>
             </a>
 
             <nav class="navbar">
@@ -48,13 +48,13 @@
 
                 <!-- Desktop nav -->
                 <div class="d-none d-md-flex gap-2 ms-auto">
-                        <a href="/hosts"    class="btn btn-primary">       Hosts</a>
-                        <a href="/aliases"  class="btn btn-primary">       Alias</a>
-                        <a href="/leases"   class="btn btn-primary">       DHCP Leases</a>
-                        <a href="/devices"  class="btn btn-primary">       Devices</a>
-                        <a href="/logs"     class="btn btn-primary active">Logs</a>
-                        <a href="/settings" class="btn btn-primary">       Settings</a>
-                        <button class="btn btn-primary btn-logout">Logout</button>
+                        <a href="/hosts"    class="btn btn-primary"        data-i18n="hosts.title">Hosts</a>
+                        <a href="/aliases"  class="btn btn-primary"        data-i18n="aliases.title">Alias</a>
+                        <a href="/leases"   class="btn btn-primary"        data-i18n="dhcp.title">DHCP Leases</a>
+                        <a href="/devices"  class="btn btn-primary"        data-i18n="devices.title">Devices</a>
+                        <a href="/logs"     class="btn btn-primary active" data-i18n="logs.title">Logs</a>
+                        <a href="/settings" class="btn btn-primary"        data-i18n="settings.title">Settings</a>
+                        <button class="btn btn-primary btn-logout"         data-i18n="auth.logout">Logout</button>
                 </div>
             </nav>
 
@@ -62,24 +62,26 @@
             <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="mobileMenu">
 
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Network Manager</h5>
+                    <h5 class="offcanvas-title" data-i18n="app.name">Network Manager</h5>
 
                     <button
                         type="button"
                         class="btn-close"
+                        data-i18n-title="common.close"
+                        data-i18n-aria-label="common.close"
                         data-bs-dismiss="offcanvas">
                     </button>
                 </div>
 
                 <div class="offcanvas-body">
                     <div class="d-grid gap-2">
-                        <a href="/hosts"    class="btn btn-primary">       Hosts</a>
-                        <a href="/aliases"  class="btn btn-primary">       Alias</a>
-                        <a href="/leases"   class="btn btn-primary">       DHCP Leases</a>
-                        <a href="/devices"  class="btn btn-primary">       Devices</a>
-                        <a href="/logs"     class="btn btn-primary active">Logs</a>
-                        <a href="/settings" class="btn btn-primary">       Settings</a>
-                        <button class="btn btn-primary btn-logout">Logout</button>
+                        <a href="/hosts"    class="btn btn-primary"        data-i18n="hosts.title">Hosts</a>
+                        <a href="/aliases"  class="btn btn-primary"        data-i18n="aliases.title">Alias</a>
+                        <a href="/leases"   class="btn btn-primary"        data-i18n="dhcp.title">DHCP Leases</a>
+                        <a href="/devices"  class="btn btn-primary"        data-i18n="devices.title">Devices</a>
+                        <a href="/logs"     class="btn btn-primary active" data-i18n="logs.title">Logs</a>
+                        <a href="/settings" class="btn btn-primary"        data-i18n="settings.title">Settings</a>
+                        <button class="btn btn-primary btn-logout"         data-i18n="auth.logout">Logout</button>
                     </div>
                 </div>
             </div>
@@ -98,7 +100,7 @@
                 <div class="col-auto col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon"><i class="bi bi-hdd-network"></i></span>
-                        <span class="section-title">System Logs</span>
+                        <span class="section-title" data-i18n="logs.page.title">System Logs</span>
                     </h2>
                 </div>
 
@@ -115,7 +117,7 @@
                             class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2"
                             data-bs-toggle="dropdown">
                             <i class="bi bi-eye"></i>
-                            <span class="label d-none d-md-inline">View</span>
+                            <span class="label d-none d-md-inline" data-i18n="logs.view">View</span>
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow">
@@ -124,11 +126,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-success w-100 d-flex align-items-center gap-2"
-                                    title="Live Stream On"
-                                    aria-label="Live Stream On"
+                                    data-i18n-title="logs.live.description"
+                                    data-i18n-aria-label="logs.live.description"
                                     data-action="liveToggle">
                                     <i class="bi bi-broadcast"></i>
-                                    <span class="label d-md-inline">Live</span>
+                                    <span class="label d-md-inline" data-i18n="logs.live">Live</span>
                                 </button>
                             </li>
 
@@ -136,11 +138,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2"
-                                    title="Refresh"
-                                    aria-label="Refresh"
+                                    data-i18n-title="logs.refresh"
+                                    data-i18n-aria-label="logs.refresh"
                                     data-action="refreshLogs">
                                     <i class="bi bi-arrow-repeat"></i>
-                                    <span class="label d-md-inline">Refresh</span>
+                                    <span class="label d-md-inline" data-i18n="logs.refresh">Refresh</span>
                                 </button>
                             </li>
                         </ul>
@@ -153,7 +155,7 @@
                             class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2 px-3"
                             data-bs-toggle="dropdown">
                             <i class="bi bi-file-text"></i>
-                            <span class="label d-none d-md-inline">App</span>
+                            <span class="label d-none d-md-inline" data-i18n="logs.app">App</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow">
                             <li><a class="dropdown-item active" data-value="app" href="#">App</a></li>
@@ -170,18 +172,19 @@
                             class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2 px-3"
                             data-bs-toggle="dropdown">
                             <i class="bi bi-sliders"></i>
-                            <span class="label d-none d-md-inline">Filter</span>
+                            <span class="label d-none d-md-inline" data-i18n="logs.filter">Filter</span>
                         </button>
 
                         <div class="dropdown-menu dropdown-menu-end shadow p-3" id="filterDropdown">
                             <!-- Search Bar -->
                             <div class="mb-2">
-                                <label class="form-label small">Search</label>
+                                <label class="form-label small" data-i18n="common.search">Search</label>
                                 <input
                                     type="text"
                                     id="logSearch"
                                     class="form-control mb-2"
-                                    placeholder="Search logs">
+                                    data-i18n-placeholder="common.search.placeholder"
+                                    data-i18n-aria-label="logs.search">
                             </div>
 
                             <!-- Separator -->
@@ -235,11 +238,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2 text-nowrap"
-                                    title="Reload DNS (BIND)"
-                                    aria-label="Reload DNS"
+                                    data-i18n-title="dns.reload.description"
+                                    data-i18n-aria-label="dns.reload.description"
                                     data-action="reloadDns">
                                     <i class="bi bi-arrow-clockwise"></i>
-                                    <span class="label d-md-inline">Reload DNS</span>
+                                    <span class="label d-md-inline" data-i18n="dns.reload">Reload DNS</span>
                                 </button>
                             </li>
 
@@ -247,11 +250,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2 text-nowrap"
-                                    title="Reload DHCP (Kea)"
-                                    aria-label="Reload DHCP"
+                                    data-i18n-title="dhcp.reload.description"
+                                    data-i18n-aria-label="dhcp.reload.description"
                                     data-action="reloadDhcp">
                                     <i class="bi bi-arrow-clockwise"></i>
-                                    <span class="label d-md-inline">Reload DHCP</span>
+                                    <span class="label d-md-inline" data-i18n="dhcp.reload">Reload DHCP</span>
                                 </button>
                             </li>
 
@@ -262,11 +265,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-danger w-100 d-flex align-items-center gap-2 text-nowrap"
-                                    title="Restart system"
-                                    aria-label="Restart system"
+                                    data-i18n-title="app.restart.description"
+                                    data-i18n-aria-label="app.restart.description"
                                     data-action="restartApp">
                                     <i class="bi bi-power"></i>
-                                    <span class="label d-md-inline">Restart</span>
+                                    <span class="label d-md-inline" data-i18n="app.restart">Restart</span>
                                 </button>
                             </li>
                         </ul>
@@ -282,10 +285,9 @@
     <!-- Loader -->
     <div id="loader" class="text-center my-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden" data-i18n="common.loading">Loading...</span>
         </div>
     </div>
-    <div id="devices-container"></div>
 
     <!-- Modals -->
     <div id="modals-container"></div>

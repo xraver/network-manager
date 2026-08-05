@@ -37,6 +37,10 @@ def print_welcome(logger):
         str(settings.DB_FILE), settings.DB_RESET
     )
     logger.info(
+        "Language: %s",
+        get_config("LANGUAGE")
+    )
+    logger.info(
         "Log: level=%s, to_file=%s, file=%s",
         get_config("LOG_LEVEL"), get_config("LOG_TO_FILE"), str(settings.LOG_FILE)
     )

@@ -1,7 +1,10 @@
-// Import common js
+// -------------------------------------------------------
+// IMPORT
+// -------------------------------------------------------
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, handleSearch, filterTable, clearSearch, handleReload } from './common.js';
-// Import services
 import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLeases, serviceDeleteDHCPLease, serviceGetDHCPLease, serviceCreateHost} from './services.js';
+import { loadLanguage, translatePage, t } from "./i18n.js";
+import { getBackendMessage } from "./backendMessages.js";
 
 // -----------------------------
 // State variables
@@ -29,8 +32,8 @@ async function fetchLeases () {
         viewLeases = [...allLeases];
 
     } catch (err) {
-        console.error(err?.message || "Error loading leases");
-        showToast(err?.message || "Error loading leases", false);
+        console.error(err?.message || t("dhcp.leases.list.error"));
+        showToast(err?.message || t("dhcp.leases.list.error"), false);
         allLeases = [];
         viewLeases = [];
         // hide loader and show table
@@ -42,7 +45,7 @@ async function fetchLeases () {
 }
 
 // -----------------------------
-// Update table with current hosts
+// Update table with current leases
 // -----------------------------
 function updateTable () {
     const loader = document.getElementById("loader");
@@ -63,7 +66,7 @@ function updateTable () {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
-        tdEmpty.textContent = "No leases available.";
+        tdEmpty.textContent = t("dhcp.leases.empty");
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
@@ -155,41 +158,41 @@ function updateTable () {
             td.style.verticalAlign = "middle";
 
             const val = (l.dhcp_state ?? "").toString();
-            let aria = "";
+            let description = "";
             let iconClass = "";
             switch (val) {
                 case "active":
                     // DHCP active lease
-                    aria = "DHCP lease is active";
+                    description = t("dhcp.leases.active.description");
                     iconClass = "bi bi-check-circle-fill";
                     break;
 
                 case "expired":
                     // DHCP expired lease
-                    aria = "DHCP lease is expired";
+                    description = t("dhcp.leases.expired.description");
                     iconClass = "bi bi-clock-history";
                     break;
 
                 case "released":
                     // DHCP released lease
-                    aria = "DHCP lease is released";
+                    description = t("dhcp.leases.released.description");
                     iconClass = "bi bi-box-arrow-in-right";
                     break;
 
                 case "declined":
                     // DHCP declined lease
-                    aria = "DHCP lease is declined";
+                    description = t("dhcp.leases.declined.description");
                     iconClass = "bi bi-x-octagon-fill";
                     break;
             }
             if (iconClass) {
                 const icon = document.createElement("i");
                 icon.className = iconClass + " icon icon-static";
-                icon.setAttribute("aria-hidden", "true");
-                icon.setAttribute("title", aria);
+                td.setAttribute("title", description);
+                td.setAttribute("aria-label", description);
                 td.appendChild(icon);
             }
-
+            if (val) td.setAttribute("data-value", val);
             tr.appendChild(td);
         }
 
@@ -202,11 +205,12 @@ function updateTable () {
 
             // Add Button
             const addSpan = document.createElement("span");
+            const addText = t("dhcp.leases.add");
             addSpan.className = "action-icon";
             addSpan.setAttribute("role", "button");
             addSpan.tabIndex = 0;
-            addSpan.title = "Add static lease";
-            addSpan.setAttribute("aria-label", "Add static lease");
+            addSpan.title = addText;
+            addSpan.setAttribute("aria-label", addText);
             addSpan.setAttribute("data-bs-toggle", "modal");
             addSpan.setAttribute("data-bs-target", "#addHostModal");
             addSpan.setAttribute("data-action", "add");
@@ -220,11 +224,12 @@ function updateTable () {
 
             // Delete Button
             const delSpan = document.createElement("span");
+            const deleteText = t("dhcp.leases.delete");
             delSpan.className = "action-icon";
             delSpan.setAttribute("role", "button");
             delSpan.tabIndex = 0;
-            delSpan.title = "Delete lease";
-            delSpan.setAttribute("aria-label", "Delete lease");
+            delSpan.title = deleteText;
+            delSpan.setAttribute("aria-label", deleteText);
             delSpan.setAttribute("data-action", "delete");
             delSpan.setAttribute("data-lease-id", String(id));
             {
@@ -292,8 +297,8 @@ async function addHost(id) {
         }
 
     } catch (err) {
-        console.error(err?.message || "Error loading lease");
-        showToast(err?.message || "Error loading lease", false);
+        console.error(err?.message || t("dhcp.leases.loaded.error"));
+        showToast(err?.message || t("dhcp.leases.loaded.error"), false);
     }
 }
 
@@ -303,39 +308,45 @@ async function addHost(id) {
 async function saveHost(hostData) {
     // Validate hostname
     if (!hostData.name.trim()) {
-        showToast("Hostname is required", false);
+        showToast(t("validation.name.required"), false);
         return false;
     }
     // Validate IPv4 format
     if (!isValidIPv4(hostData.ipv4)) {
-        showToast("Invalid IPv4 format", false);
+        showToast(t("validation.ipv4.invalid"), false);
         return false;
     }
     // Validate IPv6 format
     if (!isValidIPv6(hostData.ipv6)) {
-        showToast("Invalid IPv6 format", false);
+        showToast(t("validation.ipv6.invalid"), false);
         return false;
     }
     // Validate MAC format
     if (!isValidMAC(hostData.mac)) {
-        showToast("Invalid MAC format", false);
+        showToast(t("validation.mac.invalid"), false);
         return false;
     }
 
     try {
         const result = await serviceCreateHost(hostData);
 
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : 'Host created successfully';
+        const msg = getBackendMessage(
+            result,
+            "hosts.created.ok"
+        );
 
         showToast(msg, true);
 
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+
+        const msg = getBackendMessage(
+            err,
+            "hosts.created.error"
+        );
+
+        showToast(msg, false);
     }
 
     return false;
@@ -383,7 +394,7 @@ async function handleAddHostSubmit(e) {
 
         const ok = await saveHost(data);
         if (ok !== false) {
-            // close modal and reload hosts
+            // close modal and reload leases
             closeAddHostModal();
             await fetchLeases();
             updateTable();
@@ -391,8 +402,8 @@ async function handleAddHostSubmit(e) {
         }
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+        console.error(err?.message || t("hosts.created.error"));
+        showToast(err?.message || t("hosts.created.error"), false);
     }
 
     return false;
@@ -408,17 +419,14 @@ async function handleDeleteLease(e, el) {
     // Get lease ID
     const id = Number(el.dataset.leaseId);
     if (!Number.isFinite(id)) {
-        showToast('Lease id not valid for delete', false);
+        showToast(t("dhcp.leases.delete.invalid_id"), false);
         return;
     }
 
     try {
         const result = await serviceDeleteDHCPLease(id);
 
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : 'Lease deleted successfully';
-
+        const msg = getBackendMessage(result, "dhcp.leases.deleted.ok");
         showToast(msg, true);
 
         // Reload leases
@@ -428,8 +436,8 @@ async function handleDeleteLease(e, el) {
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error deleting lease");
-        showToast(err?.message || "Error deleting lease", false);
+        console.error(err?.message || t("dhcp.leases.deleted.error"));
+        showToast(err?.message || t("dhcp.leases.deleted.error"), false);
     }
 
     return false;
@@ -452,9 +460,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDNS,
-            "DNS reload successfully",
-            "Error reloading DNS",
-            "Reloading DNS..."
+            t("dns.reload.ok"),
+            t("dns.reload.error"),
+            t("dns.reload.progress")
         );
     },
     // Reload DHCP
@@ -462,9 +470,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDHCP,
-            "DHCP reload successfully",
-            "Error reloading DHCP",
-            "Reloading DHCP..."
+            t("dhcp.reload.ok"),
+            t("dhcp.reload.error"),
+            t("dhcp.reload.progress")
         );
     },
 };
@@ -481,21 +489,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 // -----------------------------
 async function initApp() {
 
+    // Loading translation
+    try {
+        await loadLanguage();
+    } catch (err) {
+        console.error(err?.message || t("app.translation.error"));
+        showToast(t("app.translation.error"), false);
+    }
+
     // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
     try {
         await loadModals();
     } catch (err) {
-        console.error(err?.message || "Error loading modals");
-        showToast(err?.message || "Error loading modals", false);
+        console.error(err?.message || t("app.modals.error"));
+        showToast(t("app.modals.error"), false);
     }
+
+    // Translate page
+    translatePage();
 
     // Load data (leases)
     try {
         await fetchLeases();
         updateTable();
     } catch (err) {
-        console.error(err?.message || "Error loading dhcp leases");
-        showToast(err?.message || "Error loading dhcp leases", false);
+        console.error(err?.message || t("dhcp.leases.list.error"));
+        showToast(err?.message || t("dhcp.leases.list.error"), false);
     }
 
     initUI();
@@ -556,7 +575,7 @@ function initModalLifecycle() {
             try {
                 await addHost(id);
             } catch (err) {
-                showToast(err?.message || "Error loading host", false);
+                showToast(err?.message || t("dhcp.leases.loaded.error"), false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
                     closeAddHostModal();
@@ -607,8 +626,8 @@ async function handleActionClick(e) {
     try {
         await handler(e, el);
     } catch (err) {
-        console.error(err?.message || 'Action error');
-        showToast(err?.message || 'Action error', false);
+        console.error(err?.message || t("app.action.error"));
+        showToast(err?.message || t("app.action.error"), false);
     }
 }
 

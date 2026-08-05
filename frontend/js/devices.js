@@ -1,7 +1,10 @@
-// Import common js
+// -------------------------------------------------------
+// IMPORT
+// -------------------------------------------------------
 import { loadModals, isValidIPv4, isValidIPv6, isValidMAC, showToast, sortTable, initSortableTable, resetSorting, handleSearch, filterTable, clearSearch, handleReload } from './common.js';
-// Import services
-import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLeases, serviceGetDHCPLease, serviceDeleteDHCPLease, serviceGetDevices, serviceGetHost, serviceCreateHost, serviceUpdateHost, serviceDeleteHost } from './services.js';
+import { serviceReloadDNS, serviceReloadDHCP, serviceGetDHCPLease, serviceDeleteDHCPLease, serviceGetDevices, serviceGetHost, serviceCreateHost, serviceUpdateHost, serviceDeleteHost } from './services.js';
+import { loadLanguage, translatePage, t } from "./i18n.js";
+import { getBackendMessage } from "./backendMessages.js";
 
 // -----------------------------
 // State variables
@@ -30,8 +33,8 @@ async function fetchDevices () {
         viewDevices = [...allDevices];
 
     } catch (err) {
-        console.error(err?.message || "Error loading devices");
-        showToast(err?.message || "Error loading devices", false);
+        console.error(err?.message || t("devices.list.error"));
+        showToast(err?.message || t("devices.list.error"), false);
         allDevices = [];
         viewDevices = [];
         // hide loader and show table
@@ -64,7 +67,7 @@ function updateTable () {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 7;
-        tdEmpty.textContent = "No devices available.";
+        tdEmpty.textContent = t("devices.empty");
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
@@ -89,8 +92,8 @@ function updateTable () {
         } else if (id.startsWith("d-")) {
             type = 2;
         } else {
-            console.error("updateTable: unknown device type:", id);
-            showToast("updateTable: unknown device type:", false);
+            console.error(t("devices.unknown.type"), id);
+            showToast(t("devices.unknown.type"), false);
         }
 
         const tr = document.createElement("tr");
@@ -139,47 +142,47 @@ function updateTable () {
             td.style.verticalAlign = "middle";
 
             const val = (d.dhcp_state ?? "").toString();
-            let aria = "";
+            let description = "";
             let iconClass = "";
             switch (val) {
                 case "static":
-                    // Static device
-                    aria = "Device is static";
+                    // Static lease
+                    description = t("dhcp.leases.static.description");
                     iconClass = "bi bi-gear-fill";
                     break;
 
                 case "active":
                     // DHCP active lease
-                    aria = "DHCP lease is active";
+                    description = t("dhcp.leases.active.description");
                     iconClass = "bi bi-check-circle-fill";
                     break;
 
                 case "expired":
                     // DHCP expired lease
-                    aria = "DHCP lease is expired";
+                    description = t("dhcp.leases.expired.description");
                     iconClass = "bi bi-clock-history";
                     break;
 
                 case "released":
                     // DHCP released lease
-                    aria = "DHCP lease is released";
+                    description = t("dhcp.leases.released.description");
                     iconClass = "bi bi-box-arrow-in-right";
                     break;
 
                 case "declined":
                     // DHCP declined lease
-                    aria = "DHCP lease is declined";
+                    description = t("dhcp.leases.declined.description");
                     iconClass = "bi bi-x-octagon-fill";
                     break;
             }
             if (iconClass) {
                 const icon = document.createElement("i");
                 icon.className = iconClass + " icon icon-static";
-                icon.setAttribute("aria-hidden", "true");
-                icon.setAttribute("title", aria);
+                td.setAttribute("title", description);
+                td.setAttribute("aria-label", description);
                 td.appendChild(icon);
             }
-
+            if (val) td.setAttribute("data-value", val);
             tr.appendChild(td);
         }
 
@@ -188,20 +191,20 @@ function updateTable () {
             const td = document.createElement("td");
             td.style.textAlign = "center";
             td.style.verticalAlign = "middle";
+            let description = "";
 
             const active = !!d.active;
             td.setAttribute("data-value", active ? "true" : "false");
-            td.setAttribute("aria-label", active ? "device active" : "device not active");
             const icon = document.createElement("i");
             if (active) {
+                description = t("devices.active.description");
                 icon.className = "bi bi-circle-fill text-success icon icon-static";
-                icon.setAttribute("aria-hidden", "true");
-                icon.setAttribute("title", "Device is active");
             } else {
+                description = t("devices.not.active.description");
                 icon.className = "bi bi-circle-fill text-danger icon icon-static";
-                icon.setAttribute("aria-hidden", "true");
-                icon.setAttribute("title", "Device is not active");
             }
+            td.setAttribute("title", description);
+            td.setAttribute("aria-label", description);
             td.appendChild(icon);
             tr.appendChild(td);
         }
@@ -215,11 +218,12 @@ function updateTable () {
 
             // Edit Button
             const editSpan = document.createElement("span");
+            const editText = t("devices.edit");
             editSpan.className = "action-icon";
             editSpan.setAttribute("role", "button");
             editSpan.tabIndex = 0;
-            editSpan.title = "Edit host";
-            editSpan.setAttribute("aria-label", "Edit host");
+            editSpan.title = editText;
+            editSpan.setAttribute("aria-label", editText);
             editSpan.setAttribute("data-bs-toggle", "modal");
             editSpan.setAttribute("data-bs-target", "#addHostModal");
             editSpan.setAttribute("data-action", "edit");
@@ -233,11 +237,12 @@ function updateTable () {
 
             // Add Button
             const addSpan = document.createElement("span");
+            const addText = t("dhcp.leases.add");
             addSpan.className = "action-icon";
             addSpan.setAttribute("role", "button");
             addSpan.tabIndex = 0;
-            addSpan.title = "Add static lease";
-            addSpan.setAttribute("aria-label", "Add static lease");
+            addSpan.title = addText;
+            addSpan.setAttribute("aria-label", addText);
             addSpan.setAttribute("data-bs-toggle", "modal");
             addSpan.setAttribute("data-bs-target", "#addHostModal");
             addSpan.setAttribute("data-action", "add");
@@ -251,11 +256,12 @@ function updateTable () {
 
             // Delete Button
             const delSpan = document.createElement("span");
+            const deleteText = t("devices.delete");
             delSpan.className = "action-icon";
             delSpan.setAttribute("role", "button");
             delSpan.tabIndex = 0;
-            delSpan.title = "Delete device";
-            delSpan.setAttribute("aria-label", "Delete device");
+            delSpan.title = deleteText;
+            delSpan.setAttribute("aria-label", deleteText);
             delSpan.setAttribute("data-action", "delete");
             delSpan.setAttribute("data-device-id", String(id));
             {
@@ -322,11 +328,11 @@ async function editHost(id) {
             // dynamic
             host = false;
         } else {
-            throw new Error("Invalid Device ID format for edit");
+            throw new Error(t("devices.edit.invalid_id"));
         }
         id = Number(id.slice(2));
     } else {
-        throw new Error("Invalid Device ID for edit");
+        throw new Error(t("devices.edit.invalid_id"));
     }
 
     try {
@@ -355,10 +361,9 @@ async function editHost(id) {
         } else {
             document.getElementById("hostVisibilityLocal").checked = true;
         }
-
     } catch (err) {
-        console.error(err?.message || "Error loading device");
-        showToast(err?.message || "Error loading device", false);
+        console.error(err?.message || t("devices.loaded.error"));
+        showToast(err?.message || t("devices.loaded.error"), false);
     }
 }
 
@@ -368,22 +373,22 @@ async function editHost(id) {
 async function saveHost(hostData) {
     // Validate hostname
     if (!hostData.name.trim()) {
-        showToast("Hostname is required", false);
+        showToast(t("validation.name.required"), false);
         return false;
     }
     // Validate IPv4 format
     if (!isValidIPv4(hostData.ipv4)) {
-        showToast("Invalid IPv4 format", false);
+        showToast(t("validation.ipv4.invalid"), false);
         return false;
     }
     // Validate IPv6 format
     if (!isValidIPv6(hostData.ipv6)) {
-        showToast("Invalid IPv6 format", false);
+        showToast(t("validation.ipv6.invalid"), false);
         return false;
     }
     // Validate MAC format
     if (!isValidMAC(hostData.mac)) {
-        showToast("Invalid MAC format", false);
+        showToast(t("validation.mac.invalid"), false);
         return false;
     }
 
@@ -398,19 +403,27 @@ async function saveHost(hostData) {
             result = await serviceCreateHost(hostData);
         }
 
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : editingHostId !== null
-                ? 'Host updated successfully'
-                : 'Host created successfully';
+        const msg = getBackendMessage(
+            result,
+            editingHostId !== null
+                ? "devices.updated.ok"
+                : "devices.created.ok"
+        );
 
         showToast(msg, true);
 
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+
+        const msg = getBackendMessage(
+            err,
+            editingHostId !== null
+                ? "devices.updated.error"
+                : "devices.created.error"
+        );
+
+        showToast(msg, false);
     }
 
     return false;
@@ -468,8 +481,20 @@ async function handleAddHostSubmit(e) {
         }
 
     } catch (err) {
-        console.error(err?.message || "Error saving host");
-        showToast(err?.message || "Error saving host", false);
+        console.error(
+            err?.message ||
+            (editingHostId !== null
+                ? t("devices.updated.error")
+                : t("devices.created.error"))
+        );
+
+        showToast(
+            err?.message ||
+            (editingHostId !== null
+                ? t("devices.updated.error")
+                : t("devices.created.error")),
+            false
+        );
     }
 
     return false;
@@ -489,8 +514,7 @@ async function handleDeleteDevice(e, el) {
     let id = el.dataset.deviceId;
 
     if (!id) {
-        console.warn('Delete: device id not valid for delete:', id);
-        showToast('Device id not valid for delete', false);
+        showToast(t("devices.delete.invalid_id"), false);
         return;
     }
 
@@ -504,25 +528,23 @@ async function handleDeleteDevice(e, el) {
             // dynamic
             host = false;
         } else {
-            throw new Error("Invalid Device ID format for edit");
+            throw new Error(t("devices.edit.invalid_id"));
         }
         id = Number(id.slice(2));
     } else {
-        throw new Error("Invalid Device ID for edit");
+        throw new Error(t("devices.edit.invalid_id"));
     }
 
     try {
-       if(host){
-            const result = await serviceDeleteHost(id);
+       let result;
 
+       if(host){
+            result = await serviceDeleteHost(id);
         } else {
-            const result = await serviceDeleteDHCPLease(id);
+            result = await serviceDeleteDHCPLease(id);
         }
 
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : 'Host deleted successfully';
-
+        const msg = getBackendMessage(result, "devices.deleted.ok");
         showToast(msg, true);
 
         // Reload devices
@@ -532,8 +554,8 @@ async function handleDeleteDevice(e, el) {
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error deleting device");
-        showToast(err?.message || "Error deleting device", false);
+        console.error(err?.message || t("devices.deleted.error"));
+        showToast(err?.message || t("devices.deleted.error"), false);
     }
 
     return false;
@@ -547,7 +569,11 @@ const actionHandlers = {
     delete: (e, el) => {
         handleDeleteDevice(e, el);
     },
-    // Edit host
+    // Add device
+    add: () => {
+        // handled by bootstrap modal show event
+    },
+    // Edit device
     edit: () => {
         // handled by bootstrap modal show event
     },
@@ -556,9 +582,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDNS,
-            "DNS reload successfully",
-            "Error reloading DNS",
-            "Reloading DNS..."
+            t("dns.reload.ok"),
+            t("dns.reload.error"),
+            t("dns.reload.progress")
         );
     },
     // Reload DHCP
@@ -566,9 +592,9 @@ const actionHandlers = {
         await handleReload(
             el,
             serviceReloadDHCP,
-            "DHCP reload successfully",
-            "Error reloading DHCP",
-            "Reloading DHCP..."
+            t("dhcp.reload.ok"),
+            t("dhcp.reload.error"),
+            t("dhcp.reload.progress")
         );
     },
 };
@@ -585,21 +611,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 // -----------------------------
 async function initApp() {
 
+    // Loading translation
+    try {
+        await loadLanguage();
+    } catch (err) {
+        console.error(err?.message || t("app.translation.error"));
+        showToast(t("app.translation.error"), false);
+    }
+
     // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
     try {
         await loadModals();
     } catch (err) {
-        console.error(err?.message || "Error loading modals");
-        showToast(err?.message || "Error loading modals", false);
+        console.error(err?.message || t("app.modals.error"));
+        showToast(t("app.modals.error"), false);
     }
+
+    // Translate page
+    translatePage();
 
     // Load data (devices)
     try {
         await fetchDevices();
         updateTable();
     } catch (err) {
-        console.error(err?.message || "Error loading devices");
-        showToast(err?.message || "Error loading devices", false);
+        console.error(err?.message || t("devices.list.error"));
+        showToast(err?.message || t("devices.list.error"), false);
     }
 
     initUI();
@@ -661,7 +698,7 @@ function initModalLifecycle() {
             try {
                 await editHost(id);
             } catch (err) {
-                showToast(err?.message || "Error loading host", false);
+                showToast(err?.message || t("devices.loaded.error"), false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
                     closeAddHostModal();
@@ -719,8 +756,8 @@ async function handleActionClick(e) {
     try {
         await handler(e, el);
     } catch (err) {
-        console.error(err?.message || 'Action error');
-        showToast(err?.message || 'Action error', false);
+        console.error(err?.message || t("app.action.error"));
+        showToast(err?.message || t("app.action.error"), false);
     }
 }
 

@@ -34,10 +34,18 @@ def about():
 # ---------------------------------------------------------
 @router.post("/api/restart")
 def restart():
+
     def do_restart():
         time.sleep(0.5)
         os.kill(os.getpid(), signal.SIGTERM)
 
-    threading.Thread(target=do_restart, daemon=True).start()
+    threading.Thread(
+        target=do_restart,
+        daemon=True
+    ).start()
 
-    return {"message": "Application restarting..."}
+    return {
+        "code": "APP_RESTARTING",
+        "status": "success",
+        "message": "Application restarting..."
+    }

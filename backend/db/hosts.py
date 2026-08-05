@@ -53,13 +53,13 @@ def validate_data(data: Dict[str, Any]) -> Dict[str, Any]:
         if not MAC_RE.match(mac):
             raise ValueError(f"Invalid MAC address: {mac}")
 
-    # Check description
+    # Check Description
     description = data.get("description")
 
-    # Normalizzazione boolean per DB (0/1)
+    # Boolean normalization for DB (0/1)
     ssl_enabled = int(bool(data.get("ssl_enabled", 0)))
 
-    # Normalizzazione (0/1/2)
+    # Normalization (0/1/2)
     v = int(data.get("visibility", 0))
     visibility = v if v in (0, 1, 2) else 0
 
@@ -128,7 +128,7 @@ def get_host(host_id: int) -> Optional[Dict[str, Any]]:
 # -----------------------------
 # ADD HOST
 # -----------------------------
-def add_host(data: Dict[str, Any]) -> int:
+def add_host(data: Dict[str, Any]):
 
     # Validate input
     cleaned = validate_data(data)
@@ -151,7 +151,6 @@ def add_host(data: Dict[str, Any]) -> int:
             ),
         )
         conn.commit()
-        return cur.lastrowid
 
     except sqlite3.IntegrityError:
         conn.rollback()
@@ -165,7 +164,7 @@ def add_host(data: Dict[str, Any]) -> int:
 # -----------------------------
 # UPDATE HOST
 # -----------------------------
-def update_host(host_id: int, data: Dict[str, Any]) -> bool:
+def update_host(host_id: int, data: Dict[str, Any]):
 
     # Validate input
     cleaned = validate_data(data)
@@ -190,8 +189,11 @@ def update_host(host_id: int, data: Dict[str, Any]) -> bool:
                 host_id,
             ),
         )
+
+        if cur.rowcount == 0:
+            raise ValueError(f"Host {host_id} not found")
+
         conn.commit()
-        return cur.rowcount > 0
 
     except Exception as err:
         conn.rollback()
@@ -201,7 +203,7 @@ def update_host(host_id: int, data: Dict[str, Any]) -> bool:
 # -----------------------------
 # DELETE HOST
 # -----------------------------
-def delete_host(host_id: int) -> bool:
+def delete_host(host_id: int):
 
     # Validate input
     if host_id is None:
@@ -210,8 +212,11 @@ def delete_host(host_id: int) -> bool:
     conn = get_db()
     try:
         cur = conn.execute("DELETE FROM hosts WHERE id = ?", (host_id,))
+
+        if cur.rowcount == 0:
+            raise ValueError(f"Host {host_id} not found")
+
         conn.commit()
-        return cur.rowcount > 0
 
     except Exception as err:
         conn.rollback()

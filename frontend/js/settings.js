@@ -1,7 +1,10 @@
-// Import common js
+// -------------------------------------------------------
+// IMPORT
+// -------------------------------------------------------
 import { loadModals, showToast, handleSearch, clearSearch, showConfirmModal, handleReload } from './common.js';
-// Import services
 import { serviceGetConfigs, serviceGetConfig, serviceUpdateConfig, serviceResetConfig, serviceReloadDNS, serviceReloadDHCP, serviceRestartApp, serviceIsAlive } from './services.js';
+import { loadLanguage, translatePage, t } from "./i18n.js";
+import { getBackendMessage } from "./backendMessages.js";
 
 // -----------------------------
 // State variables
@@ -71,8 +74,8 @@ async function fetchConfigs () {
         viewConfigs = [...allConfigs];
 
     } catch (err) {
-        console.error(err?.message || "Error loading configs");
-        showToast(err?.message || "Error loading configs", false);
+        console.error(err?.message || t("settings.list.error"));
+        showToast(err?.message || t("settings.list.error"), false);
         allConfigs = [];
         viewConfigs = [];
         // hide loader and show table
@@ -164,7 +167,7 @@ function startReconnectPolling(button, originalHtmlButton) {
         attempts++;
         if (attempts > maxAttempts) {
             clearInterval(interval);
-            showToast("Server did not come back online", false);
+            showToast(t("app.reconnect.timeout"), false);
             button.innerHTML = originalHtmlButton;
             button.disabled = false;
             return;
@@ -178,13 +181,13 @@ function startReconnectPolling(button, originalHtmlButton) {
 
                 clearInterval(interval);
 
-                showToast("Application is back online", true);
+                showToast(t("app.reconnect.success"), true);
 
                 setTimeout(() => location.reload(), 500);
 
             }
         } catch (err) {
-            console.log("Waiting for server...");
+            console.log(t("app.reconnect.waiting"));
         }
 
     }, 2000); // check every 2 seconds
@@ -194,7 +197,7 @@ function startReconnectPolling(button, originalHtmlButton) {
 // Restart application
 // -----------------------------
 async function handleRestartApp(button) {
-    const confirmed = await showConfirmModal("Restart the application?");
+    const confirmed = await showConfirmModal(t("app.restart.confirm"));
     if (!confirmed) return;
 
     const originalHtmlButton = button.innerHTML;
@@ -202,9 +205,9 @@ async function handleRestartApp(button) {
     const ok = await handleReload(
         button,
         serviceRestartApp,
-        "Application is restarting...",
-        "Error restarting application",
-        "Restarting...",
+        t("app.restart.progress"),
+        t("app.restart.error"),
+        t("app.restart.progress"),
         true
     );
 
@@ -226,11 +229,11 @@ function updateTable (filter = null) {
     expandBtn?.toggleAttribute("disabled", hasSearch);
     collapseBtn?.toggleAttribute("disabled", hasSearch);
     if (hasSearch) {
-        expandBtn?.setAttribute("title", "Disabled during search");
-        collapseBtn?.setAttribute("title", "Disabled during search");
+        expandBtn?.setAttribute("title", t("settings.expand.disabled"));
+        collapseBtn?.setAttribute("title", t("settings.expand.disabled"));
     } else {
-        expandBtn?.setAttribute("title", "Expand all groups");
-        collapseBtn?.setAttribute("title", "Collapse all groups");
+        expandBtn?.setAttribute("title", t("settings.expand.all"));
+        collapseBtn?.setAttribute("title", t("settings.collapse.all"));
     }
 
     // DOM Reference
@@ -248,7 +251,7 @@ function updateTable (filter = null) {
         const trEmpty = document.createElement("tr");
         const tdEmpty = document.createElement("td");
         tdEmpty.colSpan = 4;
-        tdEmpty.textContent = "No configs available.";
+        tdEmpty.textContent = t("settings.empty");
         tdEmpty.style.textAlign = "center";
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
@@ -358,8 +361,9 @@ function updateTable (filter = null) {
                 editSpan.className = "action-icon";
                 editSpan.setAttribute("role", "button");
                 editSpan.tabIndex = 0;
-                editSpan.title = "Edit config";
-                editSpan.setAttribute("aria-label", "Edit config");
+                const editText = t("settings.edit");
+                editSpan.title = editText;
+                editSpan.setAttribute("aria-label", editText);
                 editSpan.setAttribute("data-bs-toggle", "modal");
                 editSpan.setAttribute("data-bs-target", "#editConfigModal");
                 editSpan.setAttribute("data-action", "edit");
@@ -373,11 +377,12 @@ function updateTable (filter = null) {
 
                 // Reset Button
                 const resetSpan = document.createElement("span");
+                const resetText = t("settings.reset");
                 resetSpan.className = "action-icon";
                 resetSpan.setAttribute("role", "button");
                 resetSpan.tabIndex = 0;
-                resetSpan.title = "Reset to default value";
-                resetSpan.setAttribute("aria-label", "Reset to default value");
+                resetSpan.title = resetText;
+                resetSpan.setAttribute("aria-label", resetText);
                 resetSpan.setAttribute("data-action", "reset");
                 resetSpan.setAttribute("data-config-key", String(c.key));
                 {
@@ -534,8 +539,8 @@ async function editConfig(key) {
         }
 
     } catch (err) {
-        console.error(err?.message || "Error loading config");
-        showToast(err?.message || "Error loading config", false);
+        console.error(err?.message || t("settings.loaded.error"));
+        showToast(err?.message || t("settings.loaded.error"), false);
     }
 }
 
@@ -547,7 +552,7 @@ async function saveConfig(configData) {
     switch (typeof configData.value) {
         case "string":
             if (!configData.value.trim()) {
-                showToast("Configuration value is required", false);
+                showToast(t("validation.config.required"), false);
                 return false;
             }
             break;
@@ -557,13 +562,13 @@ async function saveConfig(configData) {
 
         case "number":
             if (isNaN(configData.value)) {
-                showToast("Invalid numeric value", false);
+                showToast(t("validation.config.invalid_number"), false);
                 return false;
             }
             break;
 
         default:
-            showToast("Invalid configuration value", false);
+            showToast(t("validation.config.invalid"), false);
             return false;
     }
 
@@ -572,17 +577,23 @@ async function saveConfig(configData) {
 
         // Update
         result = await serviceUpdateConfig(editingConfigKey, configData);
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : 'Config updated successfully';
+        const msg = getBackendMessage(
+            result,
+            "settings.updated.ok"
+        );
 
         showToast(msg, true);
 
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error updating config");
-        showToast(err?.message || "Error updating config", false);
+
+        const msg = getBackendMessage(
+            err,
+            "settings.updated.error"
+        );
+
+        showToast(msg, false);
     }
 
     return false;
@@ -629,12 +640,20 @@ async function handleEditConfigSubmit(e) {
             closeEditConfigModal();
             await fetchConfigs();
             updateTable();
-            return true
+            return true;
         }
 
     } catch (err) {
-        console.error(err?.message || "Error saving config");
-        showToast(err?.message || "Error saving config", false);
+        console.error(
+            err?.message ||
+            t("settings.updated.error")
+        );
+
+        showToast(
+            err?.message ||
+            t("settings.updated.error"),
+            false
+        );
     }
 
     return false;
@@ -650,21 +669,18 @@ async function handleResetConfig(e, el) {
     // Get config ID
     const key = el.dataset.configKey;
     if (typeof key !== "string" || key.length === 0) {
-        showToast('Configuration key not valid for reset', false);
+        showToast(t("settings.restored.invalid_id"), false);
         return;
     }
 
     // Confirm requested
-    const confirmed = await showConfirmModal("Reset this configuration?");
+    const confirmed = await showConfirmModal(t("settings.reset.confirm"));
     if (!confirmed) return;
 
     try {
         const result = await serviceResetConfig(key);
 
-        const msg = (typeof result === 'object' && result?.message)
-            ? result.message
-            : 'Config reset to default successfully';
-
+        const msg = getBackendMessage(result, "settings.restored.ok");
         showToast(msg, true);
 
         // Reload configs
@@ -674,8 +690,8 @@ async function handleResetConfig(e, el) {
         return true;
 
     } catch (err) {
-        console.error(err?.message || "Error resetting config to default");
-        showToast(err?.message || "Error resetting config to default", false);
+        console.error(err?.message || t("settings.restored.error"));
+        showToast(err?.message || t("settings.restored.error"), false);
     }
 
     return false;
@@ -694,24 +710,22 @@ const actionHandlers = {
         // handled by bootstrap modal show event
     },
     reloadDns: async (e, el) => {
-        showToast("DNS is reloading...", true);
         await handleReload(
             el,
             serviceReloadDNS,
-            "DNS reload successfully",
-            "Error reloading DNS",
-            "Reloading DNS..."
+            t("dns.reload.ok"),
+            t("dns.reload.error"),
+            t("dns.reload.progress")
         );
     },
     // Reload DHCP
     reloadDhcp: async (e, el) => {
-        showToast("DHCP is reloading...", true);
         await handleReload(
             el,
             serviceReloadDHCP,
-            "DHCP reload successfully",
-            "Error reloading DHCP",
-            "Reloading DHCP..."
+            t("dhcp.reload.ok"),
+            t("dhcp.reload.error"),
+            t("dhcp.reload.progress")
         );
     },
     // Reload App
@@ -732,21 +746,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 // -----------------------------
 async function initApp() {
 
+    // Loading translation
+    try {
+        await loadLanguage();
+    } catch (err) {
+        console.error(err?.message || t("app.translation.error"));
+        showToast(t("app.translation.error"), false);
+    }
+
     // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
     try {
         await loadModals();
     } catch (err) {
-        console.error(err?.message || "Error loading modals");
-        showToast(err?.message || "Error loading modals", false);
+        console.error(err?.message || t("app.modals.error"));
+        showToast(t("app.modals.error"), false);
     }
+
+    // Translate page
+    translatePage();
 
     // Load data (configs)
     try {
         await fetchConfigs();
         updateTable();
     } catch (err) {
-        console.error(err?.message || "Error loading configs");
-        showToast(err?.message || "Error loading configs", false);
+        console.error(err?.message || t("settings.list.error"));
+        showToast(err?.message || t("settings.list.error"), false);
     }
 
     initUI();
@@ -806,14 +831,13 @@ function initModalLifecycle() {
             try {
                 await editConfig(key);
             } catch (err) {
-                showToast(err?.message || "Error loading config", false);
+                showToast(err?.message || t("settings.loaded.error"), false);
                 // Close modal
                 modalEl.addEventListener('shown.bs.modal', () => {
                     closeEditConfigModal();
                 }, { once: true });
             }
         } else {
-            console.warn("Invalid Configuration Key for edit");
             closeEditConfigModal();
             return;
         }
@@ -850,10 +874,10 @@ function initEvents() {
         const groupKey = groupRow.dataset.group;
         toggleGroup(groupKey);
     });
-    document.getElementById("expandAllBtn")
-        ?.addEventListener("click", expandAllGroups);
-    document.getElementById("collapseAllBtn")
-        ?.addEventListener("click", collapseAllGroups);
+    document.querySelectorAll(".expand-all-btn")
+        .forEach(btn => btn.addEventListener("click", expandAllGroups));
+    document.querySelectorAll(".collapse-all-btn")
+        .forEach(btn => btn.addEventListener("click", collapseAllGroups));
 }
 
 // -----------------------------
@@ -871,8 +895,8 @@ async function handleActionClick(e) {
     try {
         await handler(e, el);
     } catch (err) {
-        console.error(err?.message || 'Action error');
-        showToast(err?.message || 'Action error', false);
+        console.error(err?.message || t("app.action.error"));
+        showToast(err?.message || t("app.action.error"), false);
     }
 }
 

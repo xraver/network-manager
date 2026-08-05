@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="css/layout.css">
 </head>
 
-<body>
+<body data-page-title="dashboard.title">
     <!-- Topbar -->
     <header class="topbar">
         <div class="topbar-inner">
@@ -33,7 +33,7 @@
                     <line x1="12" y1="6" x2="12" y2="18" stroke="var(--accent)" stroke-width="2"></line>
                     <line x1="6" y1="12" x2="18" y2="12" stroke="var(--accent)" stroke-width="2"></line>
                 </svg>
-                <span>Network Manager</span>
+                <span data-i18n="app.name">Network Manager</span>
             </a>
 
             <nav class="navbar">
@@ -48,13 +48,13 @@
 
                 <!-- Desktop nav -->
                 <div class="d-none d-md-flex gap-2 ms-auto">
-                        <a href="/hosts"    class="btn btn-primary">       Hosts</a>
-                        <a href="/aliases"  class="btn btn-primary">       Alias</a>
-                        <a href="/leases"   class="btn btn-primary active">DHCP Leases</a>
-                        <a href="/devices"  class="btn btn-primary">       Devices</a>
-                        <a href="/logs"     class="btn btn-primary">       Logs</a>
-                        <a href="/settings" class="btn btn-primary">       Settings</a>
-                        <button class="btn btn-primary btn-logout">Logout</button>
+                        <a href="/hosts"    class="btn btn-primary"        data-i18n="hosts.title">Hosts</a>
+                        <a href="/aliases"  class="btn btn-primary"        data-i18n="aliases.title">Alias</a>
+                        <a href="/leases"   class="btn btn-primary active" data-i18n="dhcp.title">DHCP Leases</a>
+                        <a href="/devices"  class="btn btn-primary"        data-i18n="devices.title">Devices</a>
+                        <a href="/logs"     class="btn btn-primary"        data-i18n="logs.title">Logs</a>
+                        <a href="/settings" class="btn btn-primary"        data-i18n="settings.title">Settings</a>
+                        <button class="btn btn-primary btn-logout"         data-i18n="auth.logout">Logout</button>
                 </div>
             </nav>
 
@@ -62,24 +62,26 @@
             <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="mobileMenu">
 
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Network Manager</h5>
+                    <h5 class="offcanvas-title" data-i18n="app.name">Network Manager</h5>
 
                     <button
                         type="button"
                         class="btn-close"
+                        data-i18n-title="common.close"
+                        data-i18n-aria-label="common.close"
                         data-bs-dismiss="offcanvas">
                     </button>
                 </div>
 
                 <div class="offcanvas-body">
                     <div class="d-grid gap-2">
-                        <a href="/hosts"    class="btn btn-primary">       Hosts</a>
-                        <a href="/aliases"  class="btn btn-primary">       Alias</a>
-                        <a href="/leases"   class="btn btn-primary active">DHCP Leases</a>
-                        <a href="/devices"  class="btn btn-primary">       Devices</a>
-                        <a href="/logs"     class="btn btn-primary">       Logs</a>
-                        <a href="/settings" class="btn btn-primary">       Settings</a>
-                        <button class="btn btn-primary btn-logout">Logout</button>
+                        <a href="/hosts"    class="btn btn-primary"        data-i18n="hosts.title">Hosts</a>
+                        <a href="/aliases"  class="btn btn-primary"        data-i18n="aliases.title">Alias</a>
+                        <a href="/leases"   class="btn btn-primary active" data-i18n="dhcp.title">DHCP Leases</a>
+                        <a href="/devices"  class="btn btn-primary"        data-i18n="devices.title">Devices</a>
+                        <a href="/logs"     class="btn btn-primary"        data-i18n="logs.title">Logs</a>
+                        <a href="/settings" class="btn btn-primary"        data-i18n="settings.title">Settings</a>
+                        <button class="btn btn-primary btn-logout"         data-i18n="auth.logout">Logout</button>
                     </div>
                 </div>
             </div>
@@ -98,7 +100,7 @@
                 <div class="col-auto col-md-auto">
                     <h2 class="mb-0 d-flex align-items-center gap-2 lh-1">
                         <span class="title-icon"><i class="bi bi-broadcast"></i></span>
-                        <span class="section-title">DHCP Leases</span>
+                        <span class="section-title" data-i18n="dhcp.page.title">DHCP Leases</span>
                     </h2>
                 </div>
 
@@ -111,9 +113,9 @@
                         <input
                             type="text"
                             id="searchInput"
-                            placeholder="Search..."
                             class="form-control form-control-sm placeholder-italic"
-                            aria-label="Search lease">
+                            data-i18n-placeholder="common.search.placeholder"
+                            data-i18n-aria-label="dhcp.leases.search">
                     </div>
                 </div>
 
@@ -136,11 +138,11 @@
                     <!-- Add host Desktop -->
                     <button
                         class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Add Host"
-                        aria-label="Add Host"
+                        data-i18n-title="hosts.add"
+                        data-i18n-aria-label="hosts.add"
                         data-bs-toggle="modal" data-bs-target="#addHostModal">
                         <i class="bi bi-plus-lg"></i>
-                        <span class="label">Add Host</span>
+                        <span class="label" data-i18n="hosts.add">Add Host</span>
                     </button>
 
                     <!-- Separator -->
@@ -149,21 +151,21 @@
                     <!-- Reload DNS Desktop -->
                     <button
                         class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Reload DNS (BIND)"
-                        aria-label="Reload DNS"
+                        data-i18n-title="dns.reload.description"
+                        data-i18n-aria-label="dns.reload.description"
                         data-action="reloadDns">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label">Reload DNS</span>
+                        <span class="label" data-i18n="dns.reload">Reload DNS</span>
                     </button>
 
                     <!-- Reload DHCP Desktop -->
                     <button
                         class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-3"
-                        title="Reload DHCP (Kea)"
-                        aria-label="Reload DHCP"
+                        data-i18n-title="dhcp.reload.description"
+                        data-i18n-aria-label="dhcp.reload.description"
                         data-action="reloadDhcp">
                         <i class="bi bi-arrow-repeat"></i>
-                        <span class="label">Reload DHCP</span>
+                        <span class="label" data-i18n="dhcp.reload">Reload DHCP</span>
                     </button>
 
                     <!-- Mobile Dropdown -->
@@ -182,11 +184,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2"
-                                    title="Add Host"
-                                    aria-label="Add Host"
+                                    data-i18n-title="hosts.add"
+                                    data-i18n-aria-label="hosts.add"
                                     data-bs-toggle="modal" data-bs-target="#addHostModal">
                                     <i class="bi bi-plus-lg"></i>
-                                    <span>Add Host</span>
+                                    <span data-i18n="hosts.add">Add Host</span>
                                 </button>
                             </li>
 
@@ -194,11 +196,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2"
-                                    title="Reload DNS (BIND)"
-                                    aria-label="Reload DNS"
+                                    data-i18n-title="dns.reload.description"
+                                    data-i18n-aria-label="dns.reload.description"
                                     data-action="reloadDns">
                                     <i class="bi bi-arrow-repeat"></i>
-                                    <span>Reload DNS</span>
+                                    <span data-i18n="dns.reload">Reload DNS</span>
                                 </button>
                             </li>
 
@@ -206,11 +208,11 @@
                             <li class="px-2 py-1">
                                 <button
                                     class="btn btn-primary w-100 d-flex align-items-center gap-2"
-                                    title="Reload DHCP (Kea)"
-                                    aria-label="Reload DHCP"
+                                    data-i18n-title="dhcp.reload.description"
+                                    data-i18n-aria-label="dhcp.reload.description"
                                     data-action="reloadDhcp">
                                     <i class="bi bi-arrow-repeat"></i>
-                                    <span>Reload DHCP</span>
+                                    <span data-i18n="dhcp.reload">Reload DHCP</span>
                                 </button>
                             </li>
                         </ul>
@@ -223,9 +225,9 @@
                 <input
                     type="text"
                     id="searchInputMobile"
-                    placeholder="Search..."
                     class="form-control form-control-sm placeholder-italic"
-                    aria-label="Search lease">
+                    data-i18n-placeholder="common.search.placeholder"
+                    data-i18n-aria-label="dhcp.lease.search">
             </div>
         </div>
     </section>
@@ -236,31 +238,37 @@
             <thead class="table-light">
                 <tr>
                     <th data-type="ipv4" data-sortable="true" data-sort="0">
-                        IP Address <span class="sort-arrow" aria-hidden="true"></span>
+                        <span data-i18n="hosts.ipv4">IP Address</span>
+                        <span class="sort-arrow" aria-hidden="true"></span>
                     </th>
 
                     <th data-type="mac" data-sortable="true" data-sort="1">
-                        MAC <span class="sort-arrow" aria-hidden="true"></span>
+                        <span data-i18n="hosts.mac">MAC Address</span>
+                        <span class="sort-arrow" aria-hidden="true"></span>
                     </th>
 
                     <th data-type="string" data-sortable="true" data-sort="2">
-                        Hostname <span class="sort-arrow" aria-hidden="true"></span>
+                        <span data-i18n="hosts.hostname">Hostname</span>
+                        <span class="sort-arrow" aria-hidden="true"></span>
                     </th>
 
                     <th data-type="string" data-sortable="true" data-sort="3">
-                        Start <span class="sort-arrow" aria-hidden="true"></span>
+                        <span data-i18n="dhcp.lease.start">Start</span>
+                        <span class="sort-arrow" aria-hidden="true"></span>
                     </th>
 
                     <th data-type="string" data-sortable="true" data-sort="4">
-                        End <span class="sort-arrow" aria-hidden="true"></span>
+                        <span data-i18n="dhcp.lease.end">End</span>
+                        <span class="sort-arrow" aria-hidden="true"></span>
                     </th>
 
-                    <th data-type="string" data-sortable="true" data-sort="5">
-                        State <span class="sort-arrow" aria-hidden="true"></span>
+                    <th data-type="string" data-sortable="true" data-sort="5" class="text-center text-nowrap">
+                        <span data-i18n="common.state">State</span>
+                        <span class="sort-arrow" aria-hidden="true"></span>
                     </th>
 
                     <th data-type="string" data-sortable="false" class="text-center text-nowrap">
-                        Actions
+                        <span data-i18n="common.actions">Actions</span>
                     </th>
                 </tr>
             </thead>
@@ -271,10 +279,9 @@
     <!-- Loader -->
     <div id="loader" class="text-center my-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden" data-i18n="common.loading">Loading...</span>
         </div>
     </div>
-    <div id="devices-container"></div>
 
     <!-- Modals -->
     <div id="modals-container"></div>

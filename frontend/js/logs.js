@@ -1,7 +1,10 @@
-// Import common js
+// -------------------------------------------------------
+// IMPORT
+// -------------------------------------------------------
 import { loadModals, showToast, showConfirmModal, handleReload } from './common.js';
-// Import services
 import { serviceReloadDNS, serviceReloadDHCP, serviceRestartApp, serviceIsAlive, serviceGetLogs } from './services.js';
+import { loadLanguage, translatePage, t } from "./i18n.js";
+import { getBackendMessage } from "./backendMessages.js";
 
 // -----------------------------
 // State variables
@@ -107,7 +110,8 @@ function clearFilters() {
     updateFilterButton();
 
     requestAnimationFrame(() => {
-        logViewer.scrollTop = savedScrollPosition;
+        if (savedScrollPosition !== null)
+            logViewer.scrollTop = savedScrollPosition;
     });
 }
 
@@ -376,7 +380,7 @@ function startReconnectPolling(button, originalHtmlButton) {
         attempts++;
         if (attempts > maxAttempts) {
             clearInterval(interval);
-            showToast("Server did not come back online", false);
+            showToast(t("app.reconnect.timeout"), false);
             button.innerHTML = originalHtmlButton;
             button.disabled = false;
             return;
@@ -390,13 +394,13 @@ function startReconnectPolling(button, originalHtmlButton) {
 
                 clearInterval(interval);
 
-                showToast("Application is back online", true);
+                showToast(t("app.reconnect.success"), true);
 
                 setTimeout(() => location.reload(), 500);
 
             }
         } catch (err) {
-            console.log("Waiting for server...");
+            console.log(t("app.reconnect.waiting"));
         }
 
     }, 2000); // check every 2 seconds
@@ -406,7 +410,7 @@ function startReconnectPolling(button, originalHtmlButton) {
 // Restart application
 // -----------------------------
 async function handleRestartApp(button) {
-    const confirmed = await showConfirmModal("Restart the application?");
+    const confirmed = await showConfirmModal(t("app.restart.confirm"));
     if (!confirmed) return;
 
     const originalHtmlButton = button.innerHTML;
@@ -414,9 +418,9 @@ async function handleRestartApp(button) {
     const ok = await handleReload(
         button,
         serviceRestartApp,
-        "Application is restarting...",
-        "Error restarting application",
-        "Restarting...",
+        t("app.restart.progress"),
+        t("app.restart.error"),
+        t("app.restart.progress"),
         true
     );
 
@@ -443,24 +447,22 @@ const actionHandlers = {
     //},
     // Reload DNS
     reloadDns: async (e, el) => {
-        showToast("DNS is reloading...", true);
         await handleReload(
             el,
             serviceReloadDNS,
-            "DNS reload successfully",
-            "Error reloading DNS",
-            "Reloading DNS..."
+            t("dns.reload.ok"),
+            t("dns.reload.error"),
+            t("dns.reload.progress")
         );
     },
     // Reload DHCP
     reloadDhcp: async (e, el) => {
-        showToast("DHCP is reloading...", true);
         await handleReload(
             el,
             serviceReloadDHCP,
-            "DHCP reload successfully",
-            "Error reloading DHCP",
-            "Reloading DHCP..."
+            t("dhcp.reload.ok"),
+            t("dhcp.reload.error"),
+            t("dhcp.reload.progress")
         );
     },
     // Reload App
@@ -473,8 +475,8 @@ const actionHandlers = {
 // DOMContentLoaded: bootstrap app
 // -----------------------------
 document.addEventListener("DOMContentLoaded", async () => {
-    initApp();
-    loadLogs();
+    await initApp();
+    await loadLogs();
 });
 
 // -----------------------------
@@ -482,13 +484,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 // -----------------------------
 async function initApp() {
 
+    // Loading translation
+    try {
+        await loadLanguage();
+    } catch (err) {
+        console.error(err?.message || t("app.translation.error"));
+        showToast(t("app.translation.error"), false);
+    }
+
     // Load modals (Bootstrap 5 requires JS initialization for dynamic content)
     try {
         await loadModals();
     } catch (err) {
-        console.error(err?.message || "Error loading modals");
-        showToast(err?.message || "Error loading modals", false);
+        console.error(err?.message || t("app.modals.error"));
+        showToast(t("app.modals.error"), false);
     }
+
+    // Translate page
+    translatePage();
 
     initEvents();
     initDropdown();
@@ -530,8 +543,8 @@ async function handleActionClick(e) {
     try {
         await handler(e, el);
     } catch (err) {
-        console.error(err?.message || 'Action error');
-        showToast(err?.message || 'Action error', false);
+        console.error(err?.message || t("app.action.error"));
+        showToast(err?.message || t("app.action.error"), false);
     }
 }
 

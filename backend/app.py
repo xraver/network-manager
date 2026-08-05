@@ -21,6 +21,7 @@ from backend.routes.certificates import router as certificates_router
 from backend.routes.backup import router as backup_router
 from backend.routes.logs import router as logs_router
 from backend.routes.settings import router as settings_router
+from backend.routes.localization import router as localization_router
 
 # Import Security
 from backend.security import is_logged_in, apply_session
@@ -226,6 +227,7 @@ def create_app() -> FastAPI:
     app.include_router(backup_router)
     app.include_router(logs_router)
     app.include_router(settings_router)
+    app.include_router(localization_router)
 
     # CORS
     cors_origins = [

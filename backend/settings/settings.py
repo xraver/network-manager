@@ -79,6 +79,9 @@ class Settings(BaseModel):
     DB_FILE: Path = Field(default_factory=lambda: Path(os.getenv("DB_FILE", default.DB_FILE)))
     DB_RESET: bool = Field(default_factory=lambda: to_bool(os.getenv("DB_RESET"), default.DB_RESET))
 
+    # Language
+    LANGUAGE: str = Field(default_factory=lambda: os.getenv("LANGUAGE", default.LANGUAGE))
+
     # Log
     LOG_LEVEL: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", default.LOG_LEVEL))
     LOG_TO_FILE: bool = Field(default_factory=lambda: to_bool(os.getenv("LOG_TO_FILE"), default.LOG_TO_FILE))

@@ -145,7 +145,7 @@
 - [ ] Backup of generated configurations
 
 ### 🌍 Language
-- [ ] Localization
+- [X] Localization
 
 ---
 
