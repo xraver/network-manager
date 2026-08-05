@@ -166,6 +166,7 @@
 - [ ] Session timeout
 - [ ] Protection against session hijacking
 - [ ] Global logout / session invalidation
+- [ ] Themes & Dark mode
 
 ---
 
