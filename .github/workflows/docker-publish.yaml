@@ -3,7 +3,7 @@ name: Docker Publish (GHCR)
 on:
   push:
     tags:
-      - 'v*'    # e.g. v1.2.3
+      - 'v*'
 
 permissions:
   contents: read
@@ -40,8 +40,8 @@ jobs:
           images: |
             ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_REPO }}
           tags: |
-            type=ref,event=tag       # v1.2.3
-            type=raw,value=latest    # latest
+            type=ref,event=tag
+            type=raw,value=latest
           flavor: |
             latest=true
           labels: |
