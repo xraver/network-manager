@@ -44,6 +44,17 @@ This project is currently under development. For upcoming tasks and planned impr
 - Admin credentials configurable via env or Docker secrets
 - Support for `SESSION_SECRET`: custom key for cookie signing (required in production; auto-generated in development if not provided)
 
+## 🔐 Security Features
+
+- HttpOnly session cookies
+- Secure cookies when HTTPS is enabled
+- SameSite=Strict cookies
+- CSP protection
+- TrustedHostMiddleware
+- Login rate limiting
+- HSTS support
+- Security headers
+
 ---
 
 ## 📦 Requirements
@@ -69,7 +80,9 @@ project/
 # --- Host & Web ---
 DOMAIN=example.com
 EXTERNAL_NAME=dyndns.example.com
+TRUSTED_HOSTS=127.0.0.1,localhost,networkmanager.example.com
 HTTP_PORT=8000
+HTTPS_ENABLED=1
 # --- Admin ---
 ADMIN_USER=admin
 ADMIN_PASSWORD=admin
@@ -83,7 +96,8 @@ LOG_TO_FILE=false
 # --- Session secret (optional but recommended in production) ---
 # SESSION_SECRET=****ReplaceWithYourSecret*****
 ```
-If SESSION_SECRET is not set, the application generates a new random key at each restart, which invalidates all existing sessions.
+If SESSION_SECRET is not set, the application generates a new random key at each startup, invalidating all existing sessions.
+For production deployments, configure a persistent SESSION_SECRET.
 
 ### 3) 🐳 Example `docker-compose.yml`
 ```yaml
@@ -108,8 +122,10 @@ services:
       # Host
       DOMAIN: "${DOMAIN:-example.com}"
       EXTERNAL_NAME: "${EXTERNAL_NAME:-dyndns.example.com}"
+      TRUSTED_HOSTS: "${TRUSTED_HOSTS:-127.0.0.1,localhost,networkmanager.example.com}"
       # Web
       HTTP_PORT: "${HTTP_PORT:-8000}"
+      HTTPS_ENABLED: "${HTTPS_ENABLED:-0}"
       LOGIN_MAX_ATTEMPTS: "${LOGIN_MAX_ATTEMPTS:-5}"
       LOGIN_WINDOW_SECONDS: "${LOGIN_WINDOW_SECONDS:-600}"
       # Admin
@@ -143,8 +159,10 @@ secrets:
 | `LOG_ACCESS_FILE` | access.log | HTTP access log |
 | `DOMAIN` | example.com | Public domain |
 | `EXTERNAL_NAME` | dyndns.example.com | External Name |
+| `TRUSTED_HOSTS` | 127.0.0.1,localhost,networkmanager.example.com | Comma-separated list of allowed HTTP Host headers. |
 | `HTTP_HOST` | 0.0.0.0 | IP address the server binds to |
 | `HTTP_PORT` | 8000 | Internal HTTP port |
+| `HTTPS_ENABLED` | false | HTTPS enabled |
 | `LOGIN_MAX_ATTEMPTS` | 5 | Login attempts |
 | `LOGIN_WINDOW_SECONDS` | 600 | Attempt window |
 | `ADMIN_USER` | admin |  Admin username |
@@ -191,7 +209,8 @@ Docker compose will mount it in:
 
 ## 🔑 SESSION_SECRET
 Used to sign cookies.
-If set, the app generates a new key each time and all sessions expire on each restart.
+If SESSION_SECRET is not set, the application generates a new random key at startup, which invalidates all existing sessions after every restart.
+For production deployments, configure a persistent SESSION_SECRET value.
 Generate a strong secret:
 ```bash
 openssl rand -base64 64
@@ -236,10 +255,11 @@ docker compose up --build -d --force-recreate
 ---
 ## 🔒 Security Checklist
 - Use `ADMIN_PASSWORD_HASH_FILE` in production
-- Disable `SESSION_SECRET` for automatic generation
-- Set `secure=True` on cookies if you use HTTPS
-- Use a reverse proxy with TLS
-- Do not put passwords in the repository
+- Configure `SESSION_SECRET` in production
+- Configure `TRUSTED_HOSTS`
+- Enable HTTPS through a reverse proxy
+- Set `HTTPS_ENABLED=1` when running behind HTTPS
+- Do not store credentials in the repository
 
 ---
 ## 📄 License

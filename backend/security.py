@@ -4,7 +4,7 @@
 import bcrypt
 import os
 from fastapi import Request, HTTPException
-from itsdangerous import TimestampSigner
+from itsdangerous import TimestampSigner, BadSignature, SignatureExpired
 
 # Import local modules
 from backend.db.users import get_user_by_username
@@ -62,10 +62,10 @@ def apply_session(response, username: str | None = None, token: str | None = Non
         "session",
         token,
         httponly=True,
-        max_age=86400,
+        secure=settings.HTTPS_ENABLED,
+        samesite="Strict",
         path="/",
-        #secure=True, # GRGR solo via HTTPS
-        samesite="Strict"
+        max_age=86400,
     )
 
 # -----------------------------
@@ -79,7 +79,7 @@ def is_logged_in(request: Request) -> bool:
     try:
         signer.unsign(token, max_age=86400)
         return True
-    except:
+    except (BadSignature, SignatureExpired):
         return False
 
 # -----------------------------
@@ -89,7 +89,9 @@ def close_session(response):
 
     response.delete_cookie(
         key="session",
-        path="/"
+        path="/",
+        samesite="Strict",
+        secure=settings.HTTPS_ENABLED,
     )
 
     logger.debug("Session closed")

@@ -29,8 +29,12 @@ def print_welcome(logger):
         settings.APP_NAME, settings.APP_VERSION
     )
     logger.info(
-        "App settings: frontend=%s | host=%s | port=%d | secret=%s",
-        str(settings.FRONTEND_PATH), settings.HTTP_HOST, settings.HTTP_PORT, masked_secret
+        "App settings: frontend=%s | host=%s | port=%d | https_enabled=%s | secret=%s",
+        str(settings.FRONTEND_PATH), settings.HTTP_HOST, settings.HTTP_PORT, settings.HTTPS_ENABLED, masked_secret
+    )
+    logger.info(
+        "              trusted_hosts=%s",
+        settings.TRUSTED_HOSTS
     )
     logger.info(
         "Database: file=%s | reset=%s",

@@ -91,10 +91,18 @@ class Settings(BaseModel):
     # Hosts
     DOMAIN: str = Field(default_factory=lambda: os.getenv("DOMAIN", default.DOMAIN))
     EXTERNAL_NAME: str = Field(default_factory=lambda: os.getenv("EXTERNAL_NAME", default.EXTERNAL_NAME))
+    TRUSTED_HOSTS: list[str] = Field(
+        default_factory=lambda: [
+            h.strip()
+            for h in os.getenv("TRUSTED_HOSTS", default.TRUSTED_HOSTS).split(",")
+            if h.strip()
+        ]
+    )
 
     # Web
     HTTP_HOST: str = Field(default_factory=lambda: os.getenv("HTTP_HOST", default.HTTP_HOST))
     HTTP_PORT: int = Field(default_factory=lambda: to_int(os.getenv("HTTP_PORT"), default.HTTP_PORT))
+    HTTPS_ENABLED: bool = Field(default_factory=lambda: to_bool(os.getenv("HTTPS_ENABLED"), default.HTTPS_ENABLED))
     SECRET_KEY: str = Field(default_factory=_load_secret_key)
     LOGIN_MAX_ATTEMPTS: int = Field(default_factory=lambda: to_int(os.getenv("LOGIN_MAX_ATTEMPTS"), default.LOGIN_MAX_ATTEMPTS))
     LOGIN_WINDOW_SECONDS: int = Field(default_factory=lambda: to_int(os.getenv("LOGIN_WINDOW_SECONDS"), default.LOGIN_WINDOW_SECONDS))

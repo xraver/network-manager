@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from typing import Callable
 
 # Import Routers
@@ -59,19 +60,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
         response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
 
-        # CSP rigida per produzione
+        # CSP for production
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "base-uri 'self'; "
             "object-src 'none'; "
             "frame-ancestors 'none'; "
             "img-src 'self' data:; "
-            "font-src 'self' data:; "
-            "style-src 'self'; "
-            "script-src 'self'; "
-            "connect-src 'self'; "
+            "font-src 'self' data: https://cdn.jsdelivr.net; "
+            "style-src 'self' https://cdn.jsdelivr.net; "
+            "script-src 'self' https://cdn.jsdelivr.net; "
+            "connect-src 'self' https://cdn.jsdelivr.net; "
             "manifest-src 'self'; "
-            "worker-src 'self'"
+            "worker-src 'self'; "
         )
         return response
 
@@ -244,11 +245,17 @@ def create_app() -> FastAPI:
         allow_credentials=True,
     )
 
-    # Security headers (GRGR -> to be enabled in production)
-    # app.add_middleware(SecurityHeadersMiddleware)
+    # Security headers
+    app.add_middleware(SecurityHeadersMiddleware)
 
     # Session/Auth middleware (funzionale)
     app.middleware("http")(session_middleware)
+
+    # Trusted Host Middleware
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=settings.TRUSTED_HOSTS,
+    )
 
     # Route per file del frontend
     app.add_api_route("/", home_page, methods=["GET"])

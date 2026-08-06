@@ -34,12 +34,14 @@ LOG_ACCESS_FILE = "access.log"
 # ---------------------------------------------------------
 DOMAIN = "example.com"
 EXTERNAL_NAME = "dyndns.example.com"
+TRUSTED_HOSTS="127.0.0.1,localhost,*"
 
 # ---------------------------------------------------------
 # Web
 # ---------------------------------------------------------
 HTTP_HOST = "0.0.0.0"
 HTTP_PORT = 8000
+HTTPS_ENABLED = False
 LOGIN_MAX_ATTEMPTS = 5
 LOGIN_WINDOW_SECONDS = 600
 

@@ -52,6 +52,22 @@
 
 ---
 
+## 🔧 Backup & Recovery
+- [X] Backup generation
+- [X] Backup restore
+- [X] Backup/Restore from web
+- [ ] Show Backup information (metadata, integrity, statistics) in Backup Management
+- [ ] Periodic backup of SQLite DB
+- [ ] Remote Git repository backup
+- [ ] Backup of generated configurations
+
+---
+
+## 🌍 Language
+- [X] Localization
+
+---
+
 ## 📝 Logs
 
 - [x] Log Generation
@@ -114,38 +130,46 @@
 # 🔐 Web Security Hardening
 
 ### 🔒 Sessions & Cookies
-- [ ] Set `secure=True` when using HTTPS
-- [ ] Set `httponly=True` to prevent access via JS
-- [ ] Set `samesite=Strict` or `Lax` depending on use
-- [ ] Controlled rotation of `SESSION_SECRET` (manual or scheduled)
+- [X] Set secure=True when using HTTPS
+- [X] Set httponly=True to prevent access via JS
+- [X] Set samesite=Strict
+- [X] Session expiration enforced server-side (TimestampSigner max_age)
+- [X] Session renewal (sliding expiration)
+- [ ] Controlled rotation of SESSION_SECRET (manual or scheduled)
+- [ ] Global session invalidation
+- [ ] Session timeout configurable from UI
 
 ### 🛡 HTTP Protection
-- [ ] Security headers:
-  - [ ] `Content-Security-Policy`
-  - [ ] `Strict-Transport-Security`
-  - [ ] `X-Frame-Options`
-  - [ ] `X-Content-Type-Options`
-  - [ ] `Referrer-Policy`
+- [X] Content-Security-Policy
+- [X] Strict-Transport-Security (implemented, da applicare solo con HTTPS)
+- [X] X-Frame-Options
+- [X] X-Content-Type-Options
+- [X] Referrer-Policy
+- [X] Permissions-Policy
+- [X] Cross-Origin-Opener-Policy
+- [X] Cross-Origin-Resource-Policy
+
+### 🛡 Access Protection
+- [X] CORS allowlist
+- [X] TrustedHostMiddleware
 - [ ] Enable TLS via reverse proxy
-- [ ] Additional rate limiting on sensitive IPs and endpoints
+- [ ] Restrict forwarded_allow_ips
+- [ ] Disable /docs and /openapi.json in production
+
+### 🛡 Rate Limiting
+- [X] Login rate limiting
+- [ ] Additional rate limiting on sensitive endpoints
+    - /api/backup
+    - /api/settings
+    - /api/certificates
 
 ### 🔥 Application protection
 - [ ] DNS/DHCP input validation (hostname, IP, subnet)
 - [ ] Input sanitization against YAML/XML/JSON injection
 - [ ] Audit log of critical changes
-- [ ] Brute force protection
-
-### 🔧 Backup & Recovery
-- [X] Backup generation
-- [X] Backup restore
-- [X] Backup/Restore from web
-- [ ] Show Backup information (metadata, integrity, statistics) in Backup Management
-- [ ] Periodic backup of SQLite DB
-- [ ] Remote Git repository backup
-- [ ] Backup of generated configurations
-
-### 🌍 Language
-- [X] Localization
+- [X] Brute force protection (IP-based)
+- [ ] Account lockout after N failures
+- [ ] Security event logging
 
 ---
 
@@ -161,9 +185,9 @@
 - [ ] Password reset
 - [ ] User disabling
 - [ ] Admin password change
-- [ ] Hash-based authentication (bcrypt or argon2)
+- [X] Hash-based authentication (bcrypt or argon2)
 - [ ] Audit log (who did what, when)
-- [ ] Session timeout
+- [X] Session timeout
 - [ ] Protection against session hijacking
 - [ ] Global logout / session invalidation
 - [ ] Themes & Dark mode

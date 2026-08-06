@@ -2,7 +2,7 @@
 
 # import standard modules
 from fastapi import APIRouter, Request, Response, HTTPException, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import time
 
 # Import local modules
@@ -74,6 +74,17 @@ def api_login(request: Request, data: dict, response: Response):
     pwd = data.get("password")
 
     if verify_login(user, pwd):
+        # check if HTTPS is required and the request is not secure
+        if settings.HTTPS_ENABLED and request.url.scheme != "https":
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "code": "HTTPS_REQUIRED",
+                    "status": "failure",
+                    "message": "HTTPS is required for authentication"
+                }
+            )
+
         # reset tentativi su IP
         login_attempts.pop(ip, None)
 
