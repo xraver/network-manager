@@ -396,9 +396,10 @@ export function showConfirmModal(message = "Are you sure?") {
         };
 
         const onConfirm = () => {
+            document.activeElement?.blur();
             cleanUp();
-            resolve(true);
             modal.hide();
+            resolve(true);
         };
 
         const onCancel = () => {

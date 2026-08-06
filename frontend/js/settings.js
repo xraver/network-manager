@@ -67,7 +67,7 @@ async function fetchConfigs () {
 
     try {
         // Show loader
-        loader.style.display = "block";
+        loader.classList.remove("d-none");
 
         // Fetch configs
         allConfigs = await serviceGetConfigs();
@@ -82,7 +82,8 @@ async function fetchConfigs () {
         tableWrapper.classList.remove("d-none");
     }
     finally {
-        loader.style.display = "none";
+        // Hide loader
+        loader.classList.add("d-none");
     }
 }
 
@@ -256,7 +257,7 @@ function updateTable (filter = null) {
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
         // hide loader and show table
-        loader.style.display = "none";
+        loader.classList.add("d-none");
         tableWrapper.classList.remove("d-none");
         return;
     }
@@ -405,7 +406,7 @@ function updateTable (filter = null) {
     tbody.appendChild(frag);
 
     // hide loader and show table
-    loader.style.display = "none";
+    loader.classList.add("d-none");
     tableWrapper.classList.remove("d-none");
 }
 

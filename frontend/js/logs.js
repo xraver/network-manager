@@ -131,7 +131,8 @@ async function loadLogs() {
     loading = true;
     const currentRequest = ++requestId;
 
-    loader.style.display = "block";
+    // Show loader
+    loader.classList.remove("d-none");
 
     try {
         const data = await serviceGetLogs(type);
@@ -145,7 +146,8 @@ async function loadLogs() {
     } catch (err) {
         logViewer.textContent = err.message || "Errore loading logs";
     } finally {
-        loader.style.display = "none";
+        // Hide loader
+        loader.classList.add("d-none");
         loading = false;
     }
 }

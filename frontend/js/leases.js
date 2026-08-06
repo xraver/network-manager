@@ -25,7 +25,7 @@ async function fetchLeases () {
 
     try {
         // Show loader
-        loader.style.display = "block";
+        loader.classList.remove("d-none");
 
         // Fetch leases
         allLeases = await serviceGetDHCPLeases();
@@ -40,7 +40,7 @@ async function fetchLeases () {
         tableWrapper.classList.remove("d-none");
     }
     finally {
-        loader.style.display = "none";
+        loader.classList.add("d-none");
     }
 }
 
@@ -71,7 +71,7 @@ function updateTable () {
         trEmpty.appendChild(tdEmpty);
         tbody.appendChild(trEmpty);
         // hide loader and show table
-        loader.style.display = "none";
+        loader.classList.add("d-none");
         tableWrapper.classList.remove("d-none");
         return;
     }
@@ -259,7 +259,7 @@ function updateTable () {
     }
 
     // hide loader and show table
-    loader.style.display = "none";
+    loader.classList.add("d-none");
     tableWrapper.classList.remove("d-none");
 
     // apply current search filter

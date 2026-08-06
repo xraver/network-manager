@@ -426,6 +426,19 @@ i.bi {
     cursor: pointer;
 }
 
+.modal-table-scroll {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.backup-icon-column {
+    width: 40px;
+}
+
+.backup-actions-column {
+    width: 130px;
+}
+
 /* Sort arrows */
 .sort-arrow {
     display: inline-block;
