@@ -22,7 +22,7 @@ Designed to run easily via **Docker** and **Docker Compose**, with configuration
 
 ---
 
-## Why Network Manager?
+## ❓ Why Network Manager?
 
 Managing DNS, DHCP and certificates often requires editing multiple configuration files across different services.
 
@@ -176,7 +176,15 @@ Contributions, bug reports and feature requests are welcome.
 ## 📄 License
 [MIT](http://opensource.org/licenses/MIT) – see the local [LICENSE](LICENSE) file © Giorgio Ravera
 
-## ☕ Donate
+---
+
+## ☕ Support the Project
+Network Manager is an open-source project developed and maintained in my spare time.
+
+If you find this project useful, consider supporting its development. Your contribution helps cover development time, infrastructure costs, testing environments, and future improvements.
+
+Every contribution, no matter the size, is greatly appreciated and helps keep the project active and evolving.
+
 [![BuyMeCoffee][buymecoffee-button]][buymecoffee-url]
 
 ---
