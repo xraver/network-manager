@@ -64,15 +64,10 @@ All from one centralized dashboard.
 - Integrity verification
 - Configuration protection
 
-### 📊 Monitoring & Logging
-- Health checks
-- Application logging
-- Service status monitoring
-
 ### ⚙️ Operations
-- Backup and restore
-- Configuration versioning
-- Health checks and logging
+- DNS and DHCP service reload
+- Automatic configuration deployment
+- Centralized service administration
  
 ### 🐳 Deployment
 - Docker-native
@@ -90,11 +85,11 @@ All from one centralized dashboard.
                           ▼
                  ┌─────────────────┐
                  │ Network Manager │
-                 └────┬────┬────┬──┘
-                      │    │    │
-                      │    │    └──► Let's Encrypt
-                      │    └───────► Kea DHCP
-                      └────────────► BIND DNS
+                 └─────────────────┘
+                          │
+         ┌────────────────┼────────────────┐
+         ▼                ▼                ▼
+     BIND DNS         Kea DHCP      Let's Encrypt
 ```
 
 ---
@@ -117,8 +112,8 @@ docker run -d \
        ghcr.io/xraver/network-manager:latest
 ```
  
-Open:
- 
+Open your browser and navigate to:
+
 ```text
 http://localhost:8000
 ```
@@ -156,7 +151,9 @@ For production hardening recommendations, see the Security section in the Wiki.
 ---
 
 ## 🚧 Project Status
-Network Manager is under active development and new features are regularly added.
+Network Manager is actively developed and currently considered beta software.
+
+While the core functionality is already available, features, APIs, and user interfaces may evolve before the first stable release.
 
 The roadmap is available in [TODO.md](TODO.md).
 
@@ -172,16 +169,14 @@ Contributions, bug reports and feature requests are welcome.
 ---
 
 ## 📄 License
-[MIT](http://opensource.org/licenses/MIT) – see the local [LICENSE](LICENSE) file © Giorgio Ravera
+[MIT](http://opensource.org/licenses/MIT) – see the [LICENSE](LICENSE) file for details © Giorgio Ravera
 
 ---
 
 ## ☕ Support the Project
 Network Manager is an open-source project developed and maintained in my spare time.
 
-If you find this project useful, consider supporting its development. Your contribution helps cover development time, infrastructure costs, testing environments, and future improvements.
-
-Every contribution, no matter the size, is greatly appreciated and helps keep the project active and evolving.
+If you enjoy using it and would like to show your appreciation, consider supporting the project.
 
 [![BuyMeCoffee][buymecoffee-button]][buymecoffee-url]
 
