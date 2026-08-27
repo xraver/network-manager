@@ -90,13 +90,11 @@ All from one centralized dashboard.
                           ▼
                  ┌─────────────────┐
                  │ Network Manager │
-                 └──────┬────┬─────┘
-                        │    │
-                        ▼    ▼
-                   BIND DNS  Kea DHCP
-                        │
-                        ▼
-                 Let's Encrypt
+                 └────┬────┬────┬──┘
+                      │    │    │
+                      │    │    └──► Let's Encrypt
+                      │    └───────► Kea DHCP
+                      └────────────► BIND DNS
 ```
 
 ---
