@@ -1,4 +1,6 @@
-# Network Manager
+# 🌐 Network Manager
+
+A **unified web application for complete control of your network infrastructure**, designed as an integrated frontend for **BIND** (DNS), **Kea DHCP**, and **Let's Encrypt** certificate management.
 
 [![Latest Release][releases-img]][releases-url]
 [![GHCR Image][ghcr-image-img]][ghcr-image-url]
@@ -8,260 +10,169 @@
 [![License Status][license-img]][license-url]
 [![BuyMeCoffee][buymecoffee-img]][buymecoffee-url]
 
-## 🌐 Network management web app
-
 ![Network Manager Dashboard](dashboard.png)
 
-A **unified web application for complete control of your network infrastructure**, designed as an integrated frontend for **BIND** (DNS), **Kea DHCP**, and **Let's Encrypt** certificate management.
+Network Manager is a self-hosted web application that provides a centralized interface for managing DNS, DHCP, and TLS certificate services.
 
-Network Manager provides a centralized interface to manage hosts, aliases, DNS records, DHCP reservations, certificates, backups, and system settings, eliminating the need to manually edit configuration files.
+Built for BIND, Kea DHCP, and Let's Encrypt, it enables administrators to manage hosts, aliases, DNS records, DHCP reservations, certificates, backups, and system settings from a single dashboard, eliminating the need to manually edit configuration files.
 
-The application includes:
-
-- DNS host and alias management
-- DHCP lease and reservation management
-- Device inventory and monitoring
-- Let's Encrypt certificate management
-- Backup and restore with integrity verification
-- Health monitoring and logging
-- Automatic DNS and DHCP configuration generation
-- Docker-native deployment
-
-This solution allows you to manage hosts, DNS zones, DHCP leases, and certificates from a single centralized interface, reducing manual errors and greatly simplifying operations.
+By centralizing network service management, Network Manager reduces configuration errors, improves operational efficiency, and simplifies day-to-day administration of network infrastructure.
 
 Designed to run easily via **Docker** and **Docker Compose**, with configuration via environment variables.
 
-This project is currently under development. For upcoming tasks and planned improvements, please refer to the [TODO list](TODO.md) file.
+---
+
+## Why Network Manager?
+
+Managing DNS, DHCP and certificates often requires editing multiple configuration files across different services.
+
+Network Manager provides a single interface to:
+
+- Manage hosts and network devices
+- Generate DNS and DHCP configurations
+- Monitor leases and system health
+- Manage TLS certificates
+- Backup and restore configurations
+
+All from one centralized dashboard.
 
 ---
 
 ## ✨ Features
+### 🌐 DNS Management
+- DNS hosts and aliases
+- Forward and reverse records
+- Automatic BIND configuration generation
+ 
+### 📡 DHCP Management
+- DHCP reservations
+- Lease monitoring
+- IPv4 and IPv6 support
+ 
+### 🖥️ Device Inventory
+- Host inventory management
+- Device status monitoring
+- Integrated network overview
+ 
+### 🔒 Certificate Management
+- Let's Encrypt integration
+- Certificate monitoring
+- Renewal management
 
-- Static frontend served by the application (`FRONTEND_PATH`)
-- Persistent SQLite database (`/data/database.db`)
-- Configurable logging to console and/or file
-- Login protection with configurable rate-limit
-- Admin credentials configurable via env or Docker secrets
-- Support for `SESSION_SECRET`: custom key for cookie signing (required in production; auto-generated in development if not provided)
+### 💾 Backup & Recovery
+- Backup and restore
+- Integrity verification
+- Configuration protection
 
-## 🔐 Security Features
+### 📊 Monitoring & Logging
+- Health checks
+- Application logging
+- Service status monitoring
 
-- HttpOnly session cookies
-- Secure cookies when HTTPS is enabled
-- SameSite=Strict cookies
-- CSP protection
-- TrustedHostMiddleware
-- Login rate limiting
-- HSTS support
-- Security headers
+### ⚙️ Operations
+- Backup and restore
+- Configuration versioning
+- Health checks and logging
+ 
+### 🐳 Deployment
+- Docker-native
+- Lightweight SQLite storage
+- Single-container deployment
 
 ---
 
-## 📦 Requirements
-- Docker = 20.x
-- Docker Compose = v2
+## 🏛️ Architecture
+```text
+                 ┌─────────────────┐
+                 │  Web Interface  │
+                 └────────┬────────┘
+                          │
+                          ▼
+                 ┌─────────────────┐
+                 │ Network Manager │
+                 └──────┬────┬─────┘
+                        │    │
+                        ▼    ▼
+                   BIND DNS  Kea DHCP
+                        │
+                        ▼
+                 Let's Encrypt
+```
 
 ---
 
 ## 🚀 Quick start
 
-### 1) Recommended structure
+Create a persistent volume:
+ 
+```bash
+mkdir data
 ```
-project/
-+- docker-compose.yml
-+- .env
-+- secrets/
-¦  +- admin_password_hash
-+- data/
+ 
+Run the container:
+ 
+```bash
+docker run -d \
+       --name network-manager \
+       -p 8000:8000 \
+       -v $(pwd)/data:/data \
+       ghcr.io/xraver/network-manager:latest
 ```
-
-### 2) ⚙️ Configuration via `.env` (optional)
-```dotenv
-# --- Host & Web ---
-DOMAIN=example.com
-EXTERNAL_NAME=dyndns.example.com
-TRUSTED_HOSTS=127.0.0.1,localhost,networkmanager.example.com
-HTTP_PORT=8000
-HTTPS_ENABLED=1
-# --- Admin ---
-ADMIN_USER=admin
-ADMIN_PASSWORD=admin
-# In production use ADMIN_PASSWORD_HASH_FILE
-# --- Login rate limit ---
-LOGIN_MAX_ATTEMPTS=5
-LOGIN_WINDOW_SECONDS=600
-# --- Log ---
-LOG_LEVEL=info
-LOG_TO_FILE=false
-# --- Session secret (optional but recommended in production) ---
-# SESSION_SECRET=****ReplaceWithYourSecret*****
+ 
+Open:
+ 
+```text
+http://localhost:8000
 ```
-If SESSION_SECRET is not set, the application generates a new random key at each startup, invalidating all existing sessions.
-For production deployments, configure a persistent SESSION_SECRET.
-
-### 3) 🐳 Example `docker-compose.yml`
-```yaml
-services:
-  network-manager:
-    image: ghcr.io/xraver/network-manager:latest
-    container_name: network-manager
-    restart: unless-stopped
-    ports:
-      - "${HTTP_PORT:-8000}:8000"
-    environment:
-      # Frontend
-      FRONTEND_PATH: "/app/frontend"
-      # Database
-      DB_FILE: "/data/database.db"
-      DB_RESET: "${DB_RESET:-false}"
-      # Log
-      LOG_LEVEL: "${LOG_LEVEL:-info}"
-      LOG_TO_FILE: "${LOG_TO_FILE:-false}"
-      LOG_FILE: "/data/app.log"
-      LOG_ACCESS_FILE: "/data/access.log"
-      # Host
-      DOMAIN: "${DOMAIN:-example.com}"
-      EXTERNAL_NAME: "${EXTERNAL_NAME:-dyndns.example.com}"
-      TRUSTED_HOSTS: "${TRUSTED_HOSTS:-127.0.0.1,localhost,networkmanager.example.com}"
-      # Web
-      HTTP_PORT: "${HTTP_PORT:-8000}"
-      HTTPS_ENABLED: "${HTTPS_ENABLED:-0}"
-      LOGIN_MAX_ATTEMPTS: "${LOGIN_MAX_ATTEMPTS:-5}"
-      LOGIN_WINDOW_SECONDS: "${LOGIN_WINDOW_SECONDS:-600}"
-      # Admin
-      ADMIN_USER: "${ADMIN_USER:-admin}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
-      ADMIN_PASSWORD_HASH_FILE: "/run/secrets/admin_password_hash"
-      # Session key (optional)
-      # SESSION_SECRET: "****ReplaceWithYourSecret*****"
-    volumes:
-      - ./data:/data
-    secrets:
-      - admin_password_hash
-
-secrets:
-  admin_password_hash:
-    file: ./secrets/admin_password_hash
-```
+For Docker Compose examples and production deployments, see the Wiki.
 
 ---
 
-## 🔧 Supported environment variables
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FRONTEND_PATH` | /app/frontend | Frontend directory |
-| `DATA_PATH`| /data | Data Path for DB and Backups |
-| `DB_FILE` | database.db | SQLite file |
-| `DB_RESET` | false | Reset DB on every startup |
-| `LOG_LEVEL` | info | Log level |
-| `LOG_TO_FILE` | false | Enable file logging |
-| `LOG_FILE` | app.log | Application log file |
-| `LOG_ACCESS_FILE` | access.log | HTTP access log |
-| `DOMAIN` | example.com | Public domain |
-| `EXTERNAL_NAME` | dyndns.example.com | External Name |
-| `TRUSTED_HOSTS` | 127.0.0.1,localhost,networkmanager.example.com | Comma-separated list of allowed HTTP Host headers. |
-| `HTTP_HOST` | 0.0.0.0 | IP address the server binds to |
-| `HTTP_PORT` | 8000 | Internal HTTP port |
-| `HTTPS_ENABLED` | false | HTTPS enabled |
-| `LOGIN_MAX_ATTEMPTS` | 5 | Login attempts |
-| `LOGIN_WINDOW_SECONDS` | 600 | Attempt window |
-| `ADMIN_USER` | admin |  Admin username |
-| `ADMIN_PASSWORD` | admin | Admin password (development) |
-| `ADMIN_PASSWORD_HASH_FILE` | /run/secrets/admin_password_hash |  Admin password hash |
-| `SESSION_SECRET` | (auto-generated) |  Session secret |
-| `DNS_HOST_FILE` | /dns/etc/{DOMAIN}/hosts.inc | BIND9 Hosts file |
-| `DNS_ALIAS_FILE` | /dns/etc/{DOMAIN}/alias.inc | BIND9 Alias file |
-| `DNS_REVERSE_FILE` | /dns/etc/reverse/hosts.inc | BIND9 Reverse Hosts file |
-| `DHCP4_HOST_FILE` | /dhcp/etc/hosts-ipv4.json | KEA-DHCP4 Hosts file |
-| `DHCP4_LEASES_FILE` | /dhcp/lib/dhcp4.leases | KEA-DHCP4 leases file |
-| `DHCP6_HOST_FILE` | /dhcp/etc/hosts-ipv6.json | KEA-DHCP6 Hosts file |
-| `DHCP6_LEASES_FILE` | /dhcp/lib/dhcp6.leases | KEA-DHCP6 leases file |
-| `BACKUP_PATH` | backup | Backup folder (*) |
-| `PING_WORKERS` | 25 | Number of threads used for pinging |
-
-(*) Note: If the path starts with '/', it is treated as an absolute path. Otherwise, it is considered relative to DATA_PATH.
+## 📖 Documentation
+Complete documentation is available in the Wiki:
+- Getting Started
+- Installation
+- Configuration
+- DNS Management
+- DHCP Management
+- Certificate Management
+- Security
+- Backup & Restore
+- Troubleshooting
+- Development Guide
 
 ---
 
-## 🔐 Admin credential management
-### ✔ Development: use variables
-```bash
-ADMIN_USER=admin
-ADMIN_PASSWORD=admin
-```
+## 🔒 Security
+Network Manager includes:
+- Session-based authentication
+- Login rate limiting
+- Security headers
+- CSP protection
+- Trusted Host validation
+- HTTPS-aware cookies
+- Docker Secrets support
 
-### ✔ Production: use Docker secrets
-```bash
-python - <<‘PY’
-import bcrypt
-pwd = b“SecurePassword”
-print(bcrypt.hashpw(pwd, bcrypt.gensalt()).decode())
-PY
-```
-Save the hash in `./secrets/admin_password_hash`.
-
-Docker compose will mount it in:
-```
-/run/secrets/admin_password_hash
-```
+For production hardening recommendations, see the Security section in the Wiki.
 
 ---
 
-## 🔑 SESSION_SECRET
-Used to sign cookies.
-If SESSION_SECRET is not set, the application generates a new random key at startup, which invalidates all existing sessions after every restart.
-For production deployments, configure a persistent SESSION_SECRET value.
-Generate a strong secret:
-```bash
-openssl rand -base64 64
-```
-Then:
-`SESSION_SECRET`: “paste-the-secret-here”
+## 🚧 Project Status
+Network Manager is under active development and new features are regularly added.
+
+The roadmap is available in [TODO.md](TODO.md).
 
 ---
 
-## 💾 Persistence
-### Database + Log
-Map `/data` as a volume:
-```yaml
-volumes:
-  - ./data:/data
-```
+## 🤝 Contributing
+Contributions, bug reports and feature requests are welcome.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Submit a Pull Request
 
 ---
 
-## 📌 Useful commands
-Normal startup:
-```bash
-docker compose up
-```
-In the background:
-```bash
-docker compose up -d
-```
-Log:
-```bash
-docker compose logs -f network-manager
-```
-Container recreation:
-```bash
-docker compose up -d --force-recreate
-```
-Container rebuild & recreation:
-```
-docker compose up --build -d --force-recreate
-```
-
----
-## 🔒 Security Checklist
-- Use `ADMIN_PASSWORD_HASH_FILE` in production
-- Configure `SESSION_SECRET` in production
-- Configure `TRUSTED_HOSTS`
-- Enable HTTPS through a reverse proxy
-- Set `HTTPS_ENABLED=1` when running behind HTTPS
-- Do not store credentials in the repository
-
----
 ## 📄 License
 [MIT](http://opensource.org/licenses/MIT) – see the local [LICENSE](LICENSE) file © Giorgio Ravera
 
@@ -269,7 +180,6 @@ docker compose up --build -d --force-recreate
 [![BuyMeCoffee][buymecoffee-button]][buymecoffee-url]
 
 ---
-
 
 [license-img]: https://img.shields.io/github/license/xraver/network-manager?logo=open-source-initiative
 [license-url]: LICENSE
