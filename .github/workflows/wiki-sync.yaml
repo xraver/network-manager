@@ -49,6 +49,8 @@ jobs:
 
       - name: Checkout wiki
         if: steps.current-main.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git clone https://github.com/${GITHUB_REPOSITORY}.wiki.git wiki
 
@@ -60,6 +62,8 @@ jobs:
       - name: Commit and push
         if: steps.current-main.outputs.publish == 'true'
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
           if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
