@@ -1,0 +1,90 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/wiki/**'
+      - '.github/workflows/wiki-sync.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki-sync
+  cancel-in-progress: false
+
+jobs:
+  wiki-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure repository authentication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh auth setup-git
+
+      - name: Check whether this is still the current main revision
+        id: current-main
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
+          if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
+            echo "Skipping obsolete workflow."
+            echo "Current SHA: $CURRENT_SHA"
+            echo "Workflow SHA: $GITHUB_SHA"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout wiki
+        if: steps.current-main.outputs.publish == 'true'
+        run: |
+          git clone https://github.com/${GITHUB_REPOSITORY}.wiki.git wiki
+
+      - name: Sync wiki
+        if: steps.current-main.outputs.publish == 'true'
+        run: |
+          rsync -av --delete docs/wiki/ wiki/
+
+      - name: Commit and push
+        if: steps.current-main.outputs.publish == 'true'
+        shell: bash
+        run: |
+          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
+          if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
+            echo "Skipping obsolete workflow."
+            echo "Current SHA: $CURRENT_SHA"
+            echo "Workflow SHA: $GITHUB_SHA"
+            exit 0
+          fi
+
+          git -C "wiki" diff --check
+          git -C "wiki" add --all
+          if git -C "wiki" diff --cached --quiet; then
+            echo "Wiki already up to date"
+            exit 0
+          fi
+
+          git -C "wiki" config user.name "github-actions[bot]"
+          git -C "wiki" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "wiki" commit -m "docs: sync wiki from ${GITHUB_SHA:0:12}"
+
+          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
+          if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
+            echo "Skipping obsolete workflow."
+            echo "Current SHA: $CURRENT_SHA"
+            echo "Workflow SHA: $GITHUB_SHA"
+            exit 0
+          fi
+          git -C "wiki" push origin HEAD
