@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -52,12 +52,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git clone https://github.com/${GITHUB_REPOSITORY}.wiki.git wiki
+          git clone https://github.com/${GITHUB_REPOSITORY}.wiki.git $RUNNER_TEMP/wiki
 
       - name: Sync wiki
         if: steps.current-main.outputs.publish == 'true'
         run: |
-          rsync -av --delete docs/wiki/ wiki/
+          rsync -av \
+            --delete \
+            --exclude='.git/' \
+            docs/wiki/ $RUNNER_TEMP/wiki/
 
       - name: Commit and push
         if: steps.current-main.outputs.publish == 'true'
@@ -73,16 +76,16 @@ jobs:
             exit 0
           fi
 
-          git -C "wiki" diff --check
-          git -C "wiki" add --all
-          if git -C "wiki" diff --cached --quiet; then
+          git -C "$RUNNER_TEMP/wiki" diff --check
+          git -C "$RUNNER_TEMP/wiki" add --all
+          if git -C "$RUNNER_TEMP/wiki" diff --cached --quiet; then
             echo "Wiki already up to date"
             exit 0
           fi
 
-          git -C "wiki" config user.name "github-actions[bot]"
-          git -C "wiki" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C "wiki" commit -m "docs: sync wiki from ${GITHUB_SHA:0:12}"
+          git -C "$RUNNER_TEMP/wiki" config user.name "github-actions[bot]"
+          git -C "$RUNNER_TEMP/wiki" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$RUNNER_TEMP/wiki" commit -m "docs: sync wiki from ${GITHUB_SHA:0:12}"
 
           CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/master --jq '.object.sha')
           if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
@@ -91,4 +94,4 @@ jobs:
             echo "Workflow SHA: $GITHUB_SHA"
             exit 0
           fi
-          git -C "wiki" push origin HEAD
+          git -C "$RUNNER_TEMP/wiki" push origin HEAD
