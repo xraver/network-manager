@@ -3,7 +3,7 @@ name: Wiki Sync
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'docs/wiki/**'
       - '.github/workflows/wiki-sync.yaml'
@@ -37,7 +37,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
+          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/master --jq '.object.sha')
           if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
             echo "Skipping obsolete workflow."
             echo "Current SHA: $CURRENT_SHA"
@@ -65,7 +65,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
+          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/master --jq '.object.sha')
           if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
             echo "Skipping obsolete workflow."
             echo "Current SHA: $CURRENT_SHA"
@@ -84,7 +84,7 @@ jobs:
           git -C "wiki" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git -C "wiki" commit -m "docs: sync wiki from ${GITHUB_SHA:0:12}"
 
-          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/main --jq '.object.sha')
+          CURRENT_SHA=$(gh api repos/${GITHUB_REPOSITORY}/git/ref/heads/master --jq '.object.sha')
           if [ "$CURRENT_SHA" != "$GITHUB_SHA" ]; then
             echo "Skipping obsolete workflow."
             echo "Current SHA: $CURRENT_SHA"

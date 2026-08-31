@@ -193,7 +193,7 @@ If you enjoy using it and would like to show your appreciation, consider support
 [image-security-img]: https://img.shields.io/badge/SBOM%20%2F%20Provenance-enabled-brightgreen?logo=security
 [image-security-url]: https://github.com/xraver/network-manager
 [last-commit-img]: https://img.shields.io/github/last-commit/xraver/network-manager
-[last-commit-url]: https://github.com/xraver/network-manager/commits/main
+[last-commit-url]: https://github.com/xraver/network-manager/commits/master
 [check-status-img]: https://github.com/xraver/network-manager/actions/workflows/ci.yaml/badge.svg
 [check-status-url]: https://github.com/xraver/network-manager/actions/workflows/ci.yaml
 [buymecoffee-img]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
